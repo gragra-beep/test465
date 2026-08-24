@@ -73,4 +73,6 @@ function playAgain() {
   initMap();
   closeLocModal();
   showToast(`Пройдено! -${loc.energyCost} энергии, +${loc.rewardSilver} серебра. Макс: ${state.maxEnergy}`);
+  
+  saveGame(); // ← Сохраняем!
 }
