@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Remanga Game</title>
+<title>Game</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,7 +11,7 @@
 <!-- LOGIN -->
 <div id="loginScreen">
   <div class="login-box">
-    <h1>牌 Remanga</h1>
+    <h1>Игрулька</h1>
     <p>Войдите в аккаунт</p>
     <input type="text" id="loginInput" placeholder="Логин" autocomplete="off">
     <input type="password" id="passwordInput" placeholder="Пароль">
@@ -23,17 +23,17 @@
 <!-- TOP BAR -->
 <div class="topbar" id="topbar" style="display:none;">
   <div class="user-info">
-    <div class="user-avatar">段</div>
+    <div class="user-avatar">аватарка</div>
     <div>
-      <div class="user-name">dnonahoi</div>
-      <div class="user-rank">УЧЕНИК</div>
+      <div class="user-name">имя</div>
+      <div class="user-rank">ранг</div>
     </div>
   </div>
   <div class="resources">
-    <div class="res-item res-energy"><span class="icon">🔵</span> <span id="resEnergy">90</span> / <span id="resMaxEnergy">90</span></div>
+    <div class="res-item res-energy"><span class="icon">⚡</span> <span id="resEnergy">90</span> / <span id="resMaxEnergy">90</span></div>
     <div class="res-item res-silver"><span class="icon"></span> <span id="resSilver">1553</span></div>
-    <div class="res-item res-gifts" onclick="showToast('Дары')"><span class="icon">🎁</span></div>
-    <div class="res-item res-quests" onclick="showToast('Задания')"><span class="icon"></span></div>
+    <div class="res-item res-gifts" onclick="showToast('подар Очка')"><span class="icon">🗓️</span></div>
+    <div class="res-item res-quests" onclick="showToast('Задания')">📋<span class="icon"></span></div>
   </div>
 </div>
 
@@ -43,8 +43,8 @@
     <div class="map-bg"></div>
     <div class="map-mountains"></div>
     <div class="map-river"></div>
-    <div class="map-squad" onclick="showToast('Отряд: 5 бойцов')">
-      <span class="squad-icon">隊</span><span class="squad-text">ОТРЯД · 5</span>
+    <div class="map-squad" onclick="showToast('Отряд: 5 карт')">
+      <span class="squad-icon">🥞</span><span class="squad-text">ОТРЯД · 5</span>
     </div>
   </div>
 </div>
@@ -92,19 +92,19 @@
 <!-- NAV (BOTTOM) -->
 <div class="nav-bar" id="navBar" style="display:none;">
   <div class="nav-item active" data-page="map" onclick="switchPage('map')">
-    <div class="nav-icon">界</div><div class="nav-label">КАРТА</div>
+    <div class="nav-icon">🗾</div><div class="nav-label">КАРТА</div>
   </div>
   <div class="nav-item" data-page="duel" onclick="switchPage('duel')">
-    <div class="nav-icon">鬥</div><div class="nav-label">ДУЭЛЬ</div>
+    <div class="nav-icon">⚔️</div><div class="nav-label">ДУЭЛЬ</div>
   </div>
   <div class="nav-item" data-page="deck" onclick="switchPage('deck')">
-    <div class="nav-icon">牌</div><div class="nav-label">КОЛОДА</div>
+    <div class="nav-icon">🃏</div><div class="nav-label">КОЛОДА</div>
   </div>
   <div class="nav-item" data-page="bazar" onclick="switchPage('bazar')">
-    <div class="nav-icon">市</div><div class="nav-label">БАЗАР</div>
+    <div class="nav-icon">🍎</div><div class="nav-label">БАЗАР</div>
   </div>
   <div class="nav-item" data-page="top" onclick="switchPage('top')">
-    <div class="nav-icon">榜</div><div class="nav-label">ТОП</div>
+    <div class="nav-icon">🏆</div><div class="nav-label">ТОП</div>
   </div>
 </div>
 
@@ -131,20 +131,20 @@
       <div class="battle-rating">сила отряда / босса · ≥ 120%</div>
       <div class="battle-verdict" id="locVerdict"></div>
       <div class="battle-bar"><div class="battle-bar-fill" id="locBarFill"></div></div>
-      <div class="modal-section-title">ПОЛУЧЕНО 賞</div>
+      <div class="modal-section-title">ПОЛУЧЕНО </div>
       <div class="rewards-section">
         <div class="reward-row"><span class="rw-bonus">без статич. бонуса</span></div>
         <div class="reward-row"><span class="rw-val positive" id="locRewardEnergy"></span><span class="rw-label">к макс. энергии</span></div>
         <div class="reward-row"><span class="rw-val positive" id="locRewardSilver"></span><span class="rw-label">серебра (разово)</span></div>
       </div>
-      <div class="modal-section-title">ПОВТОР · ВХОД 行</div>
+      <div class="modal-section-title">ПОВТОР · ВХОД </div>
       <div class="rewards-section">
         <div class="reward-row"><span class="rw-val negative" id="locCostEnergy"></span><span class="rw-label">энергии за вход</span></div>
         <div class="reward-row"><span class="rw-val positive" id="locRepeatSilver"></span><span class="rw-label">серебра за прохождение</span></div>
         <div class="reward-row"><span class="rw-val" style="color:#888;">—</span><span class="rw-label">без доп. дропа</span></div>
       </div>
       <button class="play-again-btn" onclick="playAgain()">
-        <span class="btn-icon">戰</span> ПРОЙТИ СНОВА · <span id="locEnergyCost">6</span> ЕН.
+        <span class="btn-icon">🫪</span> ПРОЙТИ СНОВА · <span id="locEnergyCost">6</span> ЕН.
       </button>
       <label class="skip-checkbox">
         <input type="checkbox" checked> Пропустить бой — сразу к результату
@@ -205,8 +205,8 @@
       <div class="upgrade-warning">При провале — поломка карты</div>
     </div>
     <div class="card-action-btns">
-      <button class="btn-upgrade" onclick="upgradeCard()"><span>鍛</span> УЛУЧШИТЬ · +<span id="cdUpBtnLevel">1</span></button>
-      <button class="btn-reroll" onclick="rerollCard()"><span>轉</span> РЕРОЛЛ</button>
+      <button class="btn-upgrade" onclick="upgradeCard()"><span>🐐</span> УЛУЧШИТЬ · +<span id="cdUpBtnLevel">1</span></button>
+      <button class="btn-reroll" onclick="rerollCard()"><span>💅</span> РЕРОЛЛ</button>
     </div>
   </div>
 </div>
