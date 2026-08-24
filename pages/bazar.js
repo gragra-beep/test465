@@ -7,10 +7,12 @@ function showBannerDetails() {
   CARDS_DATABASE.forEach(card => {
     const cardEl = document.createElement('div');
     cardEl.className = 'pool-card';
+    
+    // ИСПРАВЛЕНО: Теперь используется реальная картинка карты из базы данных
     cardEl.innerHTML = `
       <div class="card-tag">戰 БОЕВАЯ</div>
-      <div style="width:100%; height:100%; background: linear-gradient(135deg, ${getRarityColor(card.rarity)}); display:flex; align-items:center; justify-content:center; font-size:40px;">🎴</div>
-      <div style="position:absolute; bottom:6px; left:6px; right:6px; font-size:10px; font-weight:600; text-shadow: 0 1px 3px rgba(0,0,0,0.9);">${card.name}</div>
+      <div class="pool-card-img" style="background-image: url('${card.image}');"></div>
+      <div style="position:absolute; bottom:6px; left:6px; right:6px; font-size:10px; font-weight:600; text-shadow: 0 1px 3px rgba(0,0,0,0.9); text-align: center;">${card.name}</div>
     `;
     pool.appendChild(cardEl);
   });
@@ -60,12 +62,14 @@ function summon(count) {
     autoDustDuplicates();
   }
   
-  saveGame(); // ← Сохраняем!
+  saveGame(); // Сохраняем прогресс после призыва
 }
+
 function rollCard() {
   const rand = Math.random() * 100;
   let rarity;
 
+  // Проверка жесткого гаранта на эпическую карту
   if (state.bannerRolls - state.lastEpicRoll >= 20) {
     rarity = 'epic';
   } else if (rand < 2) {
@@ -83,6 +87,7 @@ function rollCard() {
   const cardsOfRarity = getCardsByRarity(rarity);
   const card = cardsOfRarity[Math.floor(Math.random() * cardsOfRarity.length)];
 
+  // Обновляем счетчики гарантов при выпадении
   if (rarity === 'epic') state.lastEpicRoll = state.bannerRolls;
   if (rarity === 'legendary') state.lastLegendaryRoll = state.bannerRolls;
   if (rarity === 'mythic') state.lastMythicRoll = state.bannerRolls;
@@ -101,6 +106,7 @@ function autoDustDuplicates() {
   if (!inventory) return;
 
   const seen = new Set();
+  // Проходим с конца, чтобы безопасно удалять элементы через splice
   for (let i = inventory.cards.length - 1; i >= 0; i--) {
     const cardId = inventory.cards[i].cardId;
     if (seen.has(cardId)) {
@@ -110,4 +116,5 @@ function autoDustDuplicates() {
     }
   }
   showToast('Дубликаты распылены');
+  saveGame(); // ИСПРАВЛЕНО: Сохраняем прогресс после распыления дубликатов
 }
