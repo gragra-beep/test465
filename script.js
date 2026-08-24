@@ -1,3 +1,16 @@
+// ===== УТИЛИТЫ =====
+function getMaxEnergy() {
+  return 50 + state.completedLocs.length * 10;
+}
+
+function getHighestCompleted() {
+  return state.completedLocs.length > 0 ? Math.max(...state.completedLocs) : 0;
+}
+
+function isLocationUnlocked(loc) {
+  return loc.id <= getHighestCompleted() + 1;
+}
+
 // ===== LOGIN =====
 function doLogin() {
   const login = document.getElementById('loginInput').value;
@@ -6,6 +19,9 @@ function doLogin() {
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('topbar').style.display = 'flex';
     document.getElementById('navBar').style.display = 'flex';
+    state.maxEnergy = getMaxEnergy();
+    state.energy = state.maxEnergy;
+    updateResources();
     initMap();
     renderCards();
   } else {
@@ -22,26 +38,34 @@ function switchPage(page) {
   document.getElementById('page-' + page).classList.add('active');
   document.querySelector(`.nav-item[data-page="${page}"]`).classList.add('active');
 }
-function goBack() { showToast('Назад к сайту'); }
 
 // ===== MAP =====
 function initMap() {
   const container = document.getElementById('mapContainer');
+  // Удаляем старые ноды (кроме фона, реки, гор, сквада)
+  container.querySelectorAll('.location-node').forEach(n => n.remove());
+
   locations.forEach(loc => {
     const node = document.createElement('div');
     node.className = 'location-node';
     node.style.left = loc.x + '%';
     node.style.top = loc.y + '%';
-    let iconClass = 'locked', extra = '';
-    if (state.completedLocs.includes(loc.id)) {
+
+    let iconClass, extra = '';
+    const isCompleted = state.completedLocs.includes(loc.id);
+    const isUnlocked = isLocationUnlocked(loc);
+
+    if (isCompleted) {
       iconClass = 'completed';
       extra = '<div class="node-check">✓</div>';
-    } else if (!loc.locked) {
+    } else if (isUnlocked) {
       iconClass = 'available';
       if (loc.alert) extra = '<div class="node-alert">!</div>';
     } else {
+      iconClass = 'locked';
       extra = '<div class="node-lock">🔒</div>';
     }
+
     node.innerHTML = `<div class="node-icon ${iconClass}">${loc.cn}${extra}</div><div class="node-num">${loc.id}</div>`;
     node.onclick = () => openLocModal(loc);
     container.appendChild(node);
@@ -70,12 +94,25 @@ function closeLocModal() { document.getElementById('locModal').classList.remove(
 function playAgain() {
   const loc = state.currentLoc;
   if (!loc) return;
-  if (state.energy < loc.energyCost) { showToast('Недостаточно энергии!', true); return; }
+  if (state.energy < loc.energyCost) {
+    showToast('Недостаточно энергии!', true);
+    return;
+  }
   state.energy -= loc.energyCost;
   state.silver += loc.rewardSilver;
+
+  // Добавляем локацию в пройденные (если ещё не там)
+  if (!state.completedLocs.includes(loc.id)) {
+    state.completedLocs.push(loc.id);
+  }
+
+  // Пересчитываем макс. энергию
+  state.maxEnergy = getMaxEnergy();
+
   updateResources();
-  showToast(`Пройдено! -${loc.energyCost} энергии, +${loc.rewardSilver} серебра`);
+  initMap();
   closeLocModal();
+  showToast(`Пройдено! -${loc.energyCost} энергии, +${loc.rewardSilver} серебра. Макс. энергии: ${state.maxEnergy}`);
 }
 
 // ===== CARDS =====
@@ -175,10 +212,8 @@ function rerollCard() {
 // ===== RESOURCES =====
 function updateResources() {
   document.getElementById('resEnergy').textContent = state.energy;
+  document.getElementById('resMaxEnergy').textContent = state.maxEnergy;
   document.getElementById('resSilver').textContent = state.silver;
-  document.getElementById('resStars').textContent = state.stars;
-  document.getElementById('resGems').textContent = state.gems;
-  document.getElementById('resTickets').textContent = state.tickets;
 }
 
 // ===== TOAST =====
