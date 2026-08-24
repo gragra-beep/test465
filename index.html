@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Remanga Game</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <h1>牌 Remanga</h1>
+    <p>Войдите в аккаунт</p>
+    <input type="text" id="loginInput" placeholder="Логин" autocomplete="off">
+    <input type="password" id="passwordInput" placeholder="Пароль">
+    <button onclick="doLogin()">Войти</button>
+    <div id="loginError"></div>
+  </div>
+</div>
+
+<!-- TOP BAR -->
+<div class="topbar" id="topbar" style="display:none;">
+  <div class="topbar-left">
+    <button class="back-btn" onclick="goBack()">← Назад к сайту</button>
+    <div class="user-info">
+      <div class="user-avatar">段</div>
+      <div>
+        <div class="user-name">dnonahoi</div>
+        <div class="user-rank">УЧЕНИК</div>
+      </div>
+    </div>
+  </div>
+  <div class="resources">
+    <div class="res-item res-energy"><span class="icon">🔵</span> <span id="resEnergy">41</span> / 90</div>
+    <div class="res-item res-silver"><span class="icon"></span> <span id="resSilver">1553</span></div>
+    <div class="res-item res-stars"><span class="icon">⭐</span> <span id="resStars">0</span></div>
+    <div class="res-item res-gems"><span class="icon">💎</span> <span id="resGems">7</span></div>
+    <div class="res-item res-tickets"><span class="icon">️</span> <span id="resTickets">103</span></div>
+  </div>
+</div>
+
+<!-- NAV -->
+<div class="nav-bar" id="navBar" style="display:none;">
+  <div class="nav-item active" data-page="map" onclick="switchPage('map')">
+    <div class="nav-icon">界</div><div class="nav-label">КАРТА</div>
+  </div>
+  <div class="nav-item" data-page="duel" onclick="switchPage('duel')">
+    <div class="nav-icon">鬥</div><div class="nav-label">ДУЭЛЬ</div>
+  </div>
+  <div class="nav-item" data-page="deck" onclick="switchPage('deck')">
+    <div class="nav-icon">牌</div><div class="nav-label">КОЛОДА</div>
+  </div>
+  <div class="nav-item" data-page="bazar" onclick="switchPage('bazar')">
+    <div class="nav-icon">市</div><div class="nav-label">БАЗАР</div>
+  </div>
+  <div class="nav-item" data-page="top" onclick="switchPage('top')">
+    <div class="nav-icon">榜</div><div class="nav-label">ТОП</div>
+  </div>
+</div>
+
+<!-- MAP PAGE -->
+<div class="page active" id="page-map">
+  <div class="map-container" id="mapContainer">
+    <div class="map-bg"></div>
+    <div class="map-mountains"></div>
+    <div class="map-river"></div>
+    <div class="map-submerge">
+      <span class="sub-icon">封</span>
+      <div><div class="sub-label">ПОГРУЖЕНИЕ</div><div class="sub-name">Катакомбы</div></div>
+    </div>
+    <div class="map-info-panel">
+      <div class="map-info-btn"><span class="btn-icon"></span> ДАРЫ</div>
+      <div class="map-info-btn"><span class="btn-icon">日</span> ЗАДАНИЯ</div>
+    </div>
+    <div class="map-squad" onclick="showToast('Отряд: 5 бойцов')">
+      <span class="squad-icon">隊</span><span class="squad-text">ОТРЯД · 5</span>
+    </div>
+  </div>
+</div>
+
+<!-- DECK PAGE -->
+<div class="page" id="page-deck">
+  <div class="deck-page">
+    <div class="deck-title"><h2><span class="cn">牌</span> КОЛОДА</h2></div>
+    <div class="deck-subtitle">Все карты что есть на аккаунте</div>
+    <div class="deck-filters">
+      <select id="filterRank" onchange="filterCards()">
+        <option value="any">Любой ранг</option>
+        <option value="1">★1</option><option value="2">★2</option><option value="3">★3</option>
+      </select>
+      <select id="filterStatus" onchange="filterCards()">
+        <option value="all">Все статусы</option>
+        <option value="normal">Обычные</option><option value="broken">Сломанные</option>
+      </select>
+      <select id="filterAwaken" onchange="filterCards()">
+        <option value="any">Любое пробуждение</option>
+        <option value="0">Не пробуждена</option><option value="1">Пробуждена</option>
+      </select>
+      <select id="filterSort" onchange="filterCards()">
+        <option value="rank">Сорт.: по рангу</option>
+        <option value="power">Сорт.: по силе</option>
+        <option value="name">Сорт.: по имени</option>
+      </select>
+    </div>
+    <button class="dust-btn" onclick="showToast('Функция распыления карт')">✨ РАСПЫЛИТЬ КАРТЫ</button>
+    <div class="cards-grid" id="cardsGrid"></div>
+  </div>
+</div>
+
+<!-- DUEL / BAZAR / TOP -->
+<div class="page" id="page-duel">
+  <div class="placeholder-page"><div class="ph-icon">鬥</div><div class="ph-text">Дуэль — скоро</div></div>
+</div>
+<div class="page" id="page-bazar">
+  <div class="placeholder-page"><div class="ph-icon">市</div><div class="ph-text">Базар — скоро</div></div>
+</div>
+<div class="page" id="page-top">
+  <div class="placeholder-page"><div class="ph-icon">榜</div><div class="ph-text">Топ — скоро</div></div>
+</div>
+
+<!-- LOCATION MODAL -->
+<div class="modal-overlay" id="locModal">
+  <div class="modal-content" style="position:relative;">
+    <button class="modal-close" onclick="closeLocModal()"></button>
+    <div class="modal-header-img" id="locModalHeader">
+      <div class="loc-label" id="locModalLabel">ЛОКАЦИЯ 2</div>
+      <div class="loc-title" id="locModalTitle">Волчье ущелье</div>
+      <div class="loc-boss-img" id="locModalBossImg">🐺</div>
+    </div>
+    <div class="modal-body">
+      <div class="loc-desc" id="locModalDesc"></div>
+      <div class="modal-section-title">БОСС ЛОКАЦИИ</div>
+      <div class="boss-info">
+        <div class="boss-avatar" id="locBossAvatar"></div>
+        <div>
+          <div class="boss-name" id="locBossName"></div>
+          <div class="boss-sub">Сила оценивается по соотношению к вашему отряду</div>
+        </div>
+      </div>
+      <div class="modal-section-title">ОЦЕНКА БОЯ</div>
+      <div class="battle-rating">сила отряда / босса · ≥ 120%</div>
+      <div class="battle-verdict" id="locVerdict"></div>
+      <div class="battle-bar"><div class="battle-bar-fill" id="locBarFill"></div></div>
+      <div class="modal-section-title">ПОЛУЧЕНО 賞</div>
+      <div class="rewards-section">
+        <div class="reward-row"><span class="rw-bonus">без статич. бонуса</span></div>
+        <div class="reward-row"><span class="rw-val positive" id="locRewardEnergy"></span><span class="rw-label">к макс. энергии</span></div>
+        <div class="reward-row"><span class="rw-val positive" id="locRewardSilver"></span><span class="rw-label">серебра (разово)</span></div>
+      </div>
+      <div class="modal-section-title">ПОВТОР · ВХОД 行</div>
+      <div class="rewards-section">
+        <div class="reward-row"><span class="rw-val negative" id="locCostEnergy"></span><span class="rw-label">энергии за вход</span></div>
+        <div class="reward-row"><span class="rw-val positive" id="locRepeatSilver"></span><span class="rw-label">серебра за прохождение</span></div>
+        <div class="reward-row"><span class="rw-val" style="color:#888;">—</span><span class="rw-label">без доп. дропа</span></div>
+      </div>
+      <button class="play-again-btn" onclick="playAgain()">
+        <span class="btn-icon">戰</span> ПРОЙТИ СНОВА · <span id="locEnergyCost">6</span> ЕН.
+      </button>
+      <label class="skip-checkbox">
+        <input type="checkbox" checked> Пропустить бой — сразу к результату
+      </label>
+    </div>
+  </div>
+</div>
+
+<!-- CARD DETAIL MODAL -->
+<div class="card-modal-overlay" id="cardModal">
+  <div class="card-modal">
+    <button class="card-modal-close" onclick="closeCardModal()">✕</button>
+    <div class="card-detail-header">
+      <div class="card-detail-power">
+        <div class="pw-icon">力</div>
+        <div class="pw-label">БОЕВАЯ СИЛА</div>
+        <div class="pw-val" id="cdPower">478</div>
+        <div class="pw-bonus" id="cdPowerBonus">+96</div>
+      </div>
+      <div class="card-detail-info">
+        <div class="cd-name" id="cdName">Чхон Мён</div>
+        <div class="cd-rarity">
+          <span class="cd-rarity-stars" id="cdStars">★★</span>
+          <span class="cd-rarity-label" id="cdRarity">РЕДКАЯ</span>
+          <div class="cd-rarity-btns">
+            <button title="Переролл">🔄</button>
+            <button title="Класс">C</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cd-stats">
+      <div class="cd-stat"><div class="stat-icon" style="color:#f87171;">攻</div><div class="stat-label">АТАКА</div><div class="stat-val atk" id="cdAtk">190</div></div>
+      <div class="cd-stat"><div class="stat-icon" style="color:#7eb8da;">守</div><div class="stat-label">ЗАЩИТА</div><div class="stat-val def" id="cdDef">111</div></div>
+      <div class="cd-stat"><div class="stat-icon" style="color:#34d399;">命</div><div class="stat-label">ЗДОРОВЬЕ</div><div class="stat-val hp" id="cdHp">587</div></div>
+    </div>
+    <div class="skill-section">
+      <div class="skill-header">
+        <div class="skill-name"><span class="sk-icon">技</span> <span id="cdSkillName"></span></div>
+        <div class="skill-stars" id="cdSkillStars"></div>
+      </div>
+      <div class="skill-desc" id="cdSkillDesc"></div>
+    </div>
+    <div class="upgrade-section">
+      <div class="upgrade-header">
+        <div class="upgrade-title"><span class="up-icon">鍛</span> СЛЕДУЮЩАЯ ЗАТОЧКА</div>
+        <div class="upgrade-chance" id="cdChance"></div>
+      </div>
+      <div class="upgrade-stats-row">
+        <div class="upgrade-level"><span id="cdCurLevel">+0</span><span class="arrow">→</span><span id="cdNextLevel">+1</span></div>
+        <div class="upgrade-bonuses">
+          <span class="ub-atk" id="cdUpAtk"></span>
+          <span class="ub-def" id="cdUpDef"></span>
+          <span class="ub-hp" id="cdUpHp"></span>
+        </div>
+      </div>
+      <div class="upgrade-price"><div>ЦЕНА</div><div class="price-val">🪙 <span id="cdPrice">5</span></div></div>
+      <div class="upgrade-warning">При провале — поломка карты</div>
+    </div>
+    <div class="card-action-btns">
+      <button class="btn-upgrade" onclick="upgradeCard()"><span>鍛</span> УЛУЧШИТЬ · +<span id="cdUpBtnLevel">1</span></button>
+      <button class="btn-reroll" onclick="rerollCard()"><span>轉</span> РЕРОЛЛ</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="data.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
