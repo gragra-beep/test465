@@ -41,8 +41,9 @@ function renderCards() {
 
     const power = card.baseStats.atk + card.baseStats.def + card.baseStats.hp;
 
+    // ИСПРАВЛЕНО: Теперь картинка подтягивается из card.image
     el.innerHTML = `
-      <div class="card-img" style="background: linear-gradient(135deg, #2a1a3a, #1a2a3a);"></div>
+      <div class="card-img" style="background-image: url('${card.image}'); background-size: cover; background-position: center; background-color: #2a1a3a;"></div>
       <div class="card-stars">★${card.stars}</div>
       <div class="card-level ${card.broken ? 'broken-lvl' : ''}">+${card.level}</div>
       ${card.broken ? '<div class="card-broken-stamp">СЛОМАНА</div>' : ''}
@@ -55,7 +56,9 @@ function renderCards() {
   });
 }
 
-function filterCards() { renderCards(); }
+function filterCards() { 
+  renderCards(); 
+}
 
 function openCardModal(card, index) {
   state.currentCard = card;
@@ -105,6 +108,7 @@ function upgradeCard() {
     openCardModal(card, state.currentCardIndex);
     renderCards();
     showToast(`Улучшение успешно! ${card.name} +${card.level}`);
+    saveGame(); // ИСПРАВЛЕНО: Сохраняем прогресс после успешной заточки
   } else {
     card.broken = true;
     state.silver -= 5;
@@ -112,6 +116,7 @@ function upgradeCard() {
     closeCardModal();
     renderCards();
     showToast(`${card.name} сломана при заточке!`, true);
+    saveGame(); // ИСПРАВЛЕНО: Сохраняем прогресс даже при поломке
   }
 }
 
