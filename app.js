@@ -1,9 +1,9 @@
 // ===== ОБЩЕЕ СОСТОЯНИЕ =====
 const state = {
   currentLogin: null,
-  energy: 8000,
-  maxEnergy: 80,
-  silver: 1000553,
+  energy: 999999,
+  maxEnergy: 999999,
+  silver: 999999,
   currentLoc: null,
   currentCard: null,
   currentCardIndex: null,
