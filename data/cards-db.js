@@ -11,32 +11,32 @@ const CARDS_DATABASE = [
   }, // ← ДОБАВЛЕНА ЗАПЯТАЯ
   { 
     id: 'card_002', 
-    name: 'Хуа Чэн', 
+    name: 'Ген', 
     rarity: 'rare', 
     stars: 2,
     baseStats: { atk: 280, def: 160, hp: 250 },
     skill: { name: 'Благословение Цветов', desc: 'Восстанавливает HP всем союзникам.', stars: 4 },
-    image: '/test465/cards/hua_cheng.png', 
+    image: '/test465/cards/gen.png', 
     tags: ['поддержка'] 
   },
   { 
     id: 'card_003', 
-    name: 'Чхон Мён', 
+    name: 'КуроШиро', 
     rarity: 'rare', 
     stars: 2,
     baseStats: { atk: 190, def: 111, hp: 587 },
     skill: { name: 'Ярость Багрового Зверя', desc: 'Повышает ATK союзнику с наибольшей атакой.', stars: 4 },
-    image: '/test465/cards/chon_myon.png', 
+    image: '/test465/cards/kuroshiro.png', 
     tags: ['боевая', 'бафф'] 
   },
   { 
     id: 'card_004', 
-    name: 'Хуа Чэн (Пробуждённый)', 
+    name: 'Сора', 
     rarity: 'epic', 
     stars: 3,
     baseStats: { atk: 380, def: 220, hp: 290 },
     skill: { name: 'Танец Бабочек', desc: 'Наносит урон всем врагам.', stars: 5 },
-    image: '/test465/cards/hua_cheng_awakened.png', 
+    image: '/test465/cards/sora.png', 
     tags: ['боевая', 'aoe'] 
   },
   { 
@@ -51,12 +51,12 @@ const CARDS_DATABASE = [
   },
   { 
     id: 'card_006', 
-    name: 'Ли Со', 
+    name: 'Юкио', 
     rarity: 'rare', 
     stars: 2,
     baseStats: { atk: 175, def: 145, hp: 175 },
     skill: { name: 'Щит Нефрита', desc: 'Повышает защиту всем союзникам на 3 хода.', stars: 3 },
-    image: '/test465/cards/li_so.png', 
+    image: '/test465/cards/yukio.png', 
     tags: ['защита'] 
   },
   { 
