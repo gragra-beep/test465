@@ -2,7 +2,7 @@ const CARDS_DATABASE = [
   { id: 'card_001', name: 'Чок Хва', rarity: 'common', stars: 1,
     baseStats: { atk: 520, def: 310, hp: 552 },
     skill: { name: 'Удар Тени', desc: 'Наносит урон одному врагу.', stars: 3 },
-    image: 'cards/chok_hwa.png', tags: ['боевая'] },
+    image: 'cards/hoshi.png', tags: ['боевая'] },
   { id: 'card_002', name: 'Хуа Чэн', rarity: 'rare', stars: 2,
     baseStats: { atk: 280, def: 160, hp: 250 },
     skill: { name: 'Благословение Цветов', desc: 'Восстанавливает HP всем союзникам.', stars: 4 },
