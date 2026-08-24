@@ -59,8 +59,9 @@ function summon(count) {
   if (document.getElementById('autoDustCheck')?.checked) {
     autoDustDuplicates();
   }
+  
+  saveGame(); // ← Сохраняем!
 }
-
 function rollCard() {
   const rand = Math.random() * 100;
   let rarity;
