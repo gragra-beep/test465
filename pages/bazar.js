@@ -7,9 +7,13 @@ function showBannerDetails() {
   CARDS_DATABASE.forEach(card => {
     const cardEl = document.createElement('div');
     cardEl.className = 'pool-card';
+    
+    // Используем абсолютный путь к картинке
+    const imagePath = card.image.startsWith('/') ? card.image : '/test465/' + card.image;
+    
     cardEl.innerHTML = `
       <div class="card-tag">戰 БОЕВАЯ</div>
-      <div class="pool-card-img" style="background-image: url('${card.image}');"></div>
+      <div class="pool-card-img" style="background-image: url('${imagePath}');"></div>
       <div style="position:absolute; bottom:6px; left:6px; right:6px; font-size:10px; font-weight:600; text-shadow: 0 1px 3px rgba(0,0,0,0.9); text-align: center;">${card.name}</div>
     `;
     pool.appendChild(cardEl);
@@ -60,7 +64,7 @@ function summon(count) {
     autoDustDuplicates();
   }
   
-  saveGame(); // Сохраняем прогресс после призыва
+  saveGame();
 }
 
 function rollCard() {
@@ -114,5 +118,5 @@ function autoDustDuplicates() {
     }
   }
   showToast('Дубликаты распылены');
-  saveGame(); // ИСПРАВЛЕНО: Сохраняем прогресс после распыления дубликатов
+  saveGame();
 }
