@@ -221,56 +221,80 @@
 <div class="card-modal-overlay" id="cardModal">
   <div class="card-modal">
     <button class="card-modal-close" onclick="closeCardModal()">✕</button>
-    <div class="card-detail-header">
-      <div class="card-detail-power">
-        <div class="pw-icon">力</div>
-        <div class="pw-label">БОЕВАЯ СИЛА</div>
-        <div class="pw-val" id="cdPower">478</div>
-        <div class="pw-bonus" id="cdPowerBonus">+96</div>
+    
+    <!-- Верх: картинка + инфо -->
+    <div class="cd-top">
+      <div class="cd-image-wrap">
+        <div class="cd-image" id="cdCardImage"></div>
       </div>
-      <div class="card-detail-info">
-        <div class="cd-name" id="cdName">Чхон Мён</div>
-        <div class="cd-rarity">
-          <span class="cd-rarity-stars" id="cdStars">★★</span>
-          <span class="cd-rarity-label" id="cdRarity">РЕДКАЯ</span>
-          <div class="cd-rarity-btns">
-            <button title="Переролл">🔄</button>
-            <button title="Класс">C</button>
+      <div class="cd-info">
+        <div class="cd-info-top">
+          <div class="cd-bm-block">
+            <div class="cd-bm-label">BM</div>
+            <div class="cd-bm-sub">БОЕВАЯ СИЛА</div>
+            <div class="cd-bm-val" id="cdPower">495</div>
+            <div class="cd-bm-bonus" id="cdPowerBonus">+99</div>
+          </div>
+          <div class="cd-name-block">
+            <div class="cd-name" id="cdName">Юкио</div>
+            <div class="cd-stars" id="cdStars">★</div>
+            <div class="cd-rarity-badge" id="cdRarityBadge">A</div>
+            <div class="cd-rank-letter" id="cdRankLetter">A</div>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- Статы -->
     <div class="cd-stats">
-      <div class="cd-stat"><div class="stat-icon" style="color:#f87171;">攻</div><div class="stat-label">АТАКА</div><div class="stat-val atk" id="cdAtk">190</div></div>
-      <div class="cd-stat"><div class="stat-icon" style="color:#7eb8da;">守</div><div class="stat-label">ЗАЩИТА</div><div class="stat-val def" id="cdDef">111</div></div>
-      <div class="cd-stat"><div class="stat-icon" style="color:#34d399;">命</div><div class="stat-label">ЗДОРОВЬЕ</div><div class="stat-val hp" id="cdHp">587</div></div>
+      <div class="cd-stat">
+        <div class="stat-label-big atk">ATK</div>
+        <div class="stat-label-small">АТАКА</div>
+        <div class="stat-val atk" id="cdAtk">175</div>
+      </div>
+      <div class="cd-stat">
+        <div class="stat-label-big def">DEF</div>
+        <div class="stat-label-small">ЗАЩИТА</div>
+        <div class="stat-val def" id="cdDef">145</div>
+      </div>
+      <div class="cd-stat">
+        <div class="stat-label-big hp">HP</div>
+        <div class="stat-label-small">ЗДОРОВЬЕ</div>
+        <div class="stat-val hp" id="cdHp">175</div>
+      </div>
     </div>
+
+    <!-- Навык -->
     <div class="skill-section">
       <div class="skill-header">
-        <div class="skill-name"><span class="sk-icon">技</span> <span id="cdSkillName"></span></div>
+        <div class="skill-name"><span class="sk-icon">◎</span> <span id="cdSkillName">Щит Нефрита</span></div>
         <div class="skill-stars" id="cdSkillStars"></div>
       </div>
       <div class="skill-desc" id="cdSkillDesc"></div>
     </div>
+
+    <!-- Заточка -->
     <div class="upgrade-section">
       <div class="upgrade-header">
-        <div class="upgrade-title"><span class="up-icon">鍛</span> СЛЕДУЮЩАЯ ЗАТОЧКА</div>
-        <div class="upgrade-chance" id="cdChance"></div>
+        <div class="upgrade-title"><span class="up-icon">✦</span> СЛЕДУЮЩАЯ ЗАТОЧКА</div>
+        <div class="upgrade-chance" id="cdChance">Шанс: 99%</div>
       </div>
       <div class="upgrade-stats-row">
         <div class="upgrade-level"><span id="cdCurLevel">+0</span><span class="arrow">→</span><span id="cdNextLevel">+1</span></div>
         <div class="upgrade-bonuses">
-          <span class="ub-atk" id="cdUpAtk"></span>
-          <span class="ub-def" id="cdUpDef"></span>
-          <span class="ub-hp" id="cdUpHp"></span>
+          <span class="ub-atk" id="cdUpAtk">+8</span>
+          <span class="ub-def" id="cdUpDef">+7</span>
+          <span class="ub-hp" id="cdUpHp">+8</span>
         </div>
       </div>
-      <div class="upgrade-price"><div>ЦЕНА</div><div class="price-value">🪙 <span id="cdPrice">5</span></div></div>
-      <div class="upgrade-warning">При провале — поломка карты</div>
+      <div class="upgrade-price"><div>ЦЕНА</div><div class="price-value"> <span id="cdPrice">5</span></div></div>
+      <div class="upgrade-warning" id="cdUpgradeWarning">При провале — откат до +0</div>
     </div>
+
+    <!-- Кнопки -->
     <div class="card-action-btns">
-      <button class="btn-upgrade" onclick="upgradeCard()"><span>鍛</span> УЛУЧШИТЬ · +<span id="cdUpBtnLevel">1</span></button>
-      <button class="btn-reroll" onclick="rerollCard()"><span>轉</span> РЕРОЛЛ</button>
+      <button class="btn-upgrade" onclick="upgradeCard()"><span>УЛУЧШИТЬ</span> · +<span id="cdUpBtnLevel">1</span></button>
+      <button class="btn-reroll" onclick="rerollCard()"><span>ВОЗНЕСЕНИЕ</span></button>
     </div>
   </div>
 </div>
