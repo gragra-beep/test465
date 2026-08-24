@@ -41,12 +41,12 @@ const CARDS_DATABASE = [
   },
   { 
     id: 'card_005', 
-    name: 'Му Сан', 
+    name: 'Аои', 
     rarity: 'rare', 
     stars: 2,
     baseStats: { atk: 210, def: 130, hp: 180 },
     skill: { name: 'Клинок Ветра', desc: 'Быстрая атака с шансом крита.', stars: 3 },
-    image: '/test465/cards/mu_san.png', 
+    image: '/test465/cards/aoi.png', 
     tags: ['боевая', 'крит'] 
   },
   { 
