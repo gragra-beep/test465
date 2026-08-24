@@ -1,28 +1,25 @@
 // ===== СОСТОЯНИЕ =====
 const state = {
-  energy: 41,
+  energy: 90,
   maxEnergy: 90,
   silver: 1553,
-  stars: 0,
-  gems: 7,
-  tickets: 103,
   currentLoc: null,
   currentCard: null,
   completedLocs: [1, 2, 3],
 };
 
-// ===== ЛОКАЦИИ =====
+// ===== ЛОКАЦИИ (energyCost = rewardSilver) =====
 const locations = [
-  { id: 1, name: 'Тропа Следов', cn: '迹', x: 12, y: 28, boss: 'Страж Тропы', bossIcon: '👤', desc: 'Древняя тропа, проложенная первыми мастерами мурим. Здесь начинающие воины учатся читать следы врагов.', energyCost: 4, rewardSilver: 3, rewardEnergy: 5, verdict: 'Лёгкая прогулка', barPct: 98 },
-  { id: 2, name: 'Волчье ущелье', cn: '狼', x: 28, y: 38, boss: 'Король Серых Волков', bossIcon: '', desc: 'Каменная теснина, где обитает зверь, вобравший внутреннюю силу павших мастеров. Здесь проверяют себя молодые воины мурим.', energyCost: 6, rewardSilver: 5, rewardEnergy: 10, verdict: 'Победа почти гарантирована', barPct: 95 },
+  { id: 1, name: 'Тропа Следов', cn: '迹', x: 12, y: 28, boss: 'Страж Тропы', bossIcon: '👤', desc: 'Древняя тропа, проложенная первыми мастерами мурим. Здесь начинающие воины учатся читать следы врагов.', energyCost: 3, rewardSilver: 3, rewardEnergy: 10, verdict: 'Лёгкая прогулка', barPct: 98 },
+  { id: 2, name: 'Волчье ущелье', cn: '狼', x: 28, y: 38, boss: 'Король Серых Волков', bossIcon: '🐺', desc: 'Каменная теснина, где обитает зверь, вобравший внутреннюю силу павших мастеров. Здесь проверяют себя молодые воины мурим.', energyCost: 5, rewardSilver: 5, rewardEnergy: 10, verdict: 'Победа почти гарантирована', barPct: 95 },
   { id: 3, name: 'Скрытый храм', cn: '隐', x: 42, y: 30, boss: 'Теневой Монах', bossIcon: '🧘', desc: 'Заброшенный храм в горах, хранящий тайны древних техник. Монахи-отступники охраняют вход.', energyCost: 8, rewardSilver: 8, rewardEnergy: 10, verdict: 'Превосходство на вашей стороне', barPct: 88 },
-  { id: 4, name: 'Храм Четырёх Ветров', cn: '寺', x: 62, y: 25, boss: 'Настоятель Ветра', bossIcon: '🌪️', desc: 'Древний храм на вершине горы. Четыре мастера ветра охраняют святыни предков.', energyCost: 10, rewardSilver: 12, rewardEnergy: 15, verdict: 'Бой будет непростым', barPct: 72, alert: true },
-  { id: 5, name: 'Кровавый пруд', cn: '血', x: 52, y: 45, boss: 'Кровавый Дух', bossIcon: '🩸', desc: 'Озеро, окрашенное кровью павших воинов. Духи жаждут мести.', energyCost: 12, rewardSilver: 15, rewardEnergy: 15, verdict: 'Опасно', barPct: 55, locked: true },
-  { id: 6, name: 'Топь Забвения', cn: '沼', x: 38, y: 55, boss: 'Болотный Колосс', bossIcon: '🌿', desc: 'Гиблое место, где тонут даже опытные воины. Топь поглощает всё живое.', energyCost: 14, rewardSilver: 18, rewardEnergy: 20, verdict: 'Крайне опасно', barPct: 40, locked: true },
-  { id: 7, name: 'Врата Дракона', cn: '关', x: 72, y: 38, boss: 'Страж Врат', bossIcon: '🐉', desc: 'Древние врата, за которыми скрыта сила драконьего клана.', energyCost: 16, rewardSilver: 20, rewardEnergy: 20, verdict: 'Недоступно', barPct: 30, locked: true },
-  { id: 8, name: 'Гробница Теней', cn: '墓', x: 22, y: 65, boss: 'Теневой Владыка', bossIcon: '💀', desc: 'Подземная гробница великого мастера. Его тень всё ещё охраняет покой.', energyCost: 18, rewardSilver: 25, rewardEnergy: 25, verdict: 'Недоступно', barPct: 20, locked: true },
-  { id: 9, name: 'Логово Змея', cn: '蛇', x: 50, y: 70, boss: 'Древний Змей', bossIcon: '🐍', desc: 'Подводная пещера, где спит древний змей. Пробуждение принесёт катастрофу.', energyCost: 20, rewardSilver: 30, rewardEnergy: 30, verdict: 'Недоступно', barPct: 15, locked: true },
-  { id: 10, name: 'Нефритовый дворец', cn: '玉', x: 78, y: 55, boss: 'Нефритовый Император', bossIcon: '👑', desc: 'Вершина всех испытаний. Дворец великого императора мурим.', energyCost: 25, rewardSilver: 50, rewardEnergy: 40, verdict: 'Недоступно', barPct: 10, locked: true },
+  { id: 4, name: 'Храм Четырёх Ветров', cn: '寺', x: 62, y: 25, boss: 'Настоятель Ветра', bossIcon: '🌪️', desc: 'Древний храм на вершине горы. Четыре мастера ветра охраняют святыни предков.', energyCost: 12, rewardSilver: 12, rewardEnergy: 10, verdict: 'Бой будет непростым', barPct: 72, alert: true },
+  { id: 5, name: 'Кровавый пруд', cn: '血', x: 52, y: 45, boss: 'Кровавый Дух', bossIcon: '', desc: 'Озеро, окрашенное кровью павших воинов. Духи жаждут мести.', energyCost: 15, rewardSilver: 15, rewardEnergy: 10, verdict: 'Опасно', barPct: 55 },
+  { id: 6, name: 'Топь Забвения', cn: '沼', x: 38, y: 55, boss: 'Болотный Колосс', bossIcon: '🌿', desc: 'Гиблое место, где тонут даже опытные воины. Топь поглощает всё живое.', energyCost: 18, rewardSilver: 18, rewardEnergy: 10, verdict: 'Крайне опасно', barPct: 40 },
+  { id: 7, name: 'Врата Дракона', cn: '关', x: 72, y: 38, boss: 'Страж Врат', bossIcon: '🐉', desc: 'Древние врата, за которыми скрыта сила драконьего клана.', energyCost: 20, rewardSilver: 20, rewardEnergy: 10, verdict: 'Очень опасно', barPct: 30 },
+  { id: 8, name: 'Гробница Теней', cn: '墓', x: 22, y: 65, boss: 'Теневой Владыка', bossIcon: '💀', desc: 'Подземная гробница великого мастера. Его тень всё ещё охраняет покой.', energyCost: 25, rewardSilver: 25, rewardEnergy: 10, verdict: 'Смертельно', barPct: 20 },
+  { id: 9, name: 'Логово Змея', cn: '蛇', x: 50, y: 70, boss: 'Древний Змей', bossIcon: '🐍', desc: 'Подводная пещера, где спит древний змей. Пробуждение принесёт катастрофу.', energyCost: 30, rewardSilver: 30, rewardEnergy: 10, verdict: 'Безумие', barPct: 15 },
+  { id: 10, name: 'Нефритовый дворец', cn: '玉', x: 78, y: 55, boss: 'Нефритовый Император', bossIcon: '👑', desc: 'Вершина всех испытаний. Дворец великого императора мурим.', energyCost: 50, rewardSilver: 50, rewardEnergy: 10, verdict: 'Финал', barPct: 10 },
 ];
 
 // ===== КАРТЫ =====
