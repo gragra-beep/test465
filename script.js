@@ -231,3 +231,208 @@ document.getElementById('locModal').addEventListener('click', e => {
 document.getElementById('cardModal').addEventListener('click', e => {
   if (e.target === document.getElementById('cardModal')) closeCardModal();
 });
+// ===== BAZAR / GACHA =====
+
+function showBannerDetails() {
+  const pool = document.getElementById('cardsPool');
+  pool.innerHTML = '';
+  
+  // Показываем все карты из базы (можно фильтровать по баннеру)
+  CARDS_DATABASE.forEach(card => {
+    const cardEl = document.createElement('div');
+    cardEl.className = 'pool-card';
+    cardEl.innerHTML = `
+      <div class="card-tag">戰 БОЕВАЯ</div>
+      <div style="width:100%; height:100%; background: linear-gradient(135deg, ${getRarityColor(card.rarity)}); display:flex; align-items:center; justify-content:center; font-size:40px;">🎴</div>
+    `;
+    pool.appendChild(cardEl);
+  });
+  
+  document.getElementById('bannerModal').classList.add('show');
+}
+
+function closeBannerModal() {
+  document.getElementById('bannerModal').classList.remove('show');
+}
+
+function getRarityColor(rarity) {
+  const colors = {
+    common: '#6b7280, #374151',
+    rare: '#34d399, #059669',
+    epic: '#a78bfa, #7c3aed',
+    legendary: '#fb923c, #ea580c',
+    mythic: '#c084fc, #9333ea'
+  };
+  return colors[rarity] || colors.common;
+}
+
+function summon(count) {
+  const cost = count * 40;
+  if (state.silver < cost) {
+    showToast(`Недостаточно серебра! Нужно ${cost}`, true);
+    return;
+  }
+  
+  state.silver -= cost;
+  state.bannerRolls += count;
+  updateResources();
+  
+  // Логика призыва
+  const newCards = [];
+  for (let i = 0; i < count; i++) {
+    const card = rollCard();
+    newCards.push(card);
+    addCardToPlayer(state.currentLogin, card.id);
+  }
+  
+  // Обновляем счётчики
+  updateSummonCounters();
+  
+  const cardsNames = newCards.map(c => c.name).join(', ');
+  showToast(`Призвано: ${cardsNames}`);
+  
+  // Если авто-распыление включено
+  if (document.getElementById('autoDustCheck')?.checked) {
+    autoDustDuplicates();
+  }
+}
+
+function rollCard() {
+  // Простая система шансов
+  const rand = Math.random() * 100;
+  let rarity;
+  
+  // Проверка гарантов
+  if (state.bannerRolls - state.lastEpicRoll >= 20) {
+    rarity = 'epic';
+  } else if (rand < 2) {
+    rarity = 'mythic';
+  } else if (rand < 8) {
+    rarity = 'legendary';
+  } else if (rand < 25) {
+    rarity = 'epic';
+  } else if (rand < 60) {
+    rarity = 'rare';
+  } else {
+    rarity = 'common';
+  }
+  
+  // Выбираем случайную карту этой редкости
+  const cardsOfRarity = getCardsByRarity(rarity);
+  const card = cardsOfRarity[Math.floor(Math.random() * cardsOfRarity.length)];
+  
+  // Обновляем счётчики
+  if (rarity === 'epic') state.lastEpicRoll = state.bannerRolls;
+  if (rarity === 'legendary') state.lastLegendaryRoll = state.bannerRolls;
+  if (rarity === 'mythic') state.lastMythicRoll = state.bannerRolls;
+  
+  return card;
+}
+
+function updateSummonCounters() {
+  const epicLeft = 20 - (state.bannerRolls - state.lastEpicRoll);
+  document.getElementById('epicCounter').textContent = Math.max(0, epicLeft);
+}
+
+function autoDustDuplicates() {
+  // Удаляем дубликаты карт (оставляем по одной)
+  const inventory = getPlayerInventory(state.currentLogin);
+  if (!inventory) return;
+  
+  const seen = new Set();
+  for (let i = inventory.cards.length - 1; i >= 0; i--) {
+    const cardId = inventory.cards[i].cardId;
+    if (seen.has(cardId)) {
+      removeCardFromPlayer(state.currentLogin, i);
+    } else {
+      seen.add(cardId);
+    }
+  }
+  
+  showToast('Дубликаты распылены');
+}
+
+// ===== ОБНОВЛЁННЫЙ doLogin =====
+function doLogin() {
+  const login = document.getElementById('loginInput').value;
+  const pass = document.getElementById('passwordInput').value;
+  if (login === 'ooo' && pass === '1234') {
+    state.currentLogin = login;
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('topbar').style.display = 'flex';
+    document.getElementById('navBar').style.display = 'flex';
+    state.maxEnergy = getMaxEnergy();
+    state.energy = state.maxEnergy;
+    updateResources();
+    initMap();
+    renderCards(); // Теперь рендерит карты конкретного игрока
+  } else {
+    document.getElementById('loginError').textContent = 'Неверный логин или пароль';
+  }
+}
+
+// ===== ОБНОВЛЁННЫЙ renderCards =====
+function renderCards() {
+  const grid = document.getElementById('cardsGrid');
+  const rank = document.getElementById('filterRank').value;
+  const status = document.getElementById('filterStatus').value;
+  const sort = document.getElementById('filterSort').value;
+  
+  // Получаем инвентарь текущего игрока
+  const inventory = getPlayerInventory(state.currentLogin);
+  if (!inventory) {
+    grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #888; padding: 40px;">Нет карт</div>';
+    return;
+  }
+  
+  // Получаем полные данные карт
+  let playerCards = inventory.cards.map(invCard => {
+    const baseCard = getCardById(invCard.cardId);
+    return { ...baseCard, ...invCard };
+  });
+  
+  // Фильтры
+  if (rank !== 'any') {
+    playerCards = playerCards.filter(c => c.stars === parseInt(rank));
+  }
+  if (status === 'broken') {
+    playerCards = playerCards.filter(c => c.broken);
+  } else if (status === 'normal') {
+    playerCards = playerCards.filter(c => !c.broken);
+  }
+  
+  // Сортировка
+  if (sort === 'power') {
+    playerCards.sort((a, b) => {
+      const powerA = a.baseStats.atk + a.baseStats.def + a.baseStats.hp;
+      const powerB = b.baseStats.atk + b.baseStats.def + b.baseStats.hp;
+      return powerB - powerA;
+    });
+  } else if (sort === 'name') {
+    playerCards.sort((a, b) => a.name.localeCompare(b.name));
+  } else {
+    playerCards.sort((a, b) => b.stars - a.stars);
+  }
+  
+  // Рендер
+  grid.innerHTML = '';
+  playerCards.forEach((card, index) => {
+    const el = document.createElement('div');
+    el.className = 'card-item' + (card.broken ? ' broken' : '');
+    el.onclick = () => openCardModal(card, index);
+    
+    const power = card.baseStats.atk + card.baseStats.def + card.baseStats.hp;
+    
+    el.innerHTML = `
+      <div class="card-img" style="background: ${card.image.includes('.png') ? '#2a1a3a' : 'linear-gradient(135deg, #2a1a3a, #1a2a3a)'};"></div>
+      <div class="card-stars">★${card.stars}</div>
+      <div class="card-level ${card.broken ? 'broken-lvl' : ''}">+${card.level}</div>
+      ${card.broken ? '<div class="card-broken-stamp">СЛОМАНА</div>' : ''}
+      <div class="card-name">${card.name}</div>
+      <div class="card-sub">${card.rarity.toUpperCase()}</div>
+      <div class="card-star-bottom">★</div>
+      <div class="card-power">сил. ${power}</div>
+    `;
+    grid.appendChild(el);
+  });
+}
