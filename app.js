@@ -35,8 +35,12 @@ function doLogin() {
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('topbar').style.display = 'flex';
     document.getElementById('navBar').style.display = 'flex';
+    
+    loadGame(); // ← Загружаем сохранение
+    
     state.maxEnergy = getMaxEnergy();
-    state.energy = state.maxEnergy;
+    if (state.energy > state.maxEnergy) state.energy = state.maxEnergy;
+    
     updateResources();
     initMap();
     renderCards();
