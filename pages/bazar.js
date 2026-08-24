@@ -7,8 +7,6 @@ function showBannerDetails() {
   CARDS_DATABASE.forEach(card => {
     const cardEl = document.createElement('div');
     cardEl.className = 'pool-card';
-    
-    // ИСПРАВЛЕНО: Теперь используется реальная картинка карты из базы данных
     cardEl.innerHTML = `
       <div class="card-tag">戰 БОЕВАЯ</div>
       <div class="pool-card-img" style="background-image: url('${card.image}');"></div>
