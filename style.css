@@ -232,7 +232,7 @@ body {
 .skip-checkbox { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 12px; font-size: 13px; color: #888; cursor: pointer; }
 .skip-checkbox input { accent-color: #34d399; }
 
-/* ===== КНОПКА ЗАКРЫТИЯ МОДАЛОК (улучшенная) ===== */
+/* ===== КНОПКА ЗАКРЫТИЯ МОДАЛОК ===== */
 .modal-close-x {
   position: absolute;
   top: 12px;
@@ -529,35 +529,6 @@ body {
 .btn-details:hover {
   background: rgba(255,255,255,0.1);
   border-color: rgba(255,255,255,0.25);
-}
-
-/* ===== КНОПКА ЗАКРЫТИЯ МОДАЛОК (улучшенная) ===== */
-.modal-close-x {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #ffffff;
-  font-size: 22px;
-  font-weight: bold;
-  cursor: pointer;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-  transition: background 0.2s, transform 0.2s;
-}
-.modal-close-x:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: scale(1.1);
-}
-.modal-close-x:active {
-  transform: scale(0.95);
 }
 
 /* ===== BANNER MODAL ===== */
