@@ -41,7 +41,6 @@ function renderCards() {
 
     const power = card.baseStats.atk + card.baseStats.def + card.baseStats.hp;
 
-    // ИСПРАВЛЕНО: Теперь картинка подтягивается из card.image
     el.innerHTML = `
       <div class="card-img" style="background-image: url('${card.image}'); background-size: cover; background-position: center; background-color: #2a1a3a;"></div>
       <div class="card-stars">★${card.stars}</div>
@@ -56,8 +55,54 @@ function renderCards() {
   });
 }
 
-function filterCards() { 
-  renderCards(); 
+function filterCards() { renderCards(); }
+
+// ===== НОВАЯ СИСТЕМА ЗАТОЧКИ =====
+
+function getUpgradeChance(level) {
+  if (level < 10) return 99;
+  if (level < 20) return 95;
+  if (level < 30) return 90;
+  if (level < 40) return 85;
+  if (level < 50) return 80;
+  if (level < 60) return 60;
+  if (level < 70) return 50;
+  if (level < 80) return 30;
+  if (level < 90) return 15;
+  return 5; // 90-100
+}
+
+function getUpgradeCost(level) {
+  if (level < 10) return 5;
+  if (level < 20) return 7;
+  if (level < 30) return 9;
+  if (level < 40) return 10;
+  if (level < 50) return 15;
+  if (level < 60) return 30;
+  if (level < 70) return 40;
+  if (level < 80) return 45;
+  if (level < 90) return 50;
+  return 55; // 90-100
+}
+
+function getRollbackLevel(level) {
+  if (level < 10) return 0;
+  if (level < 20) return 10;
+  if (level < 30) return 20;
+  if (level < 40) return 30;
+  if (level < 50) return 40;
+  if (level < 60) return 50;
+  if (level < 70) return 60;
+  if (level < 80) return 70;
+  if (level < 90) return 80;
+  return 90; // 90-100
+}
+
+function getUpgradeBonuses(card) {
+  const atkBonus = Math.floor(card.baseStats.atk * 0.05);
+  const defBonus = Math.floor(card.baseStats.def * 0.05);
+  const hpBonus = Math.floor(card.baseStats.hp * 0.05);
+  return { atk: atkBonus, def: defBonus, hp: hpBonus };
 }
 
 function openCardModal(card, index) {
@@ -65,25 +110,55 @@ function openCardModal(card, index) {
   state.currentCardIndex = index;
   const power = card.baseStats.atk + card.baseStats.def + card.baseStats.hp;
 
+  // Картинка
+  const cardImageEl = document.getElementById('cdCardImage');
+  cardImageEl.style.backgroundImage = `url('${card.image}')`;
+
+  // BM
   document.getElementById('cdPower').textContent = power;
   document.getElementById('cdPowerBonus').textContent = '+' + Math.floor(power * 0.2);
+
+  // Имя, звёзды, ранг
   document.getElementById('cdName').textContent = card.name;
   document.getElementById('cdStars').textContent = '★'.repeat(card.stars);
-  document.getElementById('cdRarity').textContent = card.rarity.toUpperCase();
+  document.getElementById('cdRarityBadge').textContent = 'A';
+  document.getElementById('cdRankLetter').textContent = 'A';
+
+  // Статы
   document.getElementById('cdAtk').textContent = card.baseStats.atk;
   document.getElementById('cdDef').textContent = card.baseStats.def;
   document.getElementById('cdHp').textContent = card.baseStats.hp;
+
+  // Навык
   document.getElementById('cdSkillName').textContent = card.skill.name;
   document.getElementById('cdSkillDesc').textContent = card.skill.desc;
   document.getElementById('cdSkillStars').textContent = '★'.repeat(card.skill.stars) + '☆'.repeat(5 - card.skill.stars);
-  document.getElementById('cdChance').textContent = 'Шанс: 95%';
+
+  // Заточка
+  const chance = getUpgradeChance(card.level);
+  const cost = getUpgradeCost(card.level);
+  const bonuses = getUpgradeBonuses(card);
+  const nextLevel = Math.min(card.level + 1, 100);
+
+  document.getElementById('cdChance').textContent = 'Шанс: ' + chance + '%';
   document.getElementById('cdCurLevel').textContent = '+' + card.level;
-  document.getElementById('cdNextLevel').textContent = '+' + (card.level + 1);
-  document.getElementById('cdUpAtk').textContent = '攻+' + Math.floor(card.baseStats.atk * 0.05);
-  document.getElementById('cdUpDef').textContent = '守+' + Math.floor(card.baseStats.def * 0.05);
-  document.getElementById('cdUpHp').textContent = '命+' + Math.floor(card.baseStats.hp * 0.05);
-  document.getElementById('cdPrice').textContent = 5;
-  document.getElementById('cdUpBtnLevel').textContent = card.level + 1;
+  document.getElementById('cdNextLevel').textContent = '+' + nextLevel;
+  document.getElementById('cdUpAtk').textContent = '+' + bonuses.atk;
+  document.getElementById('cdUpDef').textContent = '+' + bonuses.def;
+  document.getElementById('cdUpHp').textContent = '+' + bonuses.hp;
+  document.getElementById('cdPrice').textContent = cost;
+  document.getElementById('cdUpBtnLevel').textContent = nextLevel - card.level;
+
+  const warningEl = document.getElementById('cdUpgradeWarning');
+  if (card.level >= 100) {
+    warningEl.textContent = 'Максимальный уровень достигнут';
+    warningEl.style.color = '#888';
+  } else {
+    const rollback = getRollbackLevel(card.level);
+    warningEl.textContent = 'При провале — откат до +' + rollback;
+    warningEl.style.color = '#f87171';
+  }
+
   document.getElementById('cardModal').classList.add('show');
 }
 
@@ -94,34 +169,49 @@ function closeCardModal() {
 function upgradeCard() {
   const card = state.currentCard;
   if (!card) return;
-  if (card.broken) { showToast('Карта сломана!', true); return; }
-  if (state.silver < 5) { showToast('Недостаточно серебра!', true); return; }
+  
+  if (card.level >= 100) {
+    showToast('Максимальный уровень достигнут!', true);
+    return;
+  }
 
+  const cost = getUpgradeCost(card.level);
+  if (state.silver < cost) {
+    showToast(`Недостаточно серебра! Нужно ${cost}`, true);
+    return;
+  }
+
+  const chance = getUpgradeChance(card.level);
   const roll = Math.random() * 100;
-  if (roll < 95) {
+
+  if (roll < chance) {
+    // Успех
     card.level++;
-    card.baseStats.atk += Math.floor(card.baseStats.atk * 0.05);
-    card.baseStats.def += Math.floor(card.baseStats.def * 0.05);
-    card.baseStats.hp += Math.floor(card.baseStats.hp * 0.05);
-    state.silver -= 5;
+    const bonuses = getUpgradeBonuses(card);
+    card.baseStats.atk += bonuses.atk;
+    card.baseStats.def += bonuses.def;
+    card.baseStats.hp += bonuses.hp;
+    state.silver -= cost;
     updateResources();
     openCardModal(card, state.currentCardIndex);
     renderCards();
     showToast(`Улучшение успешно! ${card.name} +${card.level}`);
-    saveGame(); // ИСПРАВЛЕНО: Сохраняем прогресс после успешной заточки
+    saveGame();
   } else {
-    card.broken = true;
-    state.silver -= 5;
+    // Провал — откат уровня
+    const rollback = getRollbackLevel(card.level);
+    card.level = rollback;
+    state.silver -= cost;
     updateResources();
-    closeCardModal();
+    openCardModal(card, state.currentCardIndex);
     renderCards();
-    showToast(`${card.name} сломана при заточке!`, true);
-    saveGame(); // ИСПРАВЛЕНО: Сохраняем прогресс даже при поломке
+    showToast(`Провал! ${card.name} откатилась до +${rollback}`, true);
+    saveGame();
   }
 }
 
 function rerollCard() {
   const card = state.currentCard;
   if (!card) return;
-  showToast('Нужны гемы (пока не реализовано)');
+  showToast('Возвышение — скоро будет доступно');
 }
