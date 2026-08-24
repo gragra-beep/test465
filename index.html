@@ -88,7 +88,85 @@
 <div class="page" id="page-top">
   <div class="placeholder-page"><div class="ph-icon">榜</div><div class="ph-text">Топ — скоро</div></div>
 </div>
+<!-- BAZAR PAGE -->
+<div class="page" id="page-bazar">
+  <div class="bazar-page">
+    <div class="banner-header">
+      <div class="banner-tag">無 ВЕЧНЫЙ</div>
+      <div class="banner-image" style="background: linear-gradient(135deg, #2a1a3a, #1a2a3a);">
+        <!-- Здесь будет картинка баннера -->
+        <div style="font-size: 80px; text-align: center; padding-top: 60px;">🎴</div>
+      </div>
+    </div>
+    
+    <div class="banner-info">
+      <div class="banner-label">БАННЕР КАРТ</div>
+      <h1 class="banner-title">Под небом Мурима</h1>
+      
+      <div class="banner-rates">
+        <div class="rate-row">
+          <div class="rate-name">ЭПИЧЕСКАЯ <span class="stars">★★★</span></div>
+          <div class="rate-guarantee">ЧЕРЕЗ <span id="epicCounter">20</span></div>
+        </div>
+        <div class="rate-sub">жёсткий гарант · каждые 20</div>
+        
+        <div class="rate-row legendary">
+          <div class="rate-name">ЛЕГЕНДАРНАЯ <span class="stars">★★★★</span></div>
+          <div class="rate-guarantee">С 40-Й</div>
+        </div>
+        <div class="rate-sub">мягкий гарант с 40-й</div>
+        
+        <div class="rate-row mythic">
+          <div class="rate-name">МИФИЧЕСКАЯ <span class="stars">★★★★★</span></div>
+          <div class="rate-guarantee">С 80-Й</div>
+        </div>
+        <div class="rate-sub">мягкий гарант с 80-й</div>
+      </div>
+      
+      <div class="summon-price">
+        <span class="price-label">召 цена открытия</span>
+        <span class="price-value">40 <span class="coin-icon">●</span></span>
+      </div>
+      
+      <button class="btn-details" onclick="showBannerDetails()">
+        市 ПОДРОБНЕЕ →
+      </button>
+    </div>
+  </div>
+</div>
 
+<!-- BANNER DETAILS MODAL -->
+<div class="modal-overlay" id="bannerModal">
+  <div class="banner-modal">
+    <button class="modal-close-x" onclick="closeBannerModal()">✕</button>
+    
+    <div class="banner-modal-header">
+      <div class="banner-subtitle">· 英 · БАННЕР КАРТ · ВЕЧНЫЙ ·</div>
+      <h2>Под небом Мурима</h2>
+      <div class="pool-info">池 В КОЛОДЕ · 25 КАРТ · все возможные дропы</div>
+    </div>
+    
+    <div class="cards-pool" id="cardsPool">
+      <!-- Карты будут добавлены через JS -->
+    </div>
+    
+    <div class="auto-dust">
+      <label class="checkbox-label">
+        <input type="checkbox" id="autoDustCheck">
+        <span>塵 АВТО-РАСПЫЛЕНИЕ</span>
+      </label>
+    </div>
+    
+    <div class="summon-buttons">
+      <button class="btn-summon btn-summon-1" onclick="summon(1)">
+        ПРИЗВАТЬ ×1<br>40 СЕРЕБРА
+      </button>
+      <button class="btn-summon btn-summon-10" onclick="summon(10)">
+        ПРИЗВАТЬ ×10<br>400 СЕРЕБРА
+      </button>
+    </div>
+  </div>
+</div>
 <!-- NAV (BOTTOM) -->
 <div class="nav-bar" id="navBar" style="display:none;">
   <div class="nav-item active" data-page="map" onclick="switchPage('map')">
