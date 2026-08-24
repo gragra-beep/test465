@@ -22,41 +22,18 @@
 
 <!-- TOP BAR -->
 <div class="topbar" id="topbar" style="display:none;">
-  <div class="topbar-left">
-    <button class="back-btn" onclick="goBack()">← Назад к сайту</button>
-    <div class="user-info">
-      <div class="user-avatar">段</div>
-      <div>
-        <div class="user-name">dnonahoi</div>
-        <div class="user-rank">УЧЕНИК</div>
-      </div>
+  <div class="user-info">
+    <div class="user-avatar">段</div>
+    <div>
+      <div class="user-name">dnonahoi</div>
+      <div class="user-rank">УЧЕНИК</div>
     </div>
   </div>
   <div class="resources">
-    <div class="res-item res-energy"><span class="icon">🔵</span> <span id="resEnergy">41</span> / 90</div>
+    <div class="res-item res-energy"><span class="icon">🔵</span> <span id="resEnergy">90</span> / <span id="resMaxEnergy">90</span></div>
     <div class="res-item res-silver"><span class="icon"></span> <span id="resSilver">1553</span></div>
-    <div class="res-item res-stars"><span class="icon">⭐</span> <span id="resStars">0</span></div>
-    <div class="res-item res-gems"><span class="icon">💎</span> <span id="resGems">7</span></div>
-    <div class="res-item res-tickets"><span class="icon">️</span> <span id="resTickets">103</span></div>
-  </div>
-</div>
-
-<!-- NAV -->
-<div class="nav-bar" id="navBar" style="display:none;">
-  <div class="nav-item active" data-page="map" onclick="switchPage('map')">
-    <div class="nav-icon">界</div><div class="nav-label">КАРТА</div>
-  </div>
-  <div class="nav-item" data-page="duel" onclick="switchPage('duel')">
-    <div class="nav-icon">鬥</div><div class="nav-label">ДУЭЛЬ</div>
-  </div>
-  <div class="nav-item" data-page="deck" onclick="switchPage('deck')">
-    <div class="nav-icon">牌</div><div class="nav-label">КОЛОДА</div>
-  </div>
-  <div class="nav-item" data-page="bazar" onclick="switchPage('bazar')">
-    <div class="nav-icon">市</div><div class="nav-label">БАЗАР</div>
-  </div>
-  <div class="nav-item" data-page="top" onclick="switchPage('top')">
-    <div class="nav-icon">榜</div><div class="nav-label">ТОП</div>
+    <div class="res-item res-gifts" onclick="showToast('Дары')"><span class="icon">🎁</span></div>
+    <div class="res-item res-quests" onclick="showToast('Задания')"><span class="icon"></span></div>
   </div>
 </div>
 
@@ -66,14 +43,6 @@
     <div class="map-bg"></div>
     <div class="map-mountains"></div>
     <div class="map-river"></div>
-    <div class="map-submerge">
-      <span class="sub-icon">封</span>
-      <div><div class="sub-label">ПОГРУЖЕНИЕ</div><div class="sub-name">Катакомбы</div></div>
-    </div>
-    <div class="map-info-panel">
-      <div class="map-info-btn"><span class="btn-icon"></span> ДАРЫ</div>
-      <div class="map-info-btn"><span class="btn-icon">日</span> ЗАДАНИЯ</div>
-    </div>
     <div class="map-squad" onclick="showToast('Отряд: 5 бойцов')">
       <span class="squad-icon">隊</span><span class="squad-text">ОТРЯД · 5</span>
     </div>
@@ -120,14 +89,33 @@
   <div class="placeholder-page"><div class="ph-icon">榜</div><div class="ph-text">Топ — скоро</div></div>
 </div>
 
+<!-- NAV (BOTTOM) -->
+<div class="nav-bar" id="navBar" style="display:none;">
+  <div class="nav-item active" data-page="map" onclick="switchPage('map')">
+    <div class="nav-icon">界</div><div class="nav-label">КАРТА</div>
+  </div>
+  <div class="nav-item" data-page="duel" onclick="switchPage('duel')">
+    <div class="nav-icon">鬥</div><div class="nav-label">ДУЭЛЬ</div>
+  </div>
+  <div class="nav-item" data-page="deck" onclick="switchPage('deck')">
+    <div class="nav-icon">牌</div><div class="nav-label">КОЛОДА</div>
+  </div>
+  <div class="nav-item" data-page="bazar" onclick="switchPage('bazar')">
+    <div class="nav-icon">市</div><div class="nav-label">БАЗАР</div>
+  </div>
+  <div class="nav-item" data-page="top" onclick="switchPage('top')">
+    <div class="nav-icon">榜</div><div class="nav-label">ТОП</div>
+  </div>
+</div>
+
 <!-- LOCATION MODAL -->
 <div class="modal-overlay" id="locModal">
   <div class="modal-content" style="position:relative;">
-    <button class="modal-close" onclick="closeLocModal()"></button>
+    <button class="modal-close-x" onclick="closeLocModal()">✕</button>
     <div class="modal-header-img" id="locModalHeader">
       <div class="loc-label" id="locModalLabel">ЛОКАЦИЯ 2</div>
       <div class="loc-title" id="locModalTitle">Волчье ущелье</div>
-      <div class="loc-boss-img" id="locModalBossImg">🐺</div>
+      <div class="loc-boss-img" id="locModalBossImg"></div>
     </div>
     <div class="modal-body">
       <div class="loc-desc" id="locModalDesc"></div>
