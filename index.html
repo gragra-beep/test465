@@ -30,14 +30,16 @@
     </div>
   </div>
   <div class="resources">
-    <div class="res-item res-energy"><span class="icon"></span> <span id="resEnergy">90</span> / <span id="resMaxEnergy">90</span></div>
+    <div class="res-item res-energy"><span class="icon">⚡</span> <span id="resEnergy">80</span> / <span id="resMaxEnergy">80</span></div>
     <div class="res-item res-silver"><span class="icon">🪙</span> <span id="resSilver">1553</span></div>
     <div class="res-item res-gifts" onclick="showToast('Дары')"><span class="icon">🎁</span></div>
     <div class="res-item res-quests" onclick="showToast('Задания')"><span class="icon">📋</span></div>
   </div>
 </div>
 
-<!-- MAP PAGE -->
+<!-- ===== СТРАНИЦЫ ===== -->
+
+<!-- MAP -->
 <div class="page active" id="page-map">
   <div class="map-container" id="mapContainer">
     <div class="map-bg"></div>
@@ -49,7 +51,7 @@
   </div>
 </div>
 
-<!-- DECK PAGE -->
+<!-- DECK -->
 <div class="page" id="page-deck">
   <div class="deck-page">
     <div class="deck-title"><h2><span class="cn">牌</span> КОЛОДА</h2></div>
@@ -78,86 +80,80 @@
   </div>
 </div>
 
-<!-- DUEL PAGE -->
+<!-- DUEL -->
 <div class="page" id="page-duel">
-  <div class="placeholder-page"><div class="ph-icon">鬥</div><div class="ph-text">Дуэль — скоро</div></div>
+  <div class="placeholder-page"><div class="ph-icon">⚔️</div><div class="ph-text">Дуэль — скоро</div></div>
 </div>
 
-<!-- BAZAR PAGE -->
+<!-- BAZAR -->
 <div class="page" id="page-bazar">
   <div class="bazar-page">
     <div class="banner-header">
       <div class="banner-tag">無 ВЕЧНЫЙ</div>
       <div class="banner-image">
-        <div style="font-size: 80px; text-align: center; padding-top: 80px;">🎴</div>
+        <div style="font-size: 80px; text-align: center; padding-top: 80px;"></div>
       </div>
     </div>
-    
     <div class="banner-info">
       <div class="banner-label">БАННЕР КАРТ</div>
       <h1 class="banner-title">Под небом Мурима</h1>
-      
       <div class="banner-rates">
         <div class="rate-row">
           <div class="rate-name">ЭПИЧЕСКАЯ <span class="stars">★★★</span></div>
           <div class="rate-guarantee">ЧЕРЕЗ <span id="epicCounter">20</span></div>
         </div>
         <div class="rate-sub">жёсткий гарант · каждые 20</div>
-        
         <div class="rate-row legendary">
           <div class="rate-name">ЛЕГЕНДАРНАЯ <span class="stars">★★★★</span></div>
           <div class="rate-guarantee">С 40-Й</div>
         </div>
         <div class="rate-sub">мягкий гарант с 40-й</div>
-        
         <div class="rate-row mythic">
           <div class="rate-name">МИФИЧЕСКАЯ <span class="stars">★★★★★</span></div>
           <div class="rate-guarantee">С 80-Й</div>
         </div>
         <div class="rate-sub">мягкий гарант с 80-й</div>
       </div>
-      
       <div class="summon-price">
         <span class="price-label">召 цена открытия</span>
         <span class="price-value">40 <span class="coin-icon">🪙</span></span>
       </div>
-      
-      <button class="btn-details" onclick="showBannerDetails()">
-        市 ПОДРОБНЕЕ →
-      </button>
+      <button class="btn-details" onclick="showBannerDetails()">市 ПОДРОБНЕЕ →</button>
     </div>
   </div>
 </div>
 
-<!-- TOP PAGE -->
+<!-- TOP -->
 <div class="page" id="page-top">
   <div class="placeholder-page"><div class="ph-icon">🏆</div><div class="ph-text">Топ — скоро</div></div>
 </div>
 
-<!-- NAV (BOTTOM) -->
+<!-- ===== НАВИГАЦИЯ (НИЖНЯЯ) ===== -->
 <div class="nav-bar" id="navBar" style="display:none;">
   <div class="nav-item active" data-page="map" onclick="switchPage('map')">
-    <div class="nav-icon">️</div><div class="nav-label">КАРТА</div>
+    <div class="nav-icon">🗺️</div><div class="nav-label">КАРТА</div>
   </div>
   <div class="nav-item" data-page="duel" onclick="switchPage('duel')">
-    <div class="nav-icon">️</div><div class="nav-label">ДУЭЛЬ</div>
+    <div class="nav-icon">⚔️</div><div class="nav-label">ДУЭЛЬ</div>
   </div>
   <div class="nav-item" data-page="deck" onclick="switchPage('deck')">
     <div class="nav-icon">🃏</div><div class="nav-label">КОЛОДА</div>
   </div>
   <div class="nav-item" data-page="bazar" onclick="switchPage('bazar')">
-    <div class="nav-icon">🍎</div><div class="nav-label">БАЗАР</div>
+    <div class="nav-icon"></div><div class="nav-label">БАЗАР</div>
   </div>
   <div class="nav-item" data-page="top" onclick="switchPage('top')">
     <div class="nav-icon">🏆</div><div class="nav-label">ТОП</div>
   </div>
 </div>
 
+<!-- ===== МОДАЛКИ ===== -->
+
 <!-- LOCATION MODAL -->
 <div class="modal-overlay" id="locModal">
   <div class="modal-content" style="position:relative;">
     <button class="modal-close-x" onclick="closeLocModal()">✕</button>
-    <div class="modal-header-img" id="locModalHeader">
+    <div class="modal-header-img">
       <div class="loc-label" id="locModalLabel">ЛОКАЦИЯ 2</div>
       <div class="loc-title" id="locModalTitle">Волчье ущелье</div>
       <div class="loc-boss-img" id="locModalBossImg"></div>
@@ -189,7 +185,7 @@
         <div class="reward-row"><span class="rw-val" style="color:#888;">—</span><span class="rw-label">без доп. дропа</span></div>
       </div>
       <button class="play-again-btn" onclick="playAgain()">
-        <span class="btn-icon">️</span> ПРОЙТИ СНОВА · <span id="locEnergyCost">6</span> ЕН.
+        <span class="btn-icon">⚔️</span> ПРОЙТИ СНОВА · <span id="locEnergyCost">6</span> ЕН.
       </button>
       <label class="skip-checkbox">
         <input type="checkbox" checked> Пропустить бой — сразу к результату
@@ -198,35 +194,25 @@
   </div>
 </div>
 
-<!-- BANNER DETAILS MODAL -->
+<!-- BANNER MODAL -->
 <div class="modal-overlay" id="bannerModal">
   <div class="banner-modal">
-    <button class="modal-close-x" onclick="closeBannerModal()">✕</button>
-    
+    <button class="modal-close-x" onclick="closeBannerModal()"></button>
     <div class="banner-modal-header">
       <div class="banner-subtitle">· 英 · БАННЕР КАРТ · ВЕЧНЫЙ ·</div>
       <h2>Под небом Мурима</h2>
       <div class="pool-info">池 В КОЛОДЕ · 25 КАРТ · все возможные дропы</div>
     </div>
-    
-    <div class="cards-pool" id="cardsPool">
-      <!-- Карты будут добавлены через JS -->
-    </div>
-    
+    <div class="cards-pool" id="cardsPool"></div>
     <div class="auto-dust">
       <label class="checkbox-label">
         <input type="checkbox" id="autoDustCheck">
         <span>塵 АВТО-РАСПЫЛЕНИЕ</span>
       </label>
     </div>
-    
     <div class="summon-buttons">
-      <button class="btn-summon btn-summon-1" onclick="summon(1)">
-        ПРИЗВАТЬ ×1<br>40 СЕРЕБРА
-      </button>
-      <button class="btn-summon btn-summon-10" onclick="summon(10)">
-        ПРИЗВАТЬ ×10<br>400 СЕРЕБРА
-      </button>
+      <button class="btn-summon btn-summon-1" onclick="summon(1)">ПРИЗВАТЬ ×1<br>40 СЕРЕБРА</button>
+      <button class="btn-summon btn-summon-10" onclick="summon(10)">ПРИЗВАТЬ ×10<br>400 СЕРЕБРА</button>
     </div>
   </div>
 </div>
@@ -292,9 +278,15 @@
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<script src="cards-db.js"></script>
-<script src="accounts.js"></script>
-<script src="data.js"></script>
-<script src="script.js"></script>
+<!-- ===== ПОДКЛЮЧЕНИЕ СКРИПТОВ (порядок важен!) ===== -->
+<script src="data/cards-db.js"></script>
+<script src="data/accounts.js"></script>
+<script src="data/locations.js"></script>
+<script src="app.js"></script>
+<script src="pages/map.js"></script>
+<script src="pages/deck.js"></script>
+<script src="pages/bazar.js"></script>
+<script src="pages/duel.js"></script>
+<script src="pages/top.js"></script>
 </body>
 </html>
