@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Game</title>
+<title>Remanga Game</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,7 +11,7 @@
 <!-- LOGIN -->
 <div id="loginScreen">
   <div class="login-box">
-    <h1>Игрулька</h1>
+    <h1>牌 Remanga</h1>
     <p>Войдите в аккаунт</p>
     <input type="text" id="loginInput" placeholder="Логин" autocomplete="off">
     <input type="password" id="passwordInput" placeholder="Пароль">
@@ -23,17 +23,17 @@
 <!-- TOP BAR -->
 <div class="topbar" id="topbar" style="display:none;">
   <div class="user-info">
-    <div class="user-avatar">аватарка</div>
+    <div class="user-avatar">段</div>
     <div>
-      <div class="user-name">имя</div>
-      <div class="user-rank">ранг</div>
+      <div class="user-name">dnonahoi</div>
+      <div class="user-rank">УЧЕНИК</div>
     </div>
   </div>
   <div class="resources">
-    <div class="res-item res-energy"><span class="icon">⚡</span> <span id="resEnergy">90</span> / <span id="resMaxEnergy">90</span></div>
-    <div class="res-item res-silver"><span class="icon"></span> <span id="resSilver">1553</span></div>
-    <div class="res-item res-gifts" onclick="showToast('подар Очка')"><span class="icon">🗓️</span></div>
-    <div class="res-item res-quests" onclick="showToast('Задания')">📋<span class="icon"></span></div>
+    <div class="res-item res-energy"><span class="icon"></span> <span id="resEnergy">90</span> / <span id="resMaxEnergy">90</span></div>
+    <div class="res-item res-silver"><span class="icon">🪙</span> <span id="resSilver">1553</span></div>
+    <div class="res-item res-gifts" onclick="showToast('Дары')"><span class="icon">🎁</span></div>
+    <div class="res-item res-quests" onclick="showToast('Задания')"><span class="icon">📋</span></div>
   </div>
 </div>
 
@@ -43,8 +43,8 @@
     <div class="map-bg"></div>
     <div class="map-mountains"></div>
     <div class="map-river"></div>
-    <div class="map-squad" onclick="showToast('Отряд: 5 карт')">
-      <span class="squad-icon">🥞</span><span class="squad-text">ОТРЯД · 5</span>
+    <div class="map-squad" onclick="showToast('Отряд: 5 бойцов')">
+      <span class="squad-icon">隊</span><span class="squad-text">ОТРЯД · 5</span>
     </div>
   </div>
 </div>
@@ -78,24 +78,18 @@
   </div>
 </div>
 
-<!-- DUEL / BAZAR / TOP -->
+<!-- DUEL PAGE -->
 <div class="page" id="page-duel">
   <div class="placeholder-page"><div class="ph-icon">鬥</div><div class="ph-text">Дуэль — скоро</div></div>
 </div>
-<div class="page" id="page-bazar">
-  <div class="placeholder-page"><div class="ph-icon">市</div><div class="ph-text">Базар — скоро</div></div>
-</div>
-<div class="page" id="page-top">
-  <div class="placeholder-page"><div class="ph-icon">榜</div><div class="ph-text">Топ — скоро</div></div>
-</div>
+
 <!-- BAZAR PAGE -->
 <div class="page" id="page-bazar">
   <div class="bazar-page">
     <div class="banner-header">
       <div class="banner-tag">無 ВЕЧНЫЙ</div>
-      <div class="banner-image" style="background: linear-gradient(135deg, #2a1a3a, #1a2a3a);">
-        <!-- Здесь будет картинка баннера -->
-        <div style="font-size: 80px; text-align: center; padding-top: 60px;">🎴</div>
+      <div class="banner-image">
+        <div style="font-size: 80px; text-align: center; padding-top: 80px;">🎴</div>
       </div>
     </div>
     
@@ -125,7 +119,7 @@
       
       <div class="summon-price">
         <span class="price-label">召 цена открытия</span>
-        <span class="price-value">40 <span class="coin-icon">●</span></span>
+        <span class="price-value">40 <span class="coin-icon">🪙</span></span>
       </div>
       
       <button class="btn-details" onclick="showBannerDetails()">
@@ -135,45 +129,18 @@
   </div>
 </div>
 
-<!-- BANNER DETAILS MODAL -->
-<div class="modal-overlay" id="bannerModal">
-  <div class="banner-modal">
-    <button class="modal-close-x" onclick="closeBannerModal()">✕</button>
-    
-    <div class="banner-modal-header">
-      <div class="banner-subtitle">· 英 · БАННЕР КАРТ · ВЕЧНЫЙ ·</div>
-      <h2>Под небом Мурима</h2>
-      <div class="pool-info">池 В КОЛОДЕ · 25 КАРТ · все возможные дропы</div>
-    </div>
-    
-    <div class="cards-pool" id="cardsPool">
-      <!-- Карты будут добавлены через JS -->
-    </div>
-    
-    <div class="auto-dust">
-      <label class="checkbox-label">
-        <input type="checkbox" id="autoDustCheck">
-        <span>塵 АВТО-РАСПЫЛЕНИЕ</span>
-      </label>
-    </div>
-    
-    <div class="summon-buttons">
-      <button class="btn-summon btn-summon-1" onclick="summon(1)">
-        ПРИЗВАТЬ ×1<br>40 СЕРЕБРА
-      </button>
-      <button class="btn-summon btn-summon-10" onclick="summon(10)">
-        ПРИЗВАТЬ ×10<br>400 СЕРЕБРА
-      </button>
-    </div>
-  </div>
+<!-- TOP PAGE -->
+<div class="page" id="page-top">
+  <div class="placeholder-page"><div class="ph-icon">🏆</div><div class="ph-text">Топ — скоро</div></div>
 </div>
+
 <!-- NAV (BOTTOM) -->
 <div class="nav-bar" id="navBar" style="display:none;">
   <div class="nav-item active" data-page="map" onclick="switchPage('map')">
-    <div class="nav-icon">🗾</div><div class="nav-label">КАРТА</div>
+    <div class="nav-icon">️</div><div class="nav-label">КАРТА</div>
   </div>
   <div class="nav-item" data-page="duel" onclick="switchPage('duel')">
-    <div class="nav-icon">⚔️</div><div class="nav-label">ДУЭЛЬ</div>
+    <div class="nav-icon">️</div><div class="nav-label">ДУЭЛЬ</div>
   </div>
   <div class="nav-item" data-page="deck" onclick="switchPage('deck')">
     <div class="nav-icon">🃏</div><div class="nav-label">КОЛОДА</div>
@@ -209,24 +176,57 @@
       <div class="battle-rating">сила отряда / босса · ≥ 120%</div>
       <div class="battle-verdict" id="locVerdict"></div>
       <div class="battle-bar"><div class="battle-bar-fill" id="locBarFill"></div></div>
-      <div class="modal-section-title">ПОЛУЧЕНО </div>
+      <div class="modal-section-title">ПОЛУЧЕНО 賞</div>
       <div class="rewards-section">
         <div class="reward-row"><span class="rw-bonus">без статич. бонуса</span></div>
         <div class="reward-row"><span class="rw-val positive" id="locRewardEnergy"></span><span class="rw-label">к макс. энергии</span></div>
         <div class="reward-row"><span class="rw-val positive" id="locRewardSilver"></span><span class="rw-label">серебра (разово)</span></div>
       </div>
-      <div class="modal-section-title">ПОВТОР · ВХОД </div>
+      <div class="modal-section-title">ПОВТОР · ВХОД 行</div>
       <div class="rewards-section">
         <div class="reward-row"><span class="rw-val negative" id="locCostEnergy"></span><span class="rw-label">энергии за вход</span></div>
         <div class="reward-row"><span class="rw-val positive" id="locRepeatSilver"></span><span class="rw-label">серебра за прохождение</span></div>
         <div class="reward-row"><span class="rw-val" style="color:#888;">—</span><span class="rw-label">без доп. дропа</span></div>
       </div>
       <button class="play-again-btn" onclick="playAgain()">
-        <span class="btn-icon">🫪</span> ПРОЙТИ СНОВА · <span id="locEnergyCost">6</span> ЕН.
+        <span class="btn-icon">️</span> ПРОЙТИ СНОВА · <span id="locEnergyCost">6</span> ЕН.
       </button>
       <label class="skip-checkbox">
         <input type="checkbox" checked> Пропустить бой — сразу к результату
       </label>
+    </div>
+  </div>
+</div>
+
+<!-- BANNER DETAILS MODAL -->
+<div class="modal-overlay" id="bannerModal">
+  <div class="banner-modal">
+    <button class="modal-close-x" onclick="closeBannerModal()">✕</button>
+    
+    <div class="banner-modal-header">
+      <div class="banner-subtitle">· 英 · БАННЕР КАРТ · ВЕЧНЫЙ ·</div>
+      <h2>Под небом Мурима</h2>
+      <div class="pool-info">池 В КОЛОДЕ · 25 КАРТ · все возможные дропы</div>
+    </div>
+    
+    <div class="cards-pool" id="cardsPool">
+      <!-- Карты будут добавлены через JS -->
+    </div>
+    
+    <div class="auto-dust">
+      <label class="checkbox-label">
+        <input type="checkbox" id="autoDustCheck">
+        <span>塵 АВТО-РАСПЫЛЕНИЕ</span>
+      </label>
+    </div>
+    
+    <div class="summon-buttons">
+      <button class="btn-summon btn-summon-1" onclick="summon(1)">
+        ПРИЗВАТЬ ×1<br>40 СЕРЕБРА
+      </button>
+      <button class="btn-summon btn-summon-10" onclick="summon(10)">
+        ПРИЗВАТЬ ×10<br>400 СЕРЕБРА
+      </button>
     </div>
   </div>
 </div>
@@ -279,12 +279,12 @@
           <span class="ub-hp" id="cdUpHp"></span>
         </div>
       </div>
-      <div class="upgrade-price"><div>ЦЕНА</div><div class="price-val">🪙 <span id="cdPrice">5</span></div></div>
+      <div class="upgrade-price"><div>ЦЕНА</div><div class="price-value">🪙 <span id="cdPrice">5</span></div></div>
       <div class="upgrade-warning">При провале — поломка карты</div>
     </div>
     <div class="card-action-btns">
-      <button class="btn-upgrade" onclick="upgradeCard()"><span>🐐</span> УЛУЧШИТЬ · +<span id="cdUpBtnLevel">1</span></button>
-      <button class="btn-reroll" onclick="rerollCard()"><span>💅</span> РЕРОЛЛ</button>
+      <button class="btn-upgrade" onclick="upgradeCard()"><span>鍛</span> УЛУЧШИТЬ · +<span id="cdUpBtnLevel">1</span></button>
+      <button class="btn-reroll" onclick="rerollCard()"><span>轉</span> РЕРОЛЛ</button>
     </div>
   </div>
 </div>
@@ -292,6 +292,8 @@
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
+<script src="cards-db.js"></script>
+<script src="accounts.js"></script>
 <script src="data.js"></script>
 <script src="script.js"></script>
 </body>
