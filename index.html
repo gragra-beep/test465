@@ -13,10 +13,10 @@
     
     /* ВЫПАДАЮЩЕЕ МЕНЮ */
     .user-info { position: relative; }
-    .user-avatar { cursor: pointer; }
+    .user-avatar { cursor: pointer; font-size: 28px; display: flex; align-items: center; justify-content: center; width: 45px; height: 45px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; }
     .user-dropdown { display: none; position: absolute; top: 55px; left: 0; background: #1a1a2e; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; width: 180px; z-index: 1000; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
     .user-dropdown.show { display: block; }
-    .dropdown-item { padding: 12px 15px; cursor: pointer; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .dropdown-item { padding: 12px 15px; cursor: pointer; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #fff; }
     .dropdown-item:last-child { border-bottom: none; }
     .dropdown-item:hover { background: rgba(255,255,255,0.05); }
     
@@ -49,25 +49,27 @@
   </div>
 </div>
 
-<!-- ВЕРХНЯЯ ПАНЕЛЬ -->
+<!-- ВЕРХНЯЯ ПАНЕЛЬ (ИСПРАВЛЕНА) -->
 <div class="topbar" id="topbar" style="display:none;">
   <div class="user-info">
-    <div class="user-avatar" onclick="toggleUserMenu()"></div>
+    <div class="user-avatar" onclick="toggleUserMenu()">🫪</div>
     <div>
       <div class="user-name" id="topbarUsername">Игрок</div>
       <div class="user-rank">ранг</div>
     </div>
+    <!-- МЕНЮ ТЕПЕРЬ СОДЕРЖИТ ПОДАРКИ И ЗАДАНИЯ -->
     <div class="user-dropdown" id="userDropdown">
       <div class="dropdown-item" onclick="switchPage('inventory'); toggleUserMenu();">🎒 Инвентарь</div>
-      <div class="dropdown-item" onclick="showToast('Настройки'); toggleUserMenu();">️ Настройки</div>
+      <div class="dropdown-item" onclick="switchPage('gifts'); toggleUserMenu();">🎁 Подарки</div>
+      <div class="dropdown-item" onclick="switchPage('quests'); toggleUserMenu();">📋 Задания</div>
+      <div class="dropdown-item" onclick="showToast('Настройки'); toggleUserMenu();">⚙️ Настройки</div>
       <div class="dropdown-item" onclick="doLogout()" style="color:#f87171">🚪 Выйти</div>
     </div>
   </div>
   <div class="resources">
     <div class="res-item res-energy"><span class="icon">⚡</span> <span id="resEnergy">0</span> / <span id="resMaxEnergy">0</span></div>
     <div class="res-item res-silver"><span class="icon">🪙</span> <span id="resSilver">0</span></div>
-    <div class="res-item res-gifts" onclick="switchPage('gifts')"><span class="icon">🎁</span></div>
-    <div class="res-item res-quests" onclick="switchPage('quests')"><span class="icon">📋</span></div>
+    <!-- КНОПКИ ПОДАРКОВ И ЗАДАНИЙ ОТСЮДА УДАЛЕНЫ -->
   </div>
 </div>
 
@@ -139,7 +141,7 @@
       </div>
       <div class="summon-price">
         <span class="price-label">召 цена открытия</span>
-        <span class="price-value">40 <span class="coin-icon"></span></span>
+        <span class="price-value">40 <span class="coin-icon">🪙</span></span>
       </div>
       <button class="btn-details" onclick="showBannerDetails()">市 ПОДРОБНЕЕ →</button>
     </div>
@@ -192,7 +194,7 @@
     <div class="nav-icon">⚔️</div><div class="nav-label">ДУЭЛЬ</div>
   </div>
   <div class="nav-item" data-page="deck" onclick="switchPage('deck')">
-    <div class="nav-icon"></div><div class="nav-label">КОЛОДА</div>
+    <div class="nav-icon">🃏</div><div class="nav-label">КОЛОДА</div>
   </div>
   <div class="nav-item" data-page="bazar" onclick="switchPage('bazar')">
     <div class="nav-icon">🎴</div><div class="nav-label">БАЗАР</div>
@@ -252,7 +254,7 @@
 <!-- МОДАЛКА БАННЕРА -->
 <div class="modal-overlay" id="bannerModal">
   <div class="banner-modal">
-    <button class="modal-close-x" onclick="closeBannerModal()"></button>
+    <button class="modal-close-x" onclick="closeBannerModal()">✕</button>
     <div class="banner-modal-header">
       <div class="banner-subtitle">· · БАННЕР КАРТ · ВЕЧНЫЙ ·</div>
       <h2>Под небом Мурима</h2>
@@ -390,4 +392,4 @@
 <script src="pages/quests.js"></script>
 
 </body>
-        </html>
+  </html>
