@@ -12,19 +12,15 @@
 <div id="loginScreen">
   <div class="login-box">
     <h1>Игрулька</h1>
-    <p id="authSubtitle">Войдите в аккаунт</p>
+    <p>Войдите или создайте аккаунт</p>
     
     <input type="text" id="loginInput" placeholder="Логин" autocomplete="off">
     <input type="password" id="passwordInput" placeholder="Пароль">
-    <input type="password" id="confirmPasswordInput" placeholder="Повторите пароль" style="display:none;">
     
-    <button id="authButton" onclick="doLogin()">Войти</button>
+    <button class="auth-btn-login" onclick="doLogin()">Войти</button>
+    <button class="auth-btn-register" onclick="doRegister()">Зарегистрироваться</button>
+    
     <div id="loginError"></div>
-    
-    <div class="auth-switch">
-      <span id="authSwitchText">Нет аккаунта?</span>
-      <button class="auth-switch-btn" onclick="toggleAuthMode()" id="authSwitchBtn">Зарегистрироваться</button>
-    </div>
   </div>
 </div>
 
