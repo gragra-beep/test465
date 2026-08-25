@@ -1,17 +1,5 @@
 // ===== ОБЩЕЕ СОСТОЯНИЕ =====
 const state = {
-  // ===== АДМИН-АВТОРИЗАЦИЯ =====
-const ADMIN_EMAIL = "kamishikii@mail.ru";
-const ADMIN_PASSWORD = "2XdeMh5F4"; // ← ЗАМЕНИ НА СВОЙ ПАРОЛЬ
-
-// Автоматический вход админа при загрузке страницы
-auth.signInWithEmailAndPassword(ADMIN_EMAIL, ADMIN_PASSWORD)
-  .then(() => {
-    console.log("✅ Админ авторизован. Запись в базу разрешена.");
-  })
-  .catch((error) => {
-    console.error("❌ Ошибка авторизации админа:", error.message);
-  });
   currentLogin: null,
   energy: 5,
   maxEnergy: 50,
@@ -26,13 +14,15 @@ auth.signInWithEmailAndPassword(ADMIN_EMAIL, ADMIN_PASSWORD)
   lastMythicRoll: 0
 };
 
-// ===== ЗАГРУЗКА АККАУНТОВ ПРИ СТАРТЕ =====
+// ===== ЗАГРУЗКА АККАУНТОВ ИЗ FIREBASE =====
 function loadAccounts() {
-  const savedAccounts = localStorage.getItem('remanga_accounts');
-  if (savedAccounts) {
-    const accounts = JSON.parse(savedAccounts);
-    Object.assign(PLAYER_ACCOUNTS, accounts);
-  }
+  db.ref('accounts').once('value').then((snapshot) => {
+    const cloudAccounts = snapshot.val() || {};
+    Object.assign(PLAYER_ACCOUNTS, cloudAccounts);
+    console.log("✅ Аккаунты загружены из Firebase:", Object.keys(cloudAccounts));
+  }).catch((error) => {
+    console.error(" Ошибка загрузки аккаунтов:", error);
+  });
 }
 loadAccounts();
 
@@ -49,13 +39,15 @@ function isLocationUnlocked(loc) {
   return loc.id <= getHighestCompleted() + 1;
 }
 
-// ===== СОХРАНЕНИЕ/ЗАГРУЗКА =====
+// ===== СОХРАНЕНИЕ В FIREBASE =====
 function saveGame() {
-  const currentInventory = PLAYER_ACCOUNTS[state.currentLogin] 
-    ? PLAYER_ACCOUNTS[state.currentLogin].cards 
-    : [];
-
+  if (!state.currentLogin) return;
+  
+  const account = PLAYER_ACCOUNTS[state.currentLogin];
+  if (!account) return;
+  
   const saveData = {
+    password: account.password,
     energy: state.energy,
     maxEnergy: state.maxEnergy,
     silver: state.silver,
@@ -64,29 +56,34 @@ function saveGame() {
     lastEpicRoll: state.lastEpicRoll,
     lastLegendaryRoll: state.lastLegendaryRoll,
     lastMythicRoll: state.lastMythicRoll,
-    playerCards: currentInventory
+    cards: account.cards || []
   };
-  localStorage.setItem('remanga_save_' + state.currentLogin, JSON.stringify(saveData));
-  localStorage.setItem('remanga_accounts', JSON.stringify(PLAYER_ACCOUNTS));
+  
+  db.ref('accounts/' + state.currentLogin).update(saveData)
+    .then(() => {
+      console.log("💾 Сохранено в Firebase:", state.currentLogin);
+    })
+    .catch((error) => {
+      console.error("❌ Ошибка сохранения:", error);
+    });
 }
 
 function loadGame() {
   if (!state.currentLogin) return;
-  const saved = localStorage.getItem('remanga_save_' + state.currentLogin);
-  if (saved) {
-    const data = JSON.parse(saved);
-    state.energy = data.energy !== undefined ? data.energy : state.energy;
-    state.maxEnergy = data.maxEnergy !== undefined ? data.maxEnergy : state.maxEnergy;
-    state.silver = data.silver !== undefined ? data.silver : state.silver;
-    state.completedLocs = data.completedLocs || [];
-    state.bannerRolls = data.bannerRolls || 0;
-    state.lastEpicRoll = data.lastEpicRoll || 0;
-    state.lastLegendaryRoll = data.lastLegendaryRoll || 0;
-    state.lastMythicRoll = data.lastMythicRoll || 0;
+  const account = PLAYER_ACCOUNTS[state.currentLogin];
+  if (!account) return;
+  
+  state.energy = account.energy !== undefined ? account.energy : state.energy;
+  state.maxEnergy = account.maxEnergy !== undefined ? account.maxEnergy : state.maxEnergy;
+  state.silver = account.silver !== undefined ? account.silver : state.silver;
+  state.completedLocs = account.completedLocs || [];
+  state.bannerRolls = account.bannerRolls || 0;
+  state.lastEpicRoll = account.lastEpicRoll || 0;
+  state.lastLegendaryRoll = account.lastLegendaryRoll || 0;
+  state.lastMythicRoll = account.lastMythicRoll || 0;
 
-    if (data.playerCards && PLAYER_ACCOUNTS[state.currentLogin]) {
-      PLAYER_ACCOUNTS[state.currentLogin].cards = data.playerCards;
-    }
+  if (account.cards && PLAYER_ACCOUNTS[state.currentLogin]) {
+    PLAYER_ACCOUNTS[state.currentLogin].cards = account.cards;
   }
 }
 
@@ -110,7 +107,7 @@ function doLogin() {
     if (state.energy > state.maxEnergy) state.energy = state.maxEnergy;
     
     updateResources();
-    startEnergyRegen(); // <-- ЗАПУСК ВОССТАНОВЛЕНИЯ ЭНЕРГИИ ПРИ ВХОДЕ
+    startEnergyRegen();
     
     initMap();
     renderCards();
@@ -124,7 +121,7 @@ function doLogin() {
 document.getElementById('passwordInput').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 document.getElementById('loginInput').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('passwordInput').focus(); });
 
-// ===== РЕГИСТРАЦИЯ =====
+// ===== РЕГИСТРАЦИЯ С СОХРАНЕНИЕМ В FIREBASE =====
 function doRegister() {
   const login = document.getElementById('loginInput').value.trim();
   const pass = document.getElementById('passwordInput').value.trim();
@@ -141,11 +138,21 @@ function doRegister() {
     return;
   }
   
+  // Создаём аккаунт локально
   createAccount(login, pass);
-  localStorage.setItem('remanga_accounts', JSON.stringify(PLAYER_ACCOUNTS));
   
-  document.getElementById('loginError').textContent = 'Аккаунт создан! Теперь войдите.';
-  document.getElementById('loginError').style.color = '#34d399';
+  // Сохраняем в Firebase
+  db.ref('accounts/' + login).set(PLAYER_ACCOUNTS[login])
+    .then(() => {
+      console.log("✅ Аккаунт создан в Firebase:", login);
+      document.getElementById('loginError').textContent = 'Аккаунт создан! Теперь войдите.';
+      document.getElementById('loginError').style.color = '#34d399';
+    })
+    .catch((error) => {
+      console.error("❌ Ошибка регистрации:", error);
+      document.getElementById('loginError').textContent = 'Ошибка сети. Попробуйте позже.';
+      document.getElementById('loginError').style.color = '#f87171';
+    });
 }
 
 // ===== НАВИГАЦИЯ =====
@@ -219,10 +226,7 @@ function startEnergyRegen() {
       state.energy++;
       updateResources();
       saveGame();
-      console.log("⚡ Энергия восстановлена! Сейчас: " + state.energy + "/" + state.maxEnergy);
+      console.log(" Энергия восстановлена! Сейчас: " + state.energy + "/" + state.maxEnergy);
     }
   }, 60000); // 60000 мс = 1 минута
 }
-
-// ЗАПУСКАЕМ ТАЙМЕР СРАЗУ ПРИ ЗАГРУЗКЕ СТРАНИЦЫ (даже если уже залогинен)
-startEnergyRegen();
