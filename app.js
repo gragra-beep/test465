@@ -77,11 +77,13 @@ function loadGame() {
     state.lastLegendaryRoll = data.lastLegendaryRoll || 0;
     state.lastMythicRoll = data.lastMythicRoll || 0;
 
+    // Восстанавливаем карты из сохранения
     if (data.playerCards && PLAYER_ACCOUNTS[state.currentLogin]) {
       PLAYER_ACCOUNTS[state.currentLogin].cards = data.playerCards;
     }
   }
 }
+
 
 // ===== ЛОГИН =====
 function doLogin() {
