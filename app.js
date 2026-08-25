@@ -166,3 +166,17 @@ document.getElementById('cardModal').addEventListener('click', e => {
 document.getElementById('bannerModal').addEventListener('click', e => {
   if (e.target === document.getElementById('bannerModal')) closeBannerModal();
 });
+// ===== МЕНЮ ПОЛЬЗОВАТЕЛЯ =====
+function toggleUserMenu() {
+  const menu = document.getElementById('userMenu');
+  menu.classList.toggle('show');
+}
+
+// Закрытие меню при клике вне его
+document.addEventListener('click', e => {
+  const menu = document.getElementById('userMenu');
+  const toggleBtn = document.querySelector('.menu-toggle-btn');
+  if (menu && !menu.contains(e.target) && e.target !== toggleBtn) {
+    menu.classList.remove('show');
+  }
+});
