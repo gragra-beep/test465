@@ -1,4 +1,3 @@
-alert('deck.js загружен!');
 // ===== КОЛОДА =====
 
 function renderCards() {
@@ -168,10 +167,7 @@ function upgradeCard() {
     return;
   }
   
-  // Получаем карту из инвентаря (там только cardId, level, broken)
   const savedCard = inventory.cards[index];
-  
-  // Получаем полную карту из базы данных
   const fullCard = getCardById(savedCard.cardId);
   
   if (!fullCard) {
@@ -179,12 +175,11 @@ function upgradeCard() {
     return;
   }
   
-  // Объединяем: берём level и broken из сохранения, остальное из базы
   const card = {
     ...fullCard,
     level: savedCard.level,
     broken: savedCard.broken,
-    baseStats: { ...fullCard.baseStats } // Копируем статы чтобы не менять базу
+    baseStats: { ...fullCard.baseStats }
   };
   
   if (card.level >= 100) {
@@ -202,8 +197,7 @@ function upgradeCard() {
   const roll = Math.random() * 100;
 
   if (roll < chance) {
-    // Успех
-    savedCard.level++; // Меняем В savedCard (в инвентаре)
+    savedCard.level++; 
     const bonuses = getUpgradeBonuses(card);
     card.baseStats.atk += bonuses.atk;
     card.baseStats.def += bonuses.def;
@@ -217,9 +211,8 @@ function upgradeCard() {
     renderCards();
     showToast(`Улучшение успешно! ${card.name} +${savedCard.level}`);
   } else {
-    // Провал
     const rollback = getRollbackLevel(savedCard.level);
-    savedCard.level = rollback; // Меняем В savedCard (в инвентаре)
+    savedCard.level = rollback;
     
     state.silver -= cost;
     updateResources();
@@ -230,9 +223,14 @@ function upgradeCard() {
     showToast(`Провал! ${card.name} откатилась до +${rollback}`, true);
   }
   
+  // 🔍 ОТЛАДКА: ПРОВЕРЯЕМ, ИЗМЕНИЛСЯ ЛИ УРОВЕНЬ ПЕРЕД СОХРАНЕНИЕМ
+  alert('ПЕРЕД СОХРАНЕНИЕМ: Уровень карты в памяти = ' + inventory.cards[index].level);
+  
   saveGame();
+  
+  alert('ИГРА СОХРАНЕНА. Теперь обнови страницу и проверь, изменился ли уровень.');
 }
 
 function rerollCard() {
   showToast('Возвышение — скоро будет доступно');
-      }
+}
