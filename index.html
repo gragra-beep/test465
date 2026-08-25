@@ -6,52 +6,32 @@
   <title>Remanga Game</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    /* КРИТИЧЕСКИЕ СТИЛИ ДЛЯ КАРТЫ (чтобы точки не слипались) */
-    #page-map {
-      padding: 0 !important;
-      position: relative;
-      height: calc(100vh - 140px);
-      min-height: 500px;
-    }
-    .map-container {
-      width: 100%;
-      height: 100%;
-      min-height: 500px;
-      position: relative;
-      background-color: #1a1a2e;
-      background-image: url('/test465/cards/map.png');
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      overflow: hidden;
-    }
-    /* Скрываем старые декоративные слои */
+    /* КРИТИЧЕСКИЕ СТИЛИ ДЛЯ КАРТЫ */
+    #page-map { padding: 0 !important; position: relative; height: calc(100vh - 140px); min-height: 500px; }
+    .map-container { width: 100%; height: 100%; min-height: 500px; position: relative; background-color: #1a1a2e; background-image: url('/test465/cards/map.png'); background-size: cover; background-position: center; background-repeat: no-repeat; overflow: hidden; }
     .map-bg, .map-mountains, .map-river { display: none !important; }
     
-    /* Выпадающее меню */
+    /* ВЫПАДАЮЩЕЕ МЕНЮ */
     .user-info { position: relative; }
     .user-avatar { cursor: pointer; }
-    .user-dropdown {
-      display: none;
-      position: absolute;
-      top: 55px;
-      left: 0;
-      background: #1a1a2e;
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 10px;
-      width: 180px;
-      z-index: 1000;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-    }
+    .user-dropdown { display: none; position: absolute; top: 55px; left: 0; background: #1a1a2e; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; width: 180px; z-index: 1000; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
     .user-dropdown.show { display: block; }
-    .dropdown-item {
-      padding: 12px 15px;
-      cursor: pointer;
-      font-size: 14px;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-    }
+    .dropdown-item { padding: 12px 15px; cursor: pointer; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); }
     .dropdown-item:last-child { border-bottom: none; }
     .dropdown-item:hover { background: rgba(255,255,255,0.05); }
+    
+    /* ИНВЕНТАРЬ */
+    .inventory-page { padding: 20px; min-height: calc(100vh - 200px); }
+    .inventory-title { font-size: 28px; font-weight: 300; text-align: center; margin-bottom: 15px; color: #fff; font-style: italic; }
+    .inventory-filters { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
+    .inventory-filters select { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 8px 15px; border-radius: 8px; font-size: 14px; cursor: pointer; }
+    .inventory-divider { height: 1px; background: rgba(255,255,255,0.2); margin: 20px 0; }
+    .inventory-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; padding: 10px; }
+    .inventory-slot { aspect-ratio: 1; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
+    .inventory-slot:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.15); }
+    .inventory-slot.empty { cursor: default; }
+    .inventory-slot .item-icon { font-size: 40px; }
+    .inventory-slot .item-quantity { position: absolute; bottom: 8px; left: 0; right: 0; text-align: center; font-size: 12px; color: rgba(255,255,255,0.7); font-weight: 500; }
   </style>
 </head>
 <body>
@@ -72,12 +52,11 @@
 <!-- ВЕРХНЯЯ ПАНЕЛЬ -->
 <div class="topbar" id="topbar" style="display:none;">
   <div class="user-info">
-    <div class="user-avatar" onclick="toggleUserMenu()">🫪</div>
+    <div class="user-avatar" onclick="toggleUserMenu()"></div>
     <div>
       <div class="user-name" id="topbarUsername">Игрок</div>
       <div class="user-rank">ранг</div>
     </div>
-    <!-- Выпадающее меню -->
     <div class="user-dropdown" id="userDropdown">
       <div class="dropdown-item" onclick="switchPage('inventory'); toggleUserMenu();">🎒 Инвентарь</div>
       <div class="dropdown-item" onclick="showToast('Настройки'); toggleUserMenu();">️ Настройки</div>
@@ -87,6 +66,8 @@
   <div class="resources">
     <div class="res-item res-energy"><span class="icon">⚡</span> <span id="resEnergy">0</span> / <span id="resMaxEnergy">0</span></div>
     <div class="res-item res-silver"><span class="icon">🪙</span> <span id="resSilver">0</span></div>
+    <div class="res-item res-gifts" onclick="switchPage('gifts')"><span class="icon">🎁</span></div>
+    <div class="res-item res-quests" onclick="switchPage('quests')"><span class="icon">📋</span></div>
   </div>
 </div>
 
@@ -158,7 +139,7 @@
       </div>
       <div class="summon-price">
         <span class="price-label">召 цена открытия</span>
-        <span class="price-value">40 <span class="coin-icon">🪙</span></span>
+        <span class="price-value">40 <span class="coin-icon"></span></span>
       </div>
       <button class="btn-details" onclick="showBannerDetails()">市 ПОДРОБНЕЕ →</button>
     </div>
@@ -172,7 +153,34 @@
 
 <!-- ИНВЕНТАРЬ -->
 <div class="page" id="page-inventory">
-  <div class="placeholder-page"><div class="ph-icon">🎒</div><div class="ph-text">Инвентарь — скоро</div></div>
+  <div class="inventory-page">
+    <h2 class="inventory-title">Сортировка</h2>
+    <div class="inventory-filters">
+      <select id="invFilterType" onchange="renderInventory()">
+        <option value="all">Все типы</option>
+        <option value="material">Материалы</option>
+        <option value="consumable">Расходники</option>
+        <option value="special">Особые</option>
+      </select>
+      <select id="invSort" onchange="renderInventory()">
+        <option value="name">По имени</option>
+        <option value="quantity">По количеству</option>
+        <option value="rarity">По редкости</option>
+      </select>
+    </div>
+    <div class="inventory-divider"></div>
+    <div class="inventory-grid" id="inventoryGrid"></div>
+  </div>
+</div>
+
+<!-- ПОДАРКИ -->
+<div class="page" id="page-gifts">
+  <div class="placeholder-page"><div class="ph-icon">🎁</div><div class="ph-text">Подарки — скоро</div></div>
+</div>
+
+<!-- ЗАДАНИЯ -->
+<div class="page" id="page-quests">
+  <div class="placeholder-page"><div class="ph-icon">📋</div><div class="ph-text">Задания — скоро</div></div>
 </div>
 
 <!-- ===== НАВИГАЦИЯ ===== -->
@@ -190,7 +198,7 @@
     <div class="nav-icon">🎴</div><div class="nav-label">БАЗАР</div>
   </div>
   <div class="nav-item" data-page="top" onclick="switchPage('top')">
-    <div class="nav-icon"></div><div class="nav-label">ТОП</div>
+    <div class="nav-icon">🏆</div><div class="nav-label">ТОП</div>
   </div>
 </div>
 
@@ -377,6 +385,9 @@
 <script src="pages/bazar.js"></script>
 <script src="pages/duel.js"></script>
 <script src="pages/top.js"></script>
+<script src="pages/inventory.js"></script>
+<script src="pages/gifts.js"></script>
+<script src="pages/quests.js"></script>
 
 </body>
-  </html>
+        </html>
