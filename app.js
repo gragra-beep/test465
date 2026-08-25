@@ -198,3 +198,39 @@ document.addEventListener('click', e => {
     menu.classList.remove('show');
   }
 });
+// ===== МОДАЛЬНЫЕ СТРАНИЦЫ =====
+
+function openInventory() {
+  document.getElementById('inventoryModal').classList.add('show');
+}
+
+function closeInventory() {
+  document.getElementById('inventoryModal').classList.remove('show');
+}
+
+function openQuests() {
+  document.getElementById('questsModal').classList.add('show');
+}
+
+function closeQuests() {
+  document.getElementById('questsModal').classList.remove('show');
+}
+
+function openGifts() {
+  document.getElementById('giftsModal').classList.add('show');
+}
+
+function closeGifts() {
+  document.getElementById('giftsModal').classList.remove('show');
+}
+
+// Закрытие модалок при клике на оверлей
+document.getElementById('inventoryModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('inventoryModal')) closeInventory();
+});
+document.getElementById('questsModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('questsModal')) closeQuests();
+});
+document.getElementById('giftsModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('giftsModal')) closeGifts();
+});
