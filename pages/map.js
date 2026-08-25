@@ -50,19 +50,78 @@ function openLocModal(loc) {
   document.getElementById('locRepeatSilver').textContent = '+' + loc.rewardSilver;
   document.getElementById('locEnergyCost').textContent = loc.energyCost;
   
+  // 🔥 ПОКАЗЫВАЕМ ИНФОРМАЦИЮ О ДРОПЕ
+  showLootInfo(loc);
+  
   document.getElementById('locModal').classList.add('show');
+}
+
+// ===== ПОКАЗАТЬ ИНФОРМАЦИЮ О ДРОПЕ В МОДАЛКЕ =====
+function showLootInfo(loc) {
+  // Удаляем старый блок если он есть
+  const oldBlock = document.getElementById('lootInfoBlock');
+  if (oldBlock) oldBlock.remove();
+  
+  if (!loc.loot || loc.loot.length === 0) return;
+  
+  // Создаём новый блок
+  const lootBlock = document.createElement('div');
+  lootBlock.id = 'lootInfoBlock';
+  lootBlock.innerHTML = `
+    <div class="modal-section-title">ВОЗМОЖНЫЙ ДРОП 🎁</div>
+    <div class="rewards-section">
+      ${loc.loot.map(drop => {
+        const item = getItemById(drop.itemId);
+        if (!item) return '';
+        const chanceColor = drop.chance >= 100 ? '#4ade80' : drop.chance >= 50 ? '#fbbf24' : '#f87171';
+        return `
+          <div class="reward-row">
+            <span style="font-size: 24px; margin-right: 8px;">${item.icon}</span>
+            <span class="rw-label" style="flex: 1;">${item.name} x${drop.quantity}</span>
+            <span style="color: ${chanceColor}; font-weight: bold;">${drop.chance}%</span>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+  
+  // Вставляем блок перед кнопкой "ПРОЙТИ СНОВА"
+  const modalBody = document.querySelector('#locModal .modal-body');
+  const playBtn = document.querySelector('#locModal .play-again-btn');
+  if (modalBody && playBtn) {
+    modalBody.insertBefore(lootBlock, playBtn);
+  }
 }
 
 function closeLocModal() {
   document.getElementById('locModal').classList.remove('show');
 }
 
+// ===== ФУНКЦИЯ ДРОПА ПРЕДМЕТОВ =====
+function rollLoot(loc) {
+  if (!loc.loot || loc.loot.length === 0) return [];
+  
+  const droppedItems = [];
+  
+  for (const drop of loc.loot) {
+    const roll = Math.random() * 100;
+    if (roll < drop.chance) {
+      droppedItems.push({ itemId: drop.itemId, quantity: drop.quantity });
+    }
+  }
+  
+  return droppedItems;
+}
+
 function playAgain() {
   const loc = state.currentLoc;
-  if (!loc) return;
+  if (!loc) {
+    showToast('❌ Ошибка: локация не найдена', true);
+    return;
+  }
   
   if (state.energy < loc.energyCost) {
-    showToast('Недостаточно энергии!', true);
+    showToast(`❌ Не хватает энергии! Нужно: ${loc.energyCost}`, true);
     return;
   }
   
@@ -72,30 +131,53 @@ function playAgain() {
   // Начисляем серебро
   state.silver += loc.rewardSilver;
 
-  // Проверяем — первый ли раз проходим эту локацию
+  // Проверяем — первый ли раз проходим
   const isFirstTime = !state.completedLocs.includes(loc.id);
   
   if (isFirstTime) {
-    // 🔥 ПЕРВЫЙ РАЗ: добавляем локацию в пройденные
+    // ПЕРВЫЙ РАЗ
     state.completedLocs.push(loc.id);
-    
-    // Пересчитываем макс. энергию (увеличивается на +10 за новую локацию)
     state.maxEnergy = getMaxEnergy();
-    
-    // 🎁 ВОССТАНАВЛИВАЕМ энергию до максимума как награду за первое прохождение!
-    state.energy = state.maxEnergy;
-    
-    showToast(`🎉 Пройдено впервые! +${loc.rewardSilver} серебра. Макс. энергия: ${state.maxEnergy}. Энергия восстановлена!`);
+    state.energy = state.maxEnergy; // Восстанавливаем энергию
   } else {
-    // 🔥 ПОВТОРНЫЙ РАЗ: энергия НЕ восстанавливается
+    // ПОВТОРНЫЙ РАЗ
     state.maxEnergy = getMaxEnergy();
+    // Энергия НЕ восстанавливается
+  }
+
+  // 🎁 ДРОП ПРЕДМЕТОВ
+  const droppedItems = rollLoot(loc);
+  let lootMessage = '';
+  
+  if (droppedItems.length > 0) {
+    for (const drop of droppedItems) {
+      addItemToPlayer(state.currentLogin, drop.itemId, drop.quantity);
+      const item = getItemById(drop.itemId);
+      if (item) {
+        lootMessage += `${item.icon} ${item.name} x${drop.quantity}`;
+        if (droppedItems.indexOf(drop) < droppedItems.length - 1) lootMessage += ', ';
+      }
+    }
     
-    showToast(`Пройдено! +${loc.rewardSilver} серебра. Энергия: ${state.energy}/${state.maxEnergy}`);
+    // Обновляем инвентарь
+    if (typeof renderInventory === 'function') renderInventory();
   }
 
   updateResources();
   initMap();
   closeLocModal();
+  
+  // Показываем сообщение
+  if (isFirstTime) {
+    showToast(`🎉 Пройдено впервые! +${loc.rewardSilver} серебра. Энергия восстановлена!`);
+  } else {
+    showToast(`Пройдено! +${loc.rewardSilver} серебра. Энергия: ${state.energy}/${state.maxEnergy}`);
+  }
+  
+  // Показываем дроп отдельным сообщением
+  if (lootMessage) {
+    setTimeout(() => showToast(`🎁 Дроп: ${lootMessage}`), 500);
+  }
   
   saveGame();
 }
