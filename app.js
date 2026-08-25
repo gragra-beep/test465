@@ -14,16 +14,24 @@ const state = {
   lastMythicRoll: 0
 };
 
+// Флаг: загрузились ли аккаунты из Firebase
+let accountsLoaded = false;
+
 // ===== ЗАГРУЗКА АККАУНТОВ ИЗ FIREBASE =====
-function loadAccounts() {
-  db.ref('accounts').once('value').then((snapshot) => {
+async function loadAccounts() {
+  try {
+    const snapshot = await db.ref('accounts').once('value');
     const cloudAccounts = snapshot.val() || {};
     Object.assign(PLAYER_ACCOUNTS, cloudAccounts);
+    accountsLoaded = true;
     console.log("✅ Аккаунты загружены из Firebase:", Object.keys(cloudAccounts));
-  }).catch((error) => {
+  } catch (error) {
     console.error(" Ошибка загрузки аккаунтов:", error);
-  });
+    accountsLoaded = true; // Всё равно ставим true, чтобы игра работала
+  }
 }
+
+// Загружаем аккаунты сразу при старте
 loadAccounts();
 
 // ===== УТИЛИТЫ =====
@@ -88,47 +96,71 @@ function loadGame() {
 }
 
 // ===== ЛОГИН =====
-function doLogin() {
+async function doLogin() {
   const login = document.getElementById('loginInput').value.trim();
   const pass = document.getElementById('passwordInput').value.trim();
   
+  // Ждём, пока аккаунты загрузятся из Firebase
+  if (!accountsLoaded) {
+    document.getElementById('loginError').textContent = 'Загрузка данных... Подождите.';
+    document.getElementById('loginError').style.color = '#fbbf24';
+    return;
+  }
+  
   const account = PLAYER_ACCOUNTS[login];
-  if (account && account.password === pass) {
-    state.currentLogin = login;
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('topbar').style.display = 'flex';
-    document.getElementById('navBar').style.display = 'flex';
-    document.getElementById('userMenuToggle').style.display = 'block';
-    
-    document.querySelector('.user-name').textContent = login;
-    
-    loadGame();
-    state.maxEnergy = getMaxEnergy();
-    if (state.energy > state.maxEnergy) state.energy = state.maxEnergy;
-    
-    updateResources();
-    startEnergyRegen();
-    
-    initMap();
-    renderCards();
-    updateSummonCounters();
-  } else {
+  if (!account) {
     document.getElementById('loginError').textContent = 'Аккаунт не найден. Зарегистрируйтесь.';
     document.getElementById('loginError').style.color = '#f87171';
+    return;
   }
+  
+  if (account.password !== pass) {
+    document.getElementById('loginError').textContent = 'Неверный пароль';
+    document.getElementById('loginError').style.color = '#f87171';
+    return;
+  }
+  
+  // Всё ок — входим
+  state.currentLogin = login;
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('topbar').style.display = 'flex';
+  document.getElementById('navBar').style.display = 'flex';
+  document.getElementById('userMenuToggle').style.display = 'block';
+  
+  document.querySelector('.user-name').textContent = login;
+  
+  loadGame();
+  state.maxEnergy = getMaxEnergy();
+  if (state.energy > state.maxEnergy) state.energy = state.maxEnergy;
+  
+  updateResources();
+  startEnergyRegen();
+  
+  initMap();
+  renderCards();
+  updateSummonCounters();
+  
+  console.log("✅ Вход выполнен:", login);
 }
 
 document.getElementById('passwordInput').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 document.getElementById('loginInput').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('passwordInput').focus(); });
 
 // ===== РЕГИСТРАЦИЯ С СОХРАНЕНИЕМ В FIREBASE =====
-function doRegister() {
+async function doRegister() {
   const login = document.getElementById('loginInput').value.trim();
   const pass = document.getElementById('passwordInput').value.trim();
   
   if (!login || !pass) {
     document.getElementById('loginError').textContent = 'Введите логин и пароль';
     document.getElementById('loginError').style.color = '#f87171';
+    return;
+  }
+  
+  // Ждём загрузки аккаунтов
+  if (!accountsLoaded) {
+    document.getElementById('loginError').textContent = 'Загрузка данных... Подождите.';
+    document.getElementById('loginError').style.color = '#fbbf24';
     return;
   }
   
@@ -142,17 +174,20 @@ function doRegister() {
   createAccount(login, pass);
   
   // Сохраняем в Firebase
-  db.ref('accounts/' + login).set(PLAYER_ACCOUNTS[login])
-    .then(() => {
-      console.log("✅ Аккаунт создан в Firebase:", login);
-      document.getElementById('loginError').textContent = 'Аккаунт создан! Теперь войдите.';
-      document.getElementById('loginError').style.color = '#34d399';
-    })
-    .catch((error) => {
-      console.error("❌ Ошибка регистрации:", error);
-      document.getElementById('loginError').textContent = 'Ошибка сети. Попробуйте позже.';
-      document.getElementById('loginError').style.color = '#f87171';
-    });
+  try {
+    await db.ref('accounts/' + login).set(PLAYER_ACCOUNTS[login]);
+    console.log("✅ Аккаунт создан в Firebase:", login);
+    
+    // Добавляем в локальный объект сразу
+    Object.assign(PLAYER_ACCOUNTS, { [login]: PLAYER_ACCOUNTS[login] });
+    
+    document.getElementById('loginError').textContent = 'Аккаунт создан! Теперь войдите.';
+    document.getElementById('loginError').style.color = '#34d399';
+  } catch (error) {
+    console.error("❌ Ошибка регистрации:", error);
+    document.getElementById('loginError').textContent = 'Ошибка сети. Попробуйте позже.';
+    document.getElementById('loginError').style.color = '#f87171';
+  }
 }
 
 // ===== НАВИГАЦИЯ =====
@@ -226,7 +261,7 @@ function startEnergyRegen() {
       state.energy++;
       updateResources();
       saveGame();
-      console.log(" Энергия восстановлена! Сейчас: " + state.energy + "/" + state.maxEnergy);
+      console.log("⚡ Энергия восстановлена! Сейчас: " + state.energy + "/" + state.maxEnergy);
     }
   }, 60000); // 60000 мс = 1 минута
 }
