@@ -24,7 +24,7 @@ const STARTER_CARDS = [
 ];
 
 // Стартовые пройденные локации (чтобы maxEnergy = 80)
-const STARTER_COMPLETED_LOCS = [1, 2, 3];
+const STARTER_COMPLETED_LOCS = [0];
 
 // Создание нового аккаунта
 function createAccount(login, password) {
@@ -36,7 +36,7 @@ function createAccount(login, password) {
     lastLegendary: 0,
     lastMythic: 0,
     completedLocs: [...STARTER_COMPLETED_LOCS],
-    energy: 80,
+    energy: 50,
     silver: 100
   };
 }
