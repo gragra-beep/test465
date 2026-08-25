@@ -12,18 +12,15 @@ function renderCards() {
     return;
   }
 
-  // Сохраняем оригинальный индекс карты в инвентаре, чтобы потом правильно её обновлять
   let playerCards = inventory.cards.map((invCard, originalIndex) => {
     const baseCard = getCardById(invCard.cardId);
     return baseCard ? { ...baseCard, ...invCard, originalIndex: originalIndex } : null;
   }).filter(c => c !== null);
 
-  // Фильтры
   if (rank !== 'any') playerCards = playerCards.filter(c => c.stars === parseInt(rank));
   if (status === 'broken') playerCards = playerCards.filter(c => c.broken);
   else if (status === 'normal') playerCards = playerCards.filter(c => !c.broken);
 
-  // Сортировка
   if (sort === 'power') {
     playerCards.sort((a, b) => {
       const pA = a.baseStats.atk + a.baseStats.def + a.baseStats.hp;
@@ -40,8 +37,6 @@ function renderCards() {
   playerCards.forEach((card) => {
     const el = document.createElement('div');
     el.className = 'card-item' + (card.broken ? ' broken' : '');
-    
-    // ПЕРЕДАЁМ оригинальный индекс при клике!
     el.onclick = () => openCardModal(card, card.originalIndex);
 
     const power = card.baseStats.atk + card.baseStats.def + card.baseStats.hp;
@@ -60,9 +55,7 @@ function renderCards() {
   });
 }
 
-function filterCards() { 
-  renderCards(); 
-}
+function filterCards() { renderCards(); }
 
 // ===== СИСТЕМА ЗАТОЧКИ =====
 
@@ -113,7 +106,6 @@ function getUpgradeBonuses(card) {
 }
 
 function openCardModal(card, index) {
-  // СОХРАНЯЕМ индекс в глобальное состояние!
   state.currentCard = card;
   state.currentCardIndex = index;
   
@@ -167,47 +159,38 @@ function closeCardModal() {
 }
 
 function upgradeCard() {
-  const card = state.currentCard;
   const index = state.currentCardIndex;
   
-  if (!card) {
-    console.error('Карта не найдена в state');
-    showToast('Ошибка: карта не найдена', true);
-    return;
-  }
-  
   if (index === null || index === undefined) {
-    console.error('Индекс карты не указан. Проверь openCardModal');
-    showToast('Ошибка: индекс карты не указан', true);
+    showToast('Ошибка: откройте карту заново', true);
     return;
   }
   
-  if (card.level >= 100) {
+  const inventory = PLAYER_ACCOUNTS[state.currentLogin];
+  if (!inventory || !inventory.cards || !inventory.cards[index]) {
+    showToast('Ошибка: карта не найдена в инвентаре', true);
+    return;
+  }
+  
+  // ПОЛУЧАЕМ ПРЯМУЮ ССЫЛКУ на карту в массиве игрока
+  const realCard = inventory.cards[index];
+  
+  if (realCard.level >= 100) {
     showToast('Максимальный уровень достигнут!', true);
     return;
   }
 
-  const cost = getUpgradeCost(card.level);
+  const cost = getUpgradeCost(realCard.level);
   if (state.silver < cost) {
     showToast(`Недостаточно серебра! Нужно ${cost}`, true);
     return;
   }
 
-  const chance = getUpgradeChance(card.level);
+  const chance = getUpgradeChance(realCard.level);
   const roll = Math.random() * 100;
 
-  const inventory = PLAYER_ACCOUNTS[state.currentLogin];
-  if (!inventory || !inventory.cards || !inventory.cards[index]) {
-    console.error('Карта не найдена в инвентаре по индексу', index, inventory);
-    showToast('Ошибка: карта не найдена в инвентаре', true);
-    return;
-  }
-  
-  // Получаем прямую ссылку на объект карты в массиве игрока
-  const realCard = inventory.cards[index];
-
   if (roll < chance) {
-    // Успех
+    // Успех: меняем ПРЯМО в массиве инвентаря
     realCard.level++;
     const bonuses = getUpgradeBonuses(realCard);
     realCard.baseStats.atk += bonuses.atk;
@@ -217,13 +200,12 @@ function upgradeCard() {
     state.silver -= cost;
     updateResources();
     
-    // Обновляем отображение
     state.currentCard = realCard;
     openCardModal(realCard, index);
     renderCards();
     showToast(`Улучшение успешно! ${realCard.name} +${realCard.level}`);
   } else {
-    // Провал
+    // Провал: меняем ПРЯМО в массиве инвентаря
     const rollback = getRollbackLevel(realCard.level);
     realCard.level = rollback;
     
@@ -240,7 +222,5 @@ function upgradeCard() {
 }
 
 function rerollCard() {
-  const card = state.currentCard;
-  if (!card) return;
   showToast('Возвышение — скоро будет доступно');
-}
+      }
