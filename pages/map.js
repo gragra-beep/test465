@@ -67,6 +67,37 @@ function playAgain() {
     return;
   }
   
+  // Тратим энергию
+  state.energy -= loc.energyCost;
+  
+  // Начисляем серебро
+  state.silver += loc.rewardSilver;
+
+  // Добавляем локацию в пройденные (если ещё не там)
+  const isFirstTime = !state.completedLocs.includes(loc.id);
+  if (isFirstTime) {
+    state.completedLocs.push(loc.id);
+  }
+
+  // Пересчитываем макс. энергию (увеличивается при новых локациях)
+  state.maxEnergy = getMaxEnergy();
+  
+  // 🔥 УБРАЛИ мгновенное восстановление энергии!
+  // Энергия теперь реально тратится
+
+  updateResources();
+  initMap();
+  closeLocModal();
+  
+  if (isFirstTime) {
+    showToast(`Пройдено впервые! +${loc.rewardSilver} серебра. Макс. энергия: ${state.maxEnergy}`);
+  } else {
+    showToast(`Пройдено! +${loc.rewardSilver} серебра. Энергия: ${state.energy}/${state.maxEnergy}`);
+  }
+  
+  saveGame();
+}
+  
   state.energy -= loc.energyCost;
   state.silver += loc.rewardSilver;
 
@@ -75,18 +106,4 @@ function playAgain() {
     state.completedLocs.push(loc.id);
   }
 
-  // Пересчитываем макс. энергию
-  state.maxEnergy = getMaxEnergy();
   
-  // ⭐ ВОССТАНАВЛИВАЕМ ЭНЕРГИЮ ДО МАКСИМУМА ПОСЛЕ ПРОХОЖДЕНИЯ
-  state.energy = state.maxEnergy;
-
-  updateResources();
-  initMap();
-  closeLocModal();
-  
-  showToast(`Пройдено! +${loc.rewardSilver} серебра. Энергия восстановлена! Макс: ${state.maxEnergy}`);
-  
-  // 🔥 ОБЯЗАТЕЛЬНО: Сохраняем прогресс после прохождения локации
-  saveGame();
-}
