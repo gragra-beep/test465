@@ -2,11 +2,14 @@
 
 function renderCards() {
   const grid = document.getElementById('cardsGrid');
+  if (!grid) return;
+
   const rank = document.getElementById('filterRank').value;
   const status = document.getElementById('filterStatus').value;
   const sort = document.getElementById('filterSort').value;
 
-  const inventory = PLAYER_ACCOUNTS[state.currentLogin];
+  // 🔥 ФИКС: Используем getPlayerInventory вместо прямого обращения к PLAYER_ACCOUNTS
+  const inventory = getPlayerInventory(state.currentLogin);
   if (!inventory || !inventory.cards) {
     grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #888; padding: 40px;">Нет карт</div>';
     return;
@@ -41,8 +44,11 @@ function renderCards() {
 
     const power = card.baseStats.atk + card.baseStats.def + card.baseStats.hp;
 
+    // 🔥 ФИКС: Безопасный путь к картинке
+    const imagePath = card.image.startsWith('/') ? card.image : '/test465/' + card.image;
+
     el.innerHTML = `
-      <div class="card-img" style="background-image: url('${card.image}'); background-size: cover; background-position: center; background-color: #2a1a3a;"></div>
+      <div class="card-img" style="background-image: url('${imagePath}'); background-size: cover; background-position: center; background-color: #2a1a3a;"></div>
       <div class="card-stars">★${card.stars}</div>
       <div class="card-level ${card.broken ? 'broken-lvl' : ''}">+${card.level}</div>
       ${card.broken ? '<div class="card-broken-stamp">СЛОМАНА</div>' : ''}
@@ -111,7 +117,10 @@ function openCardModal(card, index) {
   
   const power = card.baseStats.atk + card.baseStats.def + card.baseStats.hp;
 
-  document.getElementById('cdCardImage').style.backgroundImage = `url('${card.image}')`;
+  // 🔥 ФИКС: Безопасный путь к картинке
+  const imagePath = card.image.startsWith('/') ? card.image : '/test465/' + card.image;
+  document.getElementById('cdCardImage').style.backgroundImage = `url('${imagePath}')`;
+
   document.getElementById('cdPower').textContent = power;
   document.getElementById('cdPowerBonus').textContent = '+' + Math.floor(power * 0.2);
   document.getElementById('cdName').textContent = card.name;
@@ -160,7 +169,9 @@ function closeCardModal() {
 
 function upgradeCard() {
   const index = state.currentCardIndex;
-  const inventory = PLAYER_ACCOUNTS[state.currentLogin];
+
+  // 🔥 ФИКС: Используем getPlayerInventory вместо прямого обращения к PLAYER_ACCOUNTS
+  const inventory = getPlayerInventory(state.currentLogin);
   
   if (!inventory || !inventory.cards || !inventory.cards[index]) {
     showToast('Ошибка: карта не найдена', true);
@@ -220,11 +231,8 @@ function upgradeCard() {
     // Провал — откат уровня
     const rollback = getRollbackLevel(savedCard.level);
     
-    // 🎯 ИСПРАВЛЕНИЕ: Пересчитываем статы для уровня отката
-    // Берём базовые статы из базы
     const baseStats = { ...fullCard.baseStats };
     
-    // Применяем бонусы за каждый уровень от 0 до rollback
     for (let lvl = 0; lvl < rollback; lvl++) {
       const lvlBonuses = getUpgradeBonuses({ baseStats: baseStats });
       baseStats.atk += lvlBonuses.atk;
@@ -232,11 +240,9 @@ function upgradeCard() {
       baseStats.hp += lvlBonuses.hp;
     }
     
-    // Сохраняем пересчитанные статы
     savedCard.level = rollback;
     savedCard.baseStats = baseStats;
     
-    // Обновляем card для отображения
     card.baseStats = { ...savedCard.baseStats };
     
     state.silver -= cost;
