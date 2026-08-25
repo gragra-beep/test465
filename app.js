@@ -182,41 +182,54 @@ async function loadGame() {
       state.lastLegendaryRoll = data.lastLegendaryRoll || 0;
       state.lastMythicRoll = data.lastMythicRoll || 0;
 
+      // Инициализируем PLAYER_ACCOUNTS
       if (!window.PLAYER_ACCOUNTS) window.PLAYER_ACCOUNTS = {};
+      
       window.PLAYER_ACCOUNTS[state.currentLogin] = {
         cards: data.cards || [],
         items: data.items || [],
         energy: state.energy,
         silver: state.silver
       };
+      
+      console.log("💾 PLAYER_ACCOUNTS инициализирован:", window.PLAYER_ACCOUNTS[state.currentLogin]);
     } else {
-      console.warn("⚠️ Документ не найден в базе. Создаем новый.");
+      console.warn("️ Документ не найден в базе. Создаем новый.");
       if (!window.PLAYER_ACCOUNTS) window.PLAYER_ACCOUNTS = {};
       window.PLAYER_ACCOUNTS[state.currentLogin] = { 
         cards: [], 
-        items: [{ itemId: 'herb', quantity: 1 }], 
+        items: [], 
         energy: 50, 
         silver: 100 
       };
     }
   } catch (error) {
     console.error("❌ КРИТИЧЕСКАЯ ОШИБКА ЗАГРУЗКИ:", error);
-    showToast("Ошибка загрузки данных (см. консоль F12)", true);
+    showToast("Ошибка загрузки данных", true);
   }
 }
 
 // ===== СОХРАНЕНИЕ В FIREBASE =====
 async function saveGame() {
   if (!state.currentUserId) {
-    console.warn("⚠️ Попытка сохранения без currentUserId");
+    console.warn("️ Попытка сохранения без currentUserId");
     return;
   }
 
   try {
     const userRef = window.firebaseAPI.doc(window.firebaseDb, "users", state.currentUserId);
+    
+    // Безопасно получаем данные
     const playerData = window.PLAYER_ACCOUNTS[state.currentLogin] || {};
     const cardsToSave = playerData.cards || [];
     const itemsToSave = playerData.items || [];
+
+    console.log("💾 Сохранение данных:", {
+      energy: state.energy,
+      silver: state.silver,
+      cardsCount: cardsToSave.length,
+      itemsCount: itemsToSave.length
+    });
 
     await window.firebaseAPI.updateDoc(userRef, {
       energy: state.energy,
@@ -231,16 +244,15 @@ async function saveGame() {
       items: itemsToSave,
       lastSaved: new Date().toISOString()
     });
-    console.log("💾 Игра успешно сохранена в Firebase");
+    console.log("✅ Игра успешно сохранена в Firebase");
   } catch (error) {
     console.error("❌ ОШИБКА СОХРАНЕНИЯ:", error);
-    // Не показываем ошибку пользователю, если это предупреждение о missing fields
-    if (error.code !== 'invalid-argument') {
+    // Показываем ошибку только если это не предупреждение
+    if (error.code !== 'invalid-argument' && error.code !== 'permission-denied') {
       showToast("Ошибка сохранения", true);
     }
   }
 }
-
 
 // ===== НАВИГАЦИЯ =====
 function switchPage(page) {
