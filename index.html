@@ -8,175 +8,311 @@
 </head>
 <body>
 
-<!-- LOGIN SCREEN -->
+<!-- ЭКРАН ВХОДА -->
 <div id="loginScreen">
   <div class="login-box">
-    <h1>Remanga Game</h1>
-    <p>Войди или зарегистрируйся</p>
-    <input type="text" id="loginInput" placeholder="Логин">
-    <input type="password" id="passwordInput" placeholder="Пароль">
+    <h1>Игрулька</h1>
+    <p>Войдите или создайте аккаунт</p>
+    <input type="text" id="loginInput" placeholder="Логин" autocomplete="off">
+    <input type="password" id="passwordInput" placeholder="Пароль (мин. 6 символов)">
     <button class="auth-btn-login" onclick="doLogin()">Войти</button>
     <button class="auth-btn-register" onclick="doRegister()">Зарегистрироваться</button>
     <div id="loginError"></div>
   </div>
 </div>
 
-<!-- TOP BAR -->
+<!-- ВЕРХНЯЯ ПАНЕЛЬ -->
 <div class="topbar" id="topbar" style="display:none;">
   <div class="user-info">
     <div class="user-avatar">🫪</div>
     <div>
-      <div class="user-name">ооо</div>
+      <div class="user-name" id="topbarUsername">Игрок</div>
       <div class="user-rank">ранг</div>
     </div>
   </div>
   <div class="resources">
-    <div class="res-item res-energy"><span class="icon"></span> <span id="resEnergy">80</span> / <span id="resMaxEnergy">80</span></div>
-    <div class="res-item res-silver"><span class="icon">🪙</span> <span id="resSilver">1553</span></div>
+    <div class="res-item res-energy"><span class="icon">⚡</span> <span id="resEnergy">0</span> / <span id="resMaxEnergy">0</span></div>
+    <div class="res-item res-silver"><span class="icon">🪙</span> <span id="resSilver">0</span></div>
+    <div class="res-item res-gifts" onclick="showToast('Дары')"><span class="icon">🎁</span></div>
+    <div class="res-item res-quests" onclick="showToast('Задания')"><span class="icon">📋</span></div>
   </div>
 </div>
 
-<!-- Кнопка раскрытия меню под аватаркой -->
-<div class="user-menu-toggle" id="userMenuToggle" style="display:none;">
-  <div class="res-item res-menu-btn" onclick="toggleUserMenu()">
-    <span class="icon">👜</span>
-  </div>
-</div>
-
-<!-- Выпадающее меню -->
-<div class="user-menu" id="userMenu">
-  <div class="res-item res-inventory" onclick="openInventory(); toggleUserMenu()">
-    <span class="icon">👜</span> Инвентарь
-  </div>
-  <div class="res-item res-quests" onclick="openQuests(); toggleUserMenu()">
-    <span class="icon">📋</span> Задания
-  </div>
-  <div class="res-item res-gifts" onclick="openGifts(); toggleUserMenu()">
-    <span class="icon">🎁</span> Дары
-  </div>
-</div>
-
-<!-- МОДАЛЬНОЕ ОКНО: ИНВЕНТАРЬ -->
-<div class="modal-page-overlay" id="inventoryModal">
-  <div class="modal-page">
-    <button class="modal-page-close" onclick="closeInventory()">✕</button>
-    <h2>👜 ИНВЕНТАРЬ</h2>
-    <div class="modal-page-content">
-      <p>Здесь будет твой инвентарь</p>
+<!-- СТРАНИЦЫ -->
+<div class="page active" id="page-map">
+  <div class="map-container" id="mapContainer">
+    <div class="map-bg"></div>
+    <div class="map-mountains"></div>
+    <div class="map-river"></div>
+    <div class="map-squad" onclick="showToast('Отряд: 5 бойцов')">
+      <span class="squad-icon">隊</span><span class="squad-text">ОТРЯД · 5</span>
     </div>
   </div>
 </div>
 
-<!-- МОДАЛЬНОЕ ОКНО: ЗАДАНИЯ -->
-<div class="modal-page-overlay" id="questsModal">
-  <div class="modal-page">
-    <button class="modal-page-close" onclick="closeQuests()">✕</button>
-    <h2>📋 ЗАДАНИЯ</h2>
-    <div class="modal-page-content">
-      <p>Здесь будут твои задания</p>
+<div class="page" id="page-deck">
+  <div class="deck-page">
+    <div class="deck-title"><h2><span class="cn">牌</span> КОЛОДА</h2></div>
+    <div class="deck-subtitle">Все карты что есть на аккаунте</div>
+    <div class="deck-filters">
+      <select id="filterRank" onchange="filterCards()">
+        <option value="any">Любой ранг</option>
+        <option value="1">★1</option><option value="2">★2</option><option value="3">★3</option>
+      </select>
+      <select id="filterStatus" onchange="filterCards()">
+        <option value="all">Все статусы</option>
+        <option value="normal">Обычные</option><option value="broken">Сломанные</option>
+      </select>
+      <select id="filterSort" onchange="filterCards()">
+        <option value="rank">Сорт.: по рангу</option>
+        <option value="power">Сорт.: по силе</option>
+        <option value="name">Сорт.: по имени</option>
+      </select>
+    </div>
+    <button class="dust-btn" onclick="showToast('Функция распыления карт')">✨ РАСПЫЛИТЬ КАРТЫ</button>
+    <div class="cards-grid" id="cardsGrid"></div>
+  </div>
+</div>
+
+<div class="page" id="page-duel">
+  <div class="placeholder-page"><div class="ph-icon">⚔️</div><div class="ph-text">Дуэль — скоро</div></div>
+</div>
+
+<div class="page" id="page-bazar">
+  <div class="bazar-page">
+    <div class="banner-header">
+      <div class="banner-tag">無 ВЕЧНЫЙ</div>
+      <div class="banner-image">
+        <div style="font-size: 80px; text-align: center; padding-top: 80px;"></div>
+      </div>
+    </div>
+    <div class="banner-info">
+      <div class="banner-label">БАННЕР КАРТ</div>
+      <h1 class="banner-title">Под небом Мурима</h1>
+      <div class="banner-rates">
+        <div class="rate-row">
+          <div class="rate-name">ЭПИЧЕСКАЯ <span class="stars">★★★</span></div>
+          <div class="rate-guarantee">ЧЕРЕЗ <span id="epicCounter">20</span></div>
+        </div>
+        <div class="rate-sub">жёсткий гарант · каждые 20</div>
+        <div class="rate-row legendary">
+          <div class="rate-name">ЛЕГЕНДАРНАЯ <span class="stars">★★★★</span></div>
+          <div class="rate-guarantee">С 40-Й</div>
+        </div>
+        <div class="rate-sub">мягкий гарант с 40-й</div>
+        <div class="rate-row mythic">
+          <div class="rate-name">МИФИЧЕСКАЯ <span class="stars">★★★★★</span></div>
+          <div class="rate-guarantee">С 80-Й</div>
+        </div>
+        <div class="rate-sub">мягкий гарант с 80-й</div>
+      </div>
+      <div class="summon-price">
+        <span class="price-label">召 цена открытия</span>
+        <span class="price-value">40 <span class="coin-icon">🪙</span></span>
+      </div>
+      <button class="btn-details" onclick="showBannerDetails()">市 ПОДРОБНЕЕ →</button>
     </div>
   </div>
 </div>
 
-<!-- МОДАЛЬНОЕ ОКНО: ДАРЫ -->
-<div class="modal-page-overlay" id="giftsModal">
-  <div class="modal-page">
-    <button class="modal-page-close" onclick="closeGifts()">✕</button>
-    <h2>🎁 ДАРЫ</h2>
-    <div class="modal-page-content">
-      <p>Здесь будут твои дары</p>
-    </div>
-  </div>
+<div class="page" id="page-top">
+  <div class="placeholder-page"><div class="ph-icon">🏆</div><div class="ph-text">Топ — скоро</div></div>
 </div>
 
-<!-- NAV BAR (BOTTOM) -->
+<!-- НАВИГАЦИЯ -->
 <div class="nav-bar" id="navBar" style="display:none;">
   <div class="nav-item active" data-page="map" onclick="switchPage('map')">
-    <div class="nav-icon">️</div>
-    <div class="nav-label">Карта</div>
-  </div>
-  <div class="nav-item" data-page="deck" onclick="switchPage('deck')">
-    <div class="nav-icon"></div>
-    <div class="nav-label">Колода</div>
-  </div>
-  <div class="nav-item" data-page="bazar" onclick="switchPage('bazar')">
-    <div class="nav-icon">🏪</div>
-    <div class="nav-label">Базар</div>
+    <div class="nav-icon">🗺️</div><div class="nav-label">КАРТА</div>
   </div>
   <div class="nav-item" data-page="duel" onclick="switchPage('duel')">
-    <div class="nav-icon">⚔️</div>
-    <div class="nav-label">Дуэль</div>
+    <div class="nav-icon">⚔️</div><div class="nav-label">ДУЭЛЬ</div>
+  </div>
+  <div class="nav-item" data-page="deck" onclick="switchPage('deck')">
+    <div class="nav-icon">🃏</div><div class="nav-label">КОЛОДА</div>
+  </div>
+  <div class="nav-item" data-page="bazar" onclick="switchPage('bazar')">
+    <div class="nav-icon">🎴</div><div class="nav-label">БАЗАР</div>
   </div>
   <div class="nav-item" data-page="top" onclick="switchPage('top')">
-    <div class="nav-icon">🏆</div>
-    <div class="nav-label">Топ</div>
+    <div class="nav-icon">🏆</div><div class="nav-label">ТОП</div>
   </div>
 </div>
 
-<!-- MAIN CONTENT -->
-<div id="page-map" class="page active">
-  <div class="map-container" id="mapContainer"></div>
-</div>
-
-<div id="page-deck" class="page">
-  <div class="deck-page" id="deckPage"></div>
-</div>
-
-<div id="page-bazar" class="page">
-  <div class="bazar-page" id="bazarPage"></div>
-</div>
-
-<div id="page-duel" class="page">
-  <div class="placeholder-page">
-    <div class="ph-icon">️</div>
-    <div class="ph-text">Дуэль</div>
-  </div>
-</div>
-
-<div id="page-top" class="page">
-  <div class="placeholder-page">
-    <div class="ph-icon"></div>
-    <div class="ph-text">Топ игроков</div>
-  </div>
-</div>
-
-<!-- LOCATION MODAL -->
+<!-- МОДАЛКИ -->
 <div class="modal-overlay" id="locModal">
-  <div class="modal-content" id="locModalContent"></div>
+  <div class="modal-content">
+    <button class="modal-close-x" onclick="closeLocModal()">✕</button>
+    <div class="modal-header-img">
+      <div class="loc-label" id="locModalLabel">ЛОКАЦИЯ 1</div>
+      <div class="loc-title" id="locModalTitle">Название</div>
+      <div class="loc-boss-img" id="locModalBossImg"></div>
+    </div>
+    <div class="modal-body">
+      <div class="loc-desc" id="locModalDesc"></div>
+      <div class="modal-section-title">БОСС ЛОКАЦИИ</div>
+      <div class="boss-info">
+        <div class="boss-avatar" id="locBossAvatar"></div>
+        <div>
+          <div class="boss-name" id="locBossName"></div>
+          <div class="boss-sub">Сила оценивается по соотношению к вашему отряду</div>
+        </div>
+      </div>
+      <div class="modal-section-title">ОЦЕНКА БОЯ</div>
+      <div class="battle-rating">сила отряда / босса · ≥ 120%</div>
+      <div class="battle-verdict" id="locVerdict"></div>
+      <div class="battle-bar"><div class="battle-bar-fill" id="locBarFill"></div></div>
+      <div class="modal-section-title">ПОЛУЧЕНО 賞</div>
+      <div class="rewards-section">
+        <div class="reward-row"><span class="rw-bonus">без статич. бонуса</span></div>
+        <div class="reward-row"><span class="rw-val positive" id="locRewardEnergy"></span><span class="rw-label">к макс. энергии</span></div>
+        <div class="reward-row"><span class="rw-val positive" id="locRewardSilver"></span><span class="rw-label">серебра (разово)</span></div>
+      </div>
+      <div class="modal-section-title">ПОВТОР · ВХОД 行</div>
+      <div class="rewards-section">
+        <div class="reward-row"><span class="rw-val negative" id="locCostEnergy"></span><span class="rw-label">энергии за вход</span></div>
+        <div class="reward-row"><span class="rw-val positive" id="locRepeatSilver"></span><span class="rw-label">серебра за прохождение</span></div>
+        <div class="reward-row"><span class="rw-val" style="color:#888;">—</span><span class="rw-label">без доп. дропа</span></div>
+      </div>
+      <button class="play-again-btn" onclick="playAgain()">
+        <span class="btn-icon">⚔️</span> ПРОЙТИ СНОВА · <span id="locEnergyCost">0</span> ЕН.
+      </button>
+      <label class="skip-checkbox">
+        <input type="checkbox" checked> Пропустить бой — сразу к результату
+      </label>
+    </div>
+  </div>
 </div>
 
-<!-- CARD MODAL -->
-<div class="modal-overlay" id="cardModal">
-  <div class="modal-content" id="cardModalContent"></div>
-</div>
-
-<!-- BANNER MODAL -->
 <div class="modal-overlay" id="bannerModal">
-  <div class="modal-content" id="bannerModalContent"></div>
+  <div class="banner-modal">
+    <button class="modal-close-x" onclick="closeBannerModal()">✕</button>
+    <div class="banner-modal-header">
+      <div class="banner-subtitle">· · БАННЕР КАРТ · ВЕЧНЫЙ ·</div>
+      <h2>Под небом Мурима</h2>
+      <div class="pool-info">В КОЛОДЕ · 25 КАРТ · все возможные дропы</div>
+    </div>
+    <div class="cards-pool" id="cardsPool"></div>
+    <div class="auto-dust">
+      <label class="checkbox-label">
+        <input type="checkbox" id="autoDustCheck">
+        <span>АВТО-РАСПЫЛЕНИЕ</span>
+      </label>
+    </div>
+    <div class="summon-buttons">
+      <button class="btn-summon btn-summon-1" onclick="summon(1)">ПРИЗВАТЬ ×1<br>40 СЕРЕБРА</button>
+      <button class="btn-summon btn-summon-10" onclick="summon(10)">ПРИЗВАТЬ ×10<br>400 СЕРЕБРА</button>
+    </div>
+  </div>
 </div>
 
-<!-- TOAST -->
+<div class="card-modal-overlay" id="cardModal">
+  <div class="card-modal">
+    <button class="card-modal-close" onclick="closeCardModal()">✕</button>
+    <div class="cd-top">
+      <div class="cd-image-wrap">
+        <div class="cd-image" id="cdCardImage"></div>
+      </div>
+      <div class="cd-info">
+        <div class="cd-info-top">
+          <div class="cd-bm-block">
+            <div class="cd-bm-label">BM</div>
+            <div class="cd-bm-sub">БОЕВАЯ СИЛА</div>
+            <div class="cd-bm-val" id="cdPower">0</div>
+            <div class="cd-bm-bonus" id="cdPowerBonus">+0</div>
+          </div>
+          <div class="cd-name-block">
+            <div class="cd-name" id="cdName">Имя</div>
+            <div class="cd-stars" id="cdStars">★</div>
+            <div class="cd-rarity-badge" id="cdRarityBadge">A</div>
+            <div class="cd-rank-letter" id="cdRankLetter">A</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cd-stats">
+      <div class="cd-stat"><div class="stat-label-big atk">ATK</div><div class="stat-label-small">АТАКА</div><div class="stat-val atk" id="cdAtk">0</div></div>
+      <div class="cd-stat"><div class="stat-label-big def">DEF</div><div class="stat-label-small">ЗАЩИТА</div><div class="stat-val def" id="cdDef">0</div></div>
+      <div class="cd-stat"><div class="stat-label-big hp">HP</div><div class="stat-label-small">ЗДОРОВЬЕ</div><div class="stat-val hp" id="cdHp">0</div></div>
+    </div>
+    <div class="skill-section">
+      <div class="skill-header">
+        <div class="skill-name"><span class="sk-icon">◎</span> <span id="cdSkillName">Навык</span></div>
+        <div class="skill-stars" id="cdSkillStars"></div>
+      </div>
+      <div class="skill-desc" id="cdSkillDesc"></div>
+    </div>
+    <div class="upgrade-section">
+      <div class="upgrade-header">
+        <div class="upgrade-title"><span class="up-icon">✦</span> СЛЕДУЮЩАЯ ЗАТОЧКА</div>
+        <div class="upgrade-chance" id="cdChance">Шанс: 0%</div>
+      </div>
+      <div class="upgrade-stats-row">
+        <div class="upgrade-level"><span id="cdCurLevel">+0</span><span class="arrow">→</span><span id="cdNextLevel">+1</span></div>
+        <div class="upgrade-bonuses">
+          <span class="ub-atk" id="cdUpAtk">+0</span>
+          <span class="ub-def" id="cdUpDef">+0</span>
+          <span class="ub-hp" id="cdUpHp">+0</span>
+        </div>
+      </div>
+      <div class="upgrade-price"><div>ЦЕНА</div><div class="price-value"> <span id="cdPrice">0</span> 🪙</div></div>
+      <div class="upgrade-warning" id="cdUpgradeWarning"></div>
+    </div>
+    <div class="card-action-btns">
+      <button class="btn-upgrade" onclick="upgradeCard()"><span>УЛУЧШИТЬ</span> · +<span id="cdUpBtnLevel">1</span></button>
+      <button class="btn-reroll" onclick="rerollCard()"><span>ВОЗНЕСЕНИЕ</span></button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
-<!-- ===== ПОДКЛЮЧЕНИЕ FIREBASE ===== -->
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyCkbR-xrpdwa8zV9ELxfMhdItEWZIZMNeg",
-    authDomain: "miyy465.firebaseapp.com",
-    projectId: "miyy465",
-    storageBucket: "miyy465.firebasestorage.app",
-    messagingSenderId: "566692334791",
-    appId: "1:566692334791:web:b12e04215802da961cc2e2",
-    databaseURL: "https://miyy465-default-rtdb.europe-west1.firebasedatabase.app"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
-  console.log("✅ Firebase подключён!");
-</script>
-<!-- ===== КОНЕЦ FIREBASE ===== -->
+<!-- ===== FIREBASE SDK ===== -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { 
+    getAuth, 
+    createUserWithEmailAndPassword, 
+    signInWithEmailAndPassword 
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  import { 
+    getFirestore, 
+    doc, 
+    setDoc, 
+    getDoc, 
+    updateDoc 
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+  // ⚠️ ⚠️ ⚠️ ВСТАВЬ СЮДА СВОЙ firebaseConfig ИЗ FIREBASE CONSOLE ⚠️ ⚠️ ⚠️
+  const firebaseConfig = {
+    apiKey: "ВСТАВЬ_СЮДА_API_KEY",
+    authDomain: "ВСТАВЬ_СЮДА.firebaseapp.com",
+    projectId: "ВСТАВЬ_СЮДА_PROJECT_ID",
+    storageBucket: "ВСТАВЬ_СЮДА.appspot.com",
+    messagingSenderId: "ВСТАВЬ_СЮДА",
+    appId: "ВСТАВЬ_СЮДА"
+  };
+
+  // Инициализация Firebase
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // Делаем доступным для других скриптов
+  window.firebaseAuth = auth;
+  window.firebaseDb = db;
+  window.firebaseAPI = {
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    doc,
+    setDoc,
+    getDoc,
+    updateDoc
+  };
+
+  console.log("✅ Firebase загружен");
+</script>
+
+<!-- ===== СКРИПТЫ ИГРЫ ===== -->
 <script src="data/cards-db.js"></script>
 <script src="data/accounts.js"></script>
 <script src="data/locations.js"></script>
@@ -186,9 +322,6 @@
 <script src="pages/bazar.js"></script>
 <script src="pages/duel.js"></script>
 <script src="pages/top.js"></script>
-<script src="pages/inventory.js"></script>
-<script src="pages/quests.js"></script>
-<script src="pages/gifts.js"></script>
 
 </body>
-</html>
+          </html>
