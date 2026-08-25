@@ -64,15 +64,21 @@ function playAgain() {
   state.energy -= loc.energyCost;
   state.silver += loc.rewardSilver;
 
+  // Добавляем локацию в пройденные (если ещё не там)
   if (!state.completedLocs.includes(loc.id)) {
     state.completedLocs.push(loc.id);
   }
 
+  // Пересчитываем макс. энергию
   state.maxEnergy = getMaxEnergy();
+  
+  // ⭐ ВОССТАНАВЛИВАЕМ ЭНЕРГИЮ ДО МАКСИМУМА ПОСЛЕ ПРОХОЖДЕНИЯ
+  state.energy = state.maxEnergy;
+
   updateResources();
   initMap();
   closeLocModal();
-  showToast(`Пройдено! -${loc.energyCost} энергии, +${loc.rewardSilver} серебра. Макс: ${state.maxEnergy}`);
+  showToast(`Пройдено! +${loc.rewardSilver} серебра. Энергия восстановлена! Макс: ${state.maxEnergy}`);
   
-  saveGame(); // ← Сохраняем!
+  saveGame();
 }
