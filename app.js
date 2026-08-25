@@ -2,7 +2,7 @@
 const state = {
   // ===== АДМИН-АВТОРИЗАЦИЯ =====
 const ADMIN_EMAIL = "kamishikii@mail.ru";
-const ADMIN_PASSWORD = "ТВОЙ_ПАРОЛЬ_ОТ_АДМИН_АККАУНТА"; // ← ЗАМЕНИ НА СВОЙ ПАРОЛЬ
+const ADMIN_PASSWORD = "2XdeMh5F4"; // ← ЗАМЕНИ НА СВОЙ ПАРОЛЬ
 
 // Автоматический вход админа при загрузке страницы
 auth.signInWithEmailAndPassword(ADMIN_EMAIL, ADMIN_PASSWORD)
