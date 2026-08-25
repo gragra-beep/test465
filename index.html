@@ -379,7 +379,6 @@
 <!-- ===== ПОДКЛЮЧЕНИЕ FIREBASE ===== -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyCkbR-xrpdwa8zV9ELxfMhdItEWZIZMNeg",
@@ -392,8 +391,7 @@
   };
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
-  const auth = firebase.auth();
-  console.log("Firebase подключён!");
+  console.log("✅ Firebase подключён!");
 </script>
 <!-- ===== КОНЕЦ FIREBASE ===== -->
 
