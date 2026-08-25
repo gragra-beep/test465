@@ -175,11 +175,12 @@ function upgradeCard() {
     return;
   }
   
+  // Создаём карту с текущими статами (если их нет в savedCard — берём из базы)
   const card = {
     ...fullCard,
-    level: savedCard.level,
-    broken: savedCard.broken,
-    baseStats: { ...fullCard.baseStats }
+    level: savedCard.level || 0,
+    broken: savedCard.broken || false,
+    baseStats: savedCard.baseStats ? { ...savedCard.baseStats } : { ...fullCard.baseStats }
   };
   
   if (card.level >= 100) {
@@ -197,11 +198,17 @@ function upgradeCard() {
   const roll = Math.random() * 100;
 
   if (roll < chance) {
-    savedCard.level++; 
+    // Успех
+    savedCard.level++;
     const bonuses = getUpgradeBonuses(card);
-    card.baseStats.atk += bonuses.atk;
-    card.baseStats.def += bonuses.def;
-    card.baseStats.hp += bonuses.hp;
+    savedCard.baseStats = {
+      atk: card.baseStats.atk + bonuses.atk,
+      def: card.baseStats.def + bonuses.def,
+      hp: card.baseStats.hp + bonuses.hp
+    };
+    
+    // Обновляем card для отображения
+    card.baseStats = { ...savedCard.baseStats };
     
     state.silver -= cost;
     updateResources();
@@ -211,8 +218,16 @@ function upgradeCard() {
     renderCards();
     showToast(`Улучшение успешно! ${card.name} +${savedCard.level}`);
   } else {
+    // Провал
     const rollback = getRollbackLevel(savedCard.level);
     savedCard.level = rollback;
+    
+    // При откате статы тоже откатываем
+    const rolledBackCard = getCardById(savedCard.cardId);
+    savedCard.baseStats = { ...rolledBackCard.baseStats };
+    
+    // Обновляем card для отображения
+    card.baseStats = { ...savedCard.baseStats };
     
     state.silver -= cost;
     updateResources();
@@ -223,12 +238,7 @@ function upgradeCard() {
     showToast(`Провал! ${card.name} откатилась до +${rollback}`, true);
   }
   
-  // 🔍 ОТЛАДКА: ПРОВЕРЯЕМ, ИЗМЕНИЛСЯ ЛИ УРОВЕНЬ ПЕРЕД СОХРАНЕНИЕМ
-  alert('ПЕРЕД СОХРАНЕНИЕМ: Уровень карты в памяти = ' + inventory.cards[index].level);
-  
   saveGame();
-  
-  alert('ИГРА СОХРАНЕНА. Теперь обнови страницу и проверь, изменился ли уровень.');
 }
 
 function rerollCard() {
