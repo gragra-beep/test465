@@ -1,7 +1,7 @@
 // ===== ГЛОБАЛЬНОЕ СОСТОЯНИЕ =====
 const state = {
   currentLogin: null,
-  currentUserId: null,  // UID пользователя из Firebase
+  currentUserId: null,
   energy: 50,
   maxEnergy: 50,
   silver: 100,
@@ -39,35 +39,35 @@ async function doRegister() {
     errorEl.style.color = '#f87171';
     return;
   }
-
   if (pass.length < 6) {
     errorEl.textContent = 'Пароль должен быть не менее 6 символов';
     errorEl.style.color = '#f87171';
     return;
   }
 
-  // Firebase требует email, поэтому добавляем фиктивный домен
   const email = login.includes('@') ? login : `${login}@remanga.game`;
 
   try {
+    console.log("🔄 Начало регистрации...");
     errorEl.textContent = 'Создание аккаунта...';
     errorEl.style.color = '#fbbf24';
 
-    // 1. Создаём пользователя в Firebase Auth
     const userCredential = await window.firebaseAPI.createUserWithEmailAndPassword(
-      window.firebaseAuth, 
-      email, 
-      pass
+      window.firebaseAuth, email, pass
     );
     const user = userCredential.user;
+    console.log("✅ Пользователь создан в Auth, UID:", user.uid);
 
-    // 2. Создаём стартовые данные в Firestore
     const starterCards = [
       { cardId: 'card_001', level: 0, broken: false },
       { cardId: 'card_002', level: 0, broken: false },
       { cardId: 'card_003', level: 0, broken: false },
       { cardId: 'card_005', level: 0, broken: false },
       { cardId: 'card_006', level: 0, broken: false }
+    ];
+
+    const starterItems = [
+      { itemId: 'herb', quantity: 1 }
     ];
 
     await window.firebaseAPI.setDoc(
@@ -84,27 +84,21 @@ async function doRegister() {
         lastLegendaryRoll: 0,
         lastMythicRoll: 0,
         cards: starterCards,
+        items: starterItems,
         createdAt: new Date().toISOString()
       }
     );
+    console.log("✅ Данные сохранены в Firestore!");
 
-    errorEl.textContent = '✅ Аккаунт создан! Выполняется вход...';
+    errorEl.textContent = '✅ Аккаунт создан! Вход...';
     errorEl.style.color = '#4ade80';
-
-    // 3. Автоматический вход
     await loginSuccess(user, login);
 
   } catch (error) {
-    console.error("Ошибка регистрации:", error);
-    if (error.code === 'auth/email-already-in-use') {
-      errorEl.textContent = '❌ Этот логин уже занят';
-    } else if (error.code === 'auth/weak-password') {
-      errorEl.textContent = '❌ Пароль слишком слабый';
-    } else if (error.code === 'auth/invalid-email') {
-      errorEl.textContent = '❌ Неверный формат логина';
-    } else {
-      errorEl.textContent = '❌ Ошибка: ' + error.message;
-    }
+    console.error("❌ ОШИБКА РЕГИСТРАЦИИ:", error.code, error.message);
+    if (error.code === 'auth/email-already-in-use') errorEl.textContent = '❌ Логин занят';
+    else if (error.code === 'auth/weak-password') errorEl.textContent = '❌ Пароль < 6 символов';
+    else errorEl.textContent = '❌ Ошибка: ' + error.message;
     errorEl.style.color = '#f87171';
   }
 }
@@ -124,29 +118,24 @@ async function doLogin() {
   const email = login.includes('@') ? login : `${login}@remanga.game`;
 
   try {
+    console.log("🔄 Попытка входа...");
     errorEl.textContent = 'Вход...';
     errorEl.style.color = '#fbbf24';
 
     const userCredential = await window.firebaseAPI.signInWithEmailAndPassword(
-      window.firebaseAuth, 
-      email, 
-      pass
+      window.firebaseAuth, email, pass
     );
-
+    console.log("✅ Успешный вход, UID:", userCredential.user.uid);
     await loginSuccess(userCredential.user, login);
 
   } catch (error) {
-    console.error("Ошибка входа:", error);
-    if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-      errorEl.textContent = '❌ Неверный логин или пароль';
-    } else {
-      errorEl.textContent = '❌ Ошибка: ' + error.message;
-    }
+    console.error("❌ ОШИБКА ВХОДА:", error.code, error.message);
+    errorEl.textContent = '❌ Неверный логин или пароль';
     errorEl.style.color = '#f87171';
   }
 }
 
-// ===== ВНУТРЕННЯЯ ФУНКЦИЯ УСПЕШНОГО ВХОДА =====
+// ===== УСПЕШНЫЙ ВХОД =====
 async function loginSuccess(user, login) {
   state.currentLogin = login;
   state.currentUserId = user.uid;
@@ -164,19 +153,26 @@ async function loginSuccess(user, login) {
   updateResources();
   if (typeof initMap === 'function') initMap();
   if (typeof renderCards === 'function') renderCards();
+  if (typeof renderInventory === 'function') renderInventory();
   if (typeof updateSummonCounters === 'function') updateSummonCounters();
 }
 
 // ===== ЗАГРУЗКА ИЗ FIREBASE =====
 async function loadGame() {
-  if (!state.currentUserId) return;
+  if (!state.currentUserId) {
+    console.warn("⚠️ Нет currentUserId, загрузка невозможна");
+    return;
+  }
 
   try {
+    console.log("🔄 Загрузка данных из Firestore для UID:", state.currentUserId);
     const docRef = window.firebaseAPI.doc(window.firebaseDb, "users", state.currentUserId);
     const docSnap = await window.firebaseAPI.getDoc(docRef);
 
     if (docSnap.exists()) {
       const data = docSnap.data();
+      console.log("✅ Данные успешно загружены:", data);
+      
       state.energy = data.energy !== undefined ? data.energy : 50;
       state.maxEnergy = data.maxEnergy !== undefined ? data.maxEnergy : 50;
       state.silver = data.silver !== undefined ? data.silver : 100;
@@ -186,31 +182,40 @@ async function loadGame() {
       state.lastLegendaryRoll = data.lastLegendaryRoll || 0;
       state.lastMythicRoll = data.lastMythicRoll || 0;
 
-      // Сохраняем карты в глобальный объект для совместимости
       if (!window.PLAYER_ACCOUNTS) window.PLAYER_ACCOUNTS = {};
       window.PLAYER_ACCOUNTS[state.currentLogin] = {
         cards: data.cards || [],
+        items: data.items || [],
         energy: state.energy,
         silver: state.silver
       };
-
-      console.log("✅ Данные загружены из Firebase");
     } else {
-      console.log("⚠️ Документ не найден, используются дефолтные значения");
+      console.warn("⚠️ Документ не найден в базе. Создаем новый.");
+      if (!window.PLAYER_ACCOUNTS) window.PLAYER_ACCOUNTS = {};
+      window.PLAYER_ACCOUNTS[state.currentLogin] = { 
+        cards: [], 
+        items: [{ itemId: 'herb', quantity: 1 }], 
+        energy: 50, 
+        silver: 100 
+      };
     }
   } catch (error) {
-    console.error("Ошибка загрузки из Firebase:", error);
-    showToast("Ошибка загрузки данных", true);
+    console.error("❌ КРИТИЧЕСКАЯ ОШИБКА ЗАГРУЗКИ:", error);
+    showToast("Ошибка загрузки данных (см. консоль F12)", true);
   }
 }
 
 // ===== СОХРАНЕНИЕ В FIREBASE =====
 async function saveGame() {
-  if (!state.currentUserId) return;
+  if (!state.currentUserId) {
+    console.warn("⚠️ Попытка сохранения без currentUserId");
+    return;
+  }
 
   try {
     const userRef = window.firebaseAPI.doc(window.firebaseDb, "users", state.currentUserId);
     const cardsToSave = window.PLAYER_ACCOUNTS[state.currentLogin]?.cards || [];
+    const itemsToSave = window.PLAYER_ACCOUNTS[state.currentLogin]?.items || [];
 
     await window.firebaseAPI.updateDoc(userRef, {
       energy: state.energy,
@@ -222,12 +227,13 @@ async function saveGame() {
       lastLegendaryRoll: state.lastLegendaryRoll,
       lastMythicRoll: state.lastMythicRoll,
       cards: cardsToSave,
+      items: itemsToSave,
       lastSaved: new Date().toISOString()
     });
-
-    console.log("💾 Игра сохранена в Firebase");
+    console.log("💾 Игра успешно сохранена в Firebase");
   } catch (error) {
-    console.error("Ошибка сохранения в Firebase:", error);
+    console.error("❌ ОШИБКА СОХРАНЕНИЯ:", error);
+    showToast("Ошибка сохранения", true);
   }
 }
 
@@ -235,20 +241,44 @@ async function saveGame() {
 function switchPage(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-
+  
   const targetPage = document.getElementById('page-' + page);
   if (targetPage) targetPage.classList.add('active');
-
+  
   const targetNav = document.querySelector(`.nav-item[data-page="${page}"]`);
   if (targetNav) targetNav.classList.add('active');
 }
+
+// ===== ВЫПАДАЮЩЕЕ МЕНЮ =====
+function toggleUserMenu() {
+  const menu = document.getElementById('userDropdown');
+  if (menu) menu.classList.toggle('show');
+}
+
+function doLogout() {
+  state.currentLogin = null;
+  state.currentUserId = null;
+  document.getElementById('topbar').style.display = 'none';
+  document.getElementById('navBar').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('loginInput').value = '';
+  document.getElementById('passwordInput').value = '';
+  document.getElementById('loginError').textContent = '';
+}
+
+// Закрытие меню при клике вне его
+document.addEventListener('click', e => {
+  if (!e.target.closest('.user-info')) {
+    const menu = document.getElementById('userDropdown');
+    if (menu) menu.classList.remove('show');
+  }
+});
 
 // ===== РЕСУРСЫ =====
 function updateResources() {
   const elEnergy = document.getElementById('resEnergy');
   const elMaxEnergy = document.getElementById('resMaxEnergy');
   const elSilver = document.getElementById('resSilver');
-
   if (elEnergy) elEnergy.textContent = state.energy;
   if (elMaxEnergy) elMaxEnergy.textContent = state.maxEnergy;
   if (elSilver) elSilver.textContent = state.silver;
@@ -260,59 +290,22 @@ function showToast(msg, isError = false) {
   if (!t) return;
   t.textContent = msg;
   t.className = 'toast show' + (isError ? ' error' : '');
-  setTimeout(() => {
-    t.className = 'toast';
-  }, 2500);
+  setTimeout(() => { t.className = 'toast'; }, 2500);
 }
 
-// ===== ОБРАБОТЧИКИ КЛАВИАТУРЫ =====
+// ===== ИНИЦИАЛИЗАЦИЯ =====
 document.addEventListener('DOMContentLoaded', () => {
   const passInput = document.getElementById('passwordInput');
   const loginInput = document.getElementById('loginInput');
+  
+  if (passInput) passInput.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+  if (loginInput) loginInput.addEventListener('keydown', e => { if (e.key === 'Enter') passInput.focus(); });
 
-  if (passInput) passInput.addEventListener('keydown', e => { 
-    if (e.key === 'Enter') doLogin(); 
-  });
-  if (loginInput) loginInput.addEventListener('keydown', e => { 
-    if (e.key === 'Enter') passInput.focus(); 
-  });
-
-  // Закрытие модалок по клику на оверлей
   const locModal = document.getElementById('locModal');
   const cardModal = document.getElementById('cardModal');
   const bannerModal = document.getElementById('bannerModal');
 
-  if (locModal) {
-    locModal.addEventListener('click', e => {
-      if (e.target === locModal && typeof closeLocModal === 'function') closeLocModal();
-    });
-  }
-  if (cardModal) {
-    cardModal.addEventListener('click', e => {
-      if (e.target === cardModal && typeof closeCardModal === 'function') closeCardModal();
-    });
-  }
-  if (bannerModal) {
-    bannerModal.addEventListener('click', e => {
-      if (e.target === bannerModal && typeof closeBannerModal === 'function') closeBannerModal();
-    });
-  }
+  if (locModal) locModal.addEventListener('click', e => { if (e.target === locModal && typeof closeLocModal === 'function') closeLocModal(); });
+  if (cardModal) cardModal.addEventListener('click', e => { if (e.target === cardModal && typeof closeCardModal === 'function') closeCardModal(); });
+  if (bannerModal) bannerModal.addEventListener('click', e => { if (e.target === bannerModal && typeof closeBannerModal === 'function') closeBannerModal(); });
 });
-function toggleUserMenu() {
-  document.getElementById('userDropdown').classList.toggle('show');
-}
-document.addEventListener('click', e => {
-  if (!e.target.closest('.user-info')) {
-    const menu = document.getElementById('userDropdown');
-    if (menu) menu.classList.remove('show');
-  }
-});
-function doLogout() {
-  state.currentLogin = null;
-  state.currentUserId = null;
-  document.getElementById('topbar').style.display = 'none';
-  document.getElementById('navBar').style.display = 'none';
-  document.getElementById('loginScreen').style.display = 'flex';
-  document.getElementById('loginInput').value = '';
-  document.getElementById('passwordInput').value = '';
-}
