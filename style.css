@@ -804,3 +804,96 @@ body {
   .resources { gap: 6px; }
   .res-item { padding: 4px 8px; font-size: 11px; }
 }
+/* ===== КНОПКА МЕНЮ ПОЛЬЗОВАТЕЛЯ ===== */
+.menu-toggle-btn {
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(167, 139, 250, 0.2);
+  border: 1px solid rgba(167, 139, 250, 0.4);
+  color: #a78bfa;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  z-index: 10;
+}
+
+.menu-toggle-btn:hover {
+  background: rgba(167, 139, 250, 0.3);
+  transform: scale(1.05);
+}
+
+.menu-toggle-btn:active {
+  transform: scale(0.95);
+}
+
+.user-info {
+  position: relative;
+}
+
+/* ===== ВЫПАДАЮЩЕЕ МЕНЮ ===== */
+.user-menu {
+  position: absolute;
+  top: 60px;
+  left: 16px;
+  background: rgba(20, 20, 40, 0.95);
+  border: 1px solid rgba(167, 139, 250, 0.3);
+  border-radius: 12px;
+  padding: 8px;
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 1000;
+  backdrop-filter: blur(10px);
+  animation: slideDown 0.2s ease;
+}
+
+.user-menu.show {
+  display: flex;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.user-menu-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: #e0e0e0;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.user-menu-btn:hover {
+  background: rgba(167, 139, 250, 0.15);
+  border-color: rgba(167, 139, 250, 0.3);
+}
+
+.user-menu-btn:active {
+  transform: scale(0.97);
+}
+
+.user-menu-btn .menu-icon {
+  font-size: 18px;
+}
