@@ -1,25 +1,4 @@
-// ===== ИНВЕНТАРИ ИГРОКОВ =====
-
-const PLAYER_ACCOUNTS = {
-  'ooo': {
-    password: '1234',
-    cards: [
-      { cardId: 'card_001', level: 0, broken: false },
-      { cardId: 'card_002', level: 0, broken: false },
-      { cardId: 'card_003', level: 0, broken: false },
-      { cardId: 'card_005', level: 0, broken: false },
-      { cardId: 'card_006', level: 0, broken: false },
-    ],
-    summons: 0, lastEpic: 0, lastLegendary: 0, lastMythic: 0,
-    completedLocs: [],
-    energy: 5,       // <-- ПОМЕНЯЙ НА 5
-    maxEnergy: 50,   // <-- ПОМЕНЯЙ НА 50 (если этого поля нет, добавь его)
-    silver: 100,     // <-- ПОМЕНЯЙ НА 100
-    lastEnergyUpdate: Date.now()
-  }
-};
-
-// Стартовые карты для новых аккаунтов
+// ===== СТАРТОВЫЕ КАРТЫ ДЛЯ НОВЫХ АККАУНТОВ =====
 const STARTER_CARDS = [
   { cardId: 'card_001', level: 0, broken: false },
   { cardId: 'card_002', level: 0, broken: false },
@@ -28,43 +7,25 @@ const STARTER_CARDS = [
   { cardId: 'card_006', level: 0, broken: false }
 ];
 
-// Создание нового аккаунта
-function createAccount(login, password) {
-  PLAYER_ACCOUNTS[login] = {
-    password: password,
-    cards: JSON.parse(JSON.stringify(STARTER_CARDS)),
-    summons: 0,
-    lastEpic: 0,
-    lastLegendary: 0,
-    lastMythic: 0,
-    completedLocs: [],
-    energy: 5,       // <-- ПОМЕНЯЙ НА 5
-    maxEnergy: 50,   // <-- ПОМЕНЯЙ НА 50
-    silver: 100,     // <-- ПОМЕНЯЙ НА 100
-    lastEnergyUpdate: Date.now()
-  };
-}
+// Глобальный объект для хранения данных текущего игрока в памяти
+window.PLAYER_ACCOUNTS = {};
 
-// Получить инвентарь
+// Получить инвентарь текущего игрока
 function getPlayerInventory(login) {
-  return PLAYER_ACCOUNTS[login] || null;
+  return window.PLAYER_ACCOUNTS[login] || null;
 }
 
 // Добавить карту
 function addCardToPlayer(login, cardId, level = 0) {
-  if (!PLAYER_ACCOUNTS[login]) {
-    PLAYER_ACCOUNTS[login] = {
-      password: '',
-      cards: [],
-      summons: 0, lastEpic: 0, lastLegendary: 0, lastMythic: 0
-    };
+  if (!window.PLAYER_ACCOUNTS[login]) {
+    window.PLAYER_ACCOUNTS[login] = { cards: [] };
   }
-  PLAYER_ACCOUNTS[login].cards.push({ cardId, level, broken: false });
+  window.PLAYER_ACCOUNTS[login].cards.push({ cardId, level, broken: false });
 }
 
-// Удалить карту
+// Удалить карту по индексу
 function removeCardFromPlayer(login, cardIndex) {
-  if (PLAYER_ACCOUNTS[login]) {
-    PLAYER_ACCOUNTS[login].cards.splice(cardIndex, 1);
+  if (window.PLAYER_ACCOUNTS[login]) {
+    window.PLAYER_ACCOUNTS[login].cards.splice(cardIndex, 1);
   }
 }
