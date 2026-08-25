@@ -266,6 +266,7 @@
 
 <div class="toast" id="toast"></div>
 
+
 <!-- ===== FIREBASE SDK ===== -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -282,14 +283,15 @@
     updateDoc 
   } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  // ⚠️ ⚠️ ⚠️ ВСТАВЬ СЮДА СВОЙ firebaseConfig ИЗ FIREBASE CONSOLE ⚠️ ⚠️ ⚠️
+  // ✅ ТВОЯ КОНФИГУРАЦИЯ FIREBASE
   const firebaseConfig = {
-    apiKey: "ВСТАВЬ_СЮДА_API_KEY",
-    authDomain: "ВСТАВЬ_СЮДА.firebaseapp.com",
-    projectId: "ВСТАВЬ_СЮДА_PROJECT_ID",
-    storageBucket: "ВСТАВЬ_СЮДА.appspot.com",
-    messagingSenderId: "ВСТАВЬ_СЮДА",
-    appId: "ВСТАВЬ_СЮДА"
+    apiKey: "AIzaSyCkbR-xrpdwa8zV9ELxfMhdItEWZIZMNeg",
+    authDomain: "miyy465.firebaseapp.com",
+    databaseURL: "https://miyy465-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "miyy465",
+    storageBucket: "miyy465.firebasestorage.app",
+    messagingSenderId: "566692334791",
+    appId: "1:566692334791:web:b12e04215802da961cc2e2"
   };
 
   // Инициализация Firebase
@@ -297,7 +299,7 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  // Делаем доступным для других скриптов
+  // Делаем функции доступными для app.js
   window.firebaseAuth = auth;
   window.firebaseDb = db;
   window.firebaseAPI = {
@@ -309,9 +311,8 @@
     updateDoc
   };
 
-  console.log("✅ Firebase загружен");
+  console.log("✅ Firebase успешно подключен!");
 </script>
-
 <!-- ===== СКРИПТЫ ИГРЫ ===== -->
 <script src="data/cards-db.js"></script>
 <script src="data/accounts.js"></script>
