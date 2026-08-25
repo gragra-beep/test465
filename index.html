@@ -5,6 +5,54 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Remanga Game</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* КРИТИЧЕСКИЕ СТИЛИ ДЛЯ КАРТЫ (чтобы точки не слипались) */
+    #page-map {
+      padding: 0 !important;
+      position: relative;
+      height: calc(100vh - 140px);
+      min-height: 500px;
+    }
+    .map-container {
+      width: 100%;
+      height: 100%;
+      min-height: 500px;
+      position: relative;
+      background-color: #1a1a2e;
+      background-image: url('/test465/cards/map.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      overflow: hidden;
+    }
+    /* Скрываем старые декоративные слои */
+    .map-bg, .map-mountains, .map-river { display: none !important; }
+    
+    /* Выпадающее меню */
+    .user-info { position: relative; }
+    .user-avatar { cursor: pointer; }
+    .user-dropdown {
+      display: none;
+      position: absolute;
+      top: 55px;
+      left: 0;
+      background: #1a1a2e;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      width: 180px;
+      z-index: 1000;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    }
+    .user-dropdown.show { display: block; }
+    .dropdown-item {
+      padding: 12px 15px;
+      cursor: pointer;
+      font-size: 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .dropdown-item:last-child { border-bottom: none; }
+    .dropdown-item:hover { background: rgba(255,255,255,0.05); }
+  </style>
 </head>
 <body>
 
@@ -24,32 +72,32 @@
 <!-- ВЕРХНЯЯ ПАНЕЛЬ -->
 <div class="topbar" id="topbar" style="display:none;">
   <div class="user-info">
-    <div class="user-avatar">🫪</div>
+    <div class="user-avatar" onclick="toggleUserMenu()">🫪</div>
     <div>
       <div class="user-name" id="topbarUsername">Игрок</div>
       <div class="user-rank">ранг</div>
+    </div>
+    <!-- Выпадающее меню -->
+    <div class="user-dropdown" id="userDropdown">
+      <div class="dropdown-item" onclick="switchPage('inventory'); toggleUserMenu();">🎒 Инвентарь</div>
+      <div class="dropdown-item" onclick="showToast('Настройки'); toggleUserMenu();">️ Настройки</div>
+      <div class="dropdown-item" onclick="doLogout()" style="color:#f87171">🚪 Выйти</div>
     </div>
   </div>
   <div class="resources">
     <div class="res-item res-energy"><span class="icon">⚡</span> <span id="resEnergy">0</span> / <span id="resMaxEnergy">0</span></div>
     <div class="res-item res-silver"><span class="icon">🪙</span> <span id="resSilver">0</span></div>
-    <div class="res-item res-gifts" onclick="showToast('Дары')"><span class="icon">🎁</span></div>
-    <div class="res-item res-quests" onclick="showToast('Задания')"><span class="icon">📋</span></div>
   </div>
 </div>
 
-<!-- СТРАНИЦЫ -->
+<!-- ===== СТРАНИЦЫ ===== -->
+
+<!-- КАРТА -->
 <div class="page active" id="page-map">
-  <div class="map-container" id="mapContainer">
-    <div class="map-bg"></div>
-    <div class="map-mountains"></div>
-    <div class="map-river"></div>
-    <div class="map-squad" onclick="showToast('Отряд: 5 бойцов')">
-      <span class="squad-icon">隊</span><span class="squad-text">ОТРЯД · 5</span>
-    </div>
-  </div>
+  <div class="map-container" id="mapContainer"></div>
 </div>
 
+<!-- КОЛОДА -->
 <div class="page" id="page-deck">
   <div class="deck-page">
     <div class="deck-title"><h2><span class="cn">牌</span> КОЛОДА</h2></div>
@@ -74,10 +122,12 @@
   </div>
 </div>
 
+<!-- ДУЭЛЬ -->
 <div class="page" id="page-duel">
   <div class="placeholder-page"><div class="ph-icon">⚔️</div><div class="ph-text">Дуэль — скоро</div></div>
 </div>
 
+<!-- БАЗАР -->
 <div class="page" id="page-bazar">
   <div class="bazar-page">
     <div class="banner-header">
@@ -115,11 +165,17 @@
   </div>
 </div>
 
+<!-- ТОП -->
 <div class="page" id="page-top">
   <div class="placeholder-page"><div class="ph-icon">🏆</div><div class="ph-text">Топ — скоро</div></div>
 </div>
 
-<!-- НАВИГАЦИЯ -->
+<!-- ИНВЕНТАРЬ -->
+<div class="page" id="page-inventory">
+  <div class="placeholder-page"><div class="ph-icon">🎒</div><div class="ph-text">Инвентарь — скоро</div></div>
+</div>
+
+<!-- ===== НАВИГАЦИЯ ===== -->
 <div class="nav-bar" id="navBar" style="display:none;">
   <div class="nav-item active" data-page="map" onclick="switchPage('map')">
     <div class="nav-icon">🗺️</div><div class="nav-label">КАРТА</div>
@@ -128,17 +184,19 @@
     <div class="nav-icon">⚔️</div><div class="nav-label">ДУЭЛЬ</div>
   </div>
   <div class="nav-item" data-page="deck" onclick="switchPage('deck')">
-    <div class="nav-icon">🃏</div><div class="nav-label">КОЛОДА</div>
+    <div class="nav-icon"></div><div class="nav-label">КОЛОДА</div>
   </div>
   <div class="nav-item" data-page="bazar" onclick="switchPage('bazar')">
     <div class="nav-icon">🎴</div><div class="nav-label">БАЗАР</div>
   </div>
   <div class="nav-item" data-page="top" onclick="switchPage('top')">
-    <div class="nav-icon">🏆</div><div class="nav-label">ТОП</div>
+    <div class="nav-icon"></div><div class="nav-label">ТОП</div>
   </div>
 </div>
 
-<!-- МОДАЛКИ -->
+<!-- ===== МОДАЛКИ ===== -->
+
+<!-- МОДАЛКА ЛОКАЦИИ -->
 <div class="modal-overlay" id="locModal">
   <div class="modal-content">
     <button class="modal-close-x" onclick="closeLocModal()">✕</button>
@@ -183,9 +241,10 @@
   </div>
 </div>
 
+<!-- МОДАЛКА БАННЕРА -->
 <div class="modal-overlay" id="bannerModal">
   <div class="banner-modal">
-    <button class="modal-close-x" onclick="closeBannerModal()">✕</button>
+    <button class="modal-close-x" onclick="closeBannerModal()"></button>
     <div class="banner-modal-header">
       <div class="banner-subtitle">· · БАННЕР КАРТ · ВЕЧНЫЙ ·</div>
       <h2>Под небом Мурима</h2>
@@ -205,6 +264,7 @@
   </div>
 </div>
 
+<!-- МОДАЛКА КАРТЫ -->
 <div class="card-modal-overlay" id="cardModal">
   <div class="card-modal">
     <button class="card-modal-close" onclick="closeCardModal()">✕</button>
@@ -264,8 +324,8 @@
   </div>
 </div>
 
+<!-- TOAST -->
 <div class="toast" id="toast"></div>
-
 
 <!-- ===== FIREBASE SDK ===== -->
 <script type="module">
@@ -283,7 +343,6 @@
     updateDoc 
   } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  // ✅ ТВОЯ КОНФИГУРАЦИЯ FIREBASE
   const firebaseConfig = {
     apiKey: "AIzaSyCkbR-xrpdwa8zV9ELxfMhdItEWZIZMNeg",
     authDomain: "miyy465.firebaseapp.com",
@@ -294,14 +353,9 @@
     appId: "1:566692334791:web:b12e04215802da961cc2e2"
   };
 
-  // Инициализация Firebase
   const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
-
-  // Делаем функции доступными для app.js
-  window.firebaseAuth = auth;
-  window.firebaseDb = db;
+  window.firebaseAuth = getAuth(app);
+  window.firebaseDb = getFirestore(app);
   window.firebaseAPI = {
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
@@ -310,9 +364,9 @@
     getDoc,
     updateDoc
   };
-
-  console.log("✅ Firebase успешно подключен!");
+  console.log("✅ Firebase подключен");
 </script>
+
 <!-- ===== СКРИПТЫ ИГРЫ ===== -->
 <script src="data/cards-db.js"></script>
 <script src="data/accounts.js"></script>
@@ -325,4 +379,4 @@
 <script src="pages/top.js"></script>
 
 </body>
-          </html>
+  </html>
