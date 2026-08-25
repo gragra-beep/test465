@@ -175,7 +175,7 @@ function upgradeCard() {
     return;
   }
   
-  // Создаём карту с текущими статами (если их нет в savedCard — берём из базы)
+  // Создаём карту с текущими статами
   const card = {
     ...fullCard,
     level: savedCard.level || 0,
@@ -207,7 +207,6 @@ function upgradeCard() {
       hp: card.baseStats.hp + bonuses.hp
     };
     
-    // Обновляем card для отображения
     card.baseStats = { ...savedCard.baseStats };
     
     state.silver -= cost;
@@ -218,13 +217,24 @@ function upgradeCard() {
     renderCards();
     showToast(`Улучшение успешно! ${card.name} +${savedCard.level}`);
   } else {
-    // Провал
+    // Провал — откат уровня
     const rollback = getRollbackLevel(savedCard.level);
-    savedCard.level = rollback;
     
-    // При откате статы тоже откатываем
-    const rolledBackCard = getCardById(savedCard.cardId);
-    savedCard.baseStats = { ...rolledBackCard.baseStats };
+    // 🎯 ИСПРАВЛЕНИЕ: Пересчитываем статы для уровня отката
+    // Берём базовые статы из базы
+    const baseStats = { ...fullCard.baseStats };
+    
+    // Применяем бонусы за каждый уровень от 0 до rollback
+    for (let lvl = 0; lvl < rollback; lvl++) {
+      const lvlBonuses = getUpgradeBonuses({ baseStats: baseStats });
+      baseStats.atk += lvlBonuses.atk;
+      baseStats.def += lvlBonuses.def;
+      baseStats.hp += lvlBonuses.hp;
+    }
+    
+    // Сохраняем пересчитанные статы
+    savedCard.level = rollback;
+    savedCard.baseStats = baseStats;
     
     // Обновляем card для отображения
     card.baseStats = { ...savedCard.baseStats };
