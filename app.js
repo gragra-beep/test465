@@ -89,6 +89,7 @@ function doLogin() {
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('topbar').style.display = 'flex';
     document.getElementById('navBar').style.display = 'flex';
+    document.getElementById('userMenuToggle').style.display = 'block';
     
     document.querySelector('.user-name').textContent = login;
     
@@ -146,6 +147,19 @@ function updateResources() {
   document.getElementById('resEnergy').textContent = state.energy;
   document.getElementById('resMaxEnergy').textContent = state.maxEnergy;
   document.getElementById('resSilver').textContent = state.silver;
+  
+  // Обновляем дубли в меню
+  if (document.getElementById('resEnergy2')) {
+    document.getElementById('resEnergy2').textContent = state.energy;
+    document.getElementById('resMaxEnergy2').textContent = state.maxEnergy;
+  }
+  if (document.getElementById('resEnergy3')) {
+    document.getElementById('resEnergy3').textContent = state.energy;
+    document.getElementById('resMaxEnergy3').textContent = state.maxEnergy;
+  }
+  if (document.getElementById('resSilver2')) {
+    document.getElementById('resSilver2').textContent = state.silver;
+  }
 }
 
 // ===== TOAST =====
@@ -167,11 +181,27 @@ document.getElementById('bannerModal').addEventListener('click', e => {
   if (e.target === document.getElementById('bannerModal')) closeBannerModal();
 });
 // ===== МЕНЮ ПОЛЬЗОВАТЕЛЯ =====
+let menuOpen = false;
+
 function toggleUserMenu() {
+  menuOpen = !menuOpen;
   const menu = document.getElementById('userMenu');
-  menu.classList.toggle('show');
+  if (menuOpen) {
+    menu.classList.add('show');
+  } else {
+    menu.classList.remove('show');
+  }
 }
 
+// Закрытие меню при клике вне его
+document.addEventListener('click', e => {
+  const menu = document.getElementById('userMenu');
+  const toggle = document.getElementById('userMenuToggle');
+  if (menu && menuOpen && !menu.contains(e.target) && !toggle.contains(e.target)) {
+    menuOpen = false;
+    menu.classList.remove('show');
+  }
+});
 // Закрытие меню при клике вне его
 document.addEventListener('click', e => {
   const menu = document.getElementById('userMenu');
