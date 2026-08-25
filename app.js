@@ -14,34 +14,30 @@ const state = {
   lastMythicRoll: 0
 };
 
-// ===== ЗАГРУЗКА АККАУНТОВ ИЗ FIREBASE =====
+// ===== ЗАГРУЗКА АККАУНТОВ =====
 function loadAccounts() {
-  if (typeof db === 'undefined') {
-    console.log("⚠️ Firebase не подключён, используем localStorage");
-    const savedAccounts = localStorage.getItem('remanga_accounts');
-    if (savedAccounts) {
-      const accounts = JSON.parse(savedAccounts);
-      Object.assign(PLAYER_ACCOUNTS, accounts);
-    }
-    return;
+  if (typeof db !== 'undefined') {
+    db.ref('accounts').once('value').then((snapshot) => {
+      const cloudAccounts = snapshot.val() || {};
+      Object.assign(PLAYER_ACCOUNTS, cloudAccounts);
+      console.log("✅ Аккаунты загружены из Firebase:", Object.keys(cloudAccounts));
+    }).catch((error) => {
+      console.error("⚠️ Ошибка Firebase, используем локальные данные:", error);
+      loadLocalAccounts();
+    });
+  } else {
+    console.log("⚠️ Переменная db не найдена, используем локальные данные");
+    loadLocalAccounts();
   }
-  
-  // Пробуем загрузить из Firebase
-  db.ref('accounts').once('value').then((snapshot) => {
-    const cloudAccounts = snapshot.val() || {};
-    Object.assign(PLAYER_ACCOUNTS, cloudAccounts);
-    console.log("✅ Аккаунты загружены из Firebase:", Object.keys(cloudAccounts));
-  }).catch((error) => {
-    console.error(" Ошибка Firebase, используем localStorage:", error);
-    const savedAccounts = localStorage.getItem('remanga_accounts');
-    if (savedAccounts) {
-      const accounts = JSON.parse(savedAccounts);
-      Object.assign(PLAYER_ACCOUNTS, accounts);
-    }
-  });
 }
 
-// Загружаем аккаунты сразу
+function loadLocalAccounts() {
+  const savedAccounts = localStorage.getItem('remanga_accounts');
+  if (savedAccounts) {
+    Object.assign(PLAYER_ACCOUNTS, JSON.parse(savedAccounts));
+  }
+}
+
 loadAccounts();
 
 // ===== УТИЛИТЫ =====
@@ -57,10 +53,9 @@ function isLocationUnlocked(loc) {
   return loc.id <= getHighestCompleted() + 1;
 }
 
-// ===== СОХРАНЕНИЕ В FIREBASE =====
+// ===== СОХРАНЕНИЕ =====
 function saveGame() {
   if (!state.currentLogin) return;
-  
   const account = PLAYER_ACCOUNTS[state.currentLogin];
   if (!account) return;
   
@@ -77,16 +72,10 @@ function saveGame() {
     cards: account.cards || []
   };
   
-  // Пробуем сохранить в Firebase
   if (typeof db !== 'undefined') {
     db.ref('accounts/' + state.currentLogin).update(saveData)
-      .then(() => console.log("💾 Сохранено в Firebase"))
-      .catch((error) => {
-        console.error(" Firebase не работает, сохраняем локально:", error);
-        localStorage.setItem('remanga_save_' + state.currentLogin, JSON.stringify(saveData));
-      });
+      .catch((error) => console.error("Ошибка сохранения в Firebase:", error));
   } else {
-    // Сохраняем локально
     localStorage.setItem('remanga_save_' + state.currentLogin, JSON.stringify(saveData));
   }
 }
@@ -101,11 +90,8 @@ function loadGame() {
   state.silver = account.silver !== undefined ? account.silver : state.silver;
   state.completedLocs = account.completedLocs || [];
   state.bannerRolls = account.bannerRolls || 0;
-  state.lastEpicRoll = account.lastEpicRoll || 0;
-  state.lastLegendaryRoll = account.lastLegendaryRoll || 0;
-  state.lastMythicRoll = account.lastMythicRoll || 0;
-
-  if (account.cards && PLAYER_ACCOUNTS[state.currentLogin]) {
+  
+  if (account.cards) {
     PLAYER_ACCOUNTS[state.currentLogin].cards = account.cards;
   }
 }
@@ -128,7 +114,6 @@ function doLogin() {
     return;
   }
   
-  // Всё ок — входим
   state.currentLogin = login;
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('topbar').style.display = 'flex';
@@ -143,12 +128,9 @@ function doLogin() {
   
   updateResources();
   startEnergyRegen();
-  
   initMap();
   renderCards();
   updateSummonCounters();
-  
-  console.log("✅ Вход выполнен:", login);
 }
 
 document.getElementById('passwordInput').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
@@ -171,29 +153,26 @@ function doRegister() {
     return;
   }
   
-  // Создаём аккаунт локально
   createAccount(login, pass);
   
-  // Сохраняем в Firebase (если доступен)
+  // ПРОВЕРКА: есть ли Firebase?
   if (typeof db !== 'undefined') {
     db.ref('accounts/' + login).set(PLAYER_ACCOUNTS[login])
       .then(() => {
-        console.log("✅ Аккаунт создан в Firebase:", login);
-        document.getElementById('loginError').textContent = 'Аккаунт создан! Теперь войдите.';
-        document.getElementById('loginError').style.color = '#34d399';
+        console.log("✅ Успешно сохранено в Firebase!");
+        document.getElementById('loginError').textContent = '✅ Аккаунт создан в облаке! Теперь войдите.';
+        document.getElementById('loginError').style.color = '#34d399'; // Ярко-зелёный
       })
       .catch((error) => {
-        console.error(" Firebase не работает:", error);
-        // Сохраняем локально
+        console.error("Ошибка Firebase:", error);
         localStorage.setItem('remanga_accounts', JSON.stringify(PLAYER_ACCOUNTS));
-        document.getElementById('loginError').textContent = 'Аккаунт создан локально! Теперь войдите.';
-        document.getElementById('loginError').style.color = '#34d399';
+        document.getElementById('loginError').textContent = '⚠️ Облако недоступно, сохранено локально.';
+        document.getElementById('loginError').style.color = '#fbbf24'; // Жёлтый
       });
   } else {
-    // Сохраняем локально
     localStorage.setItem('remanga_accounts', JSON.stringify(PLAYER_ACCOUNTS));
-    document.getElementById('loginError').textContent = 'Аккаунт создан локально! Теперь войдите.';
-    document.getElementById('loginError').style.color = '#34d399';
+    document.getElementById('loginError').textContent = '⚠️ Firebase не найден, сохранено локально.';
+    document.getElementById('loginError').style.color = '#fbbf24'; // Жёлтый
   }
 }
 
@@ -241,15 +220,11 @@ document.getElementById('bannerModal').addEventListener('click', e => {
 
 // ===== МЕНЮ ПОЛЬЗОВАТЕЛЯ =====
 let menuOpen = false;
-
 function toggleUserMenu() {
   menuOpen = !menuOpen;
   const menu = document.getElementById('userMenu');
-  if (menuOpen) {
-    menu.classList.add('show');
-  } else {
-    menu.classList.remove('show');
-  }
+  if (menuOpen) menu.classList.add('show');
+  else menu.classList.remove('show');
 }
 
 document.addEventListener('click', e => {
