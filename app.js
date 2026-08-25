@@ -365,3 +365,24 @@ document.addEventListener('DOMContentLoaded', () => {
   if (cardModal) cardModal.addEventListener('click', e => { if (e.target === cardModal && typeof closeCardModal === 'function') closeCardModal(); });
   if (bannerModal) bannerModal.addEventListener('click', e => { if (e.target === bannerModal && typeof closeBannerModal === 'function') closeBannerModal(); });
 });
+// Добавь в конец файла app.js (перед последним закрывающим тегом)
+
+// ===== СИСТЕМА ВОССТАНОВЛЕНИЯ ЭНЕРГИИ =====
+const ENERGY_REGEN_RATE = 1;        // Сколько энергии восстанавливается
+const ENERGY_REGEN_INTERVAL = 300000; // Интервал в миллисекундах (5 минут = 300000)
+
+function startEnergyRegen() {
+  setInterval(() => {
+    if (state.currentUserId && state.energy < state.maxEnergy) {
+      state.energy = Math.min(state.energy + ENERGY_REGEN_RATE, state.maxEnergy);
+      updateResources();
+      saveGame();
+      console.log(`⚡ Энергия восстановлена: ${state.energy}/${state.maxEnergy}`);
+    }
+  }, ENERGY_REGEN_INTERVAL);
+}
+
+// Запускаем восстановление энергии при загрузке страницы
+document.addEventListener('DOMContentLoaded', () => {
+  startEnergyRegen();
+});
