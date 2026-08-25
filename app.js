@@ -3,7 +3,7 @@ const state = {
   currentLogin: null,
   energy: 5,
   maxEnergy: 50,
-  silver: 999999,
+  silver: 100,
   currentLoc: null,
   currentCard: null,
   currentCardIndex: null,
