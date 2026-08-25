@@ -160,65 +160,77 @@ function closeCardModal() {
 }
 
 function upgradeCard() {
-  alert('Начало улучшения. Индекс: ' + state.currentCardIndex);
-  
   const index = state.currentCardIndex;
   const inventory = PLAYER_ACCOUNTS[state.currentLogin];
   
-  // Получаем ПРЯМУЮ ссылку на карту в массиве
-  const realCard = inventory.cards[index];
+  if (!inventory || !inventory.cards || !inventory.cards[index]) {
+    showToast('Ошибка: карта не найдена', true);
+    return;
+  }
   
-  alert('Реальная карта в инвентаре: ' + JSON.stringify(realCard));
+  // Получаем карту из инвентаря (там только cardId, level, broken)
+  const savedCard = inventory.cards[index];
   
-  if (realCard.level >= 100) {
+  // Получаем полную карту из базы данных
+  const fullCard = getCardById(savedCard.cardId);
+  
+  if (!fullCard) {
+    showToast('Ошибка: карта не найдена в базе', true);
+    return;
+  }
+  
+  // Объединяем: берём level и broken из сохранения, остальное из базы
+  const card = {
+    ...fullCard,
+    level: savedCard.level,
+    broken: savedCard.broken,
+    baseStats: { ...fullCard.baseStats } // Копируем статы чтобы не менять базу
+  };
+  
+  if (card.level >= 100) {
     showToast('Максимальный уровень достигнут!', true);
     return;
   }
 
-  const cost = getUpgradeCost(realCard.level);
+  const cost = getUpgradeCost(card.level);
   if (state.silver < cost) {
     showToast(`Недостаточно серебра! Нужно ${cost}`, true);
     return;
   }
 
-  const chance = getUpgradeChance(realCard.level);
+  const chance = getUpgradeChance(card.level);
   const roll = Math.random() * 100;
 
   if (roll < chance) {
-    // Успех - меняем ПРЯМО в realCard
-    realCard.level++;
-    const bonuses = getUpgradeBonuses(realCard);
-    realCard.baseStats.atk += bonuses.atk;
-    realCard.baseStats.def += bonuses.def;
-    realCard.baseStats.hp += bonuses.hp;
+    // Успех
+    savedCard.level++; // Меняем В savedCard (в инвентаре)
+    const bonuses = getUpgradeBonuses(card);
+    card.baseStats.atk += bonuses.atk;
+    card.baseStats.def += bonuses.def;
+    card.baseStats.hp += bonuses.hp;
     
     state.silver -= cost;
     updateResources();
     
-    alert('Успех! Новый уровень: ' + realCard.level);
-    
-    state.currentCard = realCard;
-    openCardModal(realCard, index);
+    state.currentCard = card;
+    openCardModal(card, index);
     renderCards();
-    showToast(`Улучшение успешно! ${realCard.name} +${realCard.level}`);
+    showToast(`Улучшение успешно! ${card.name} +${savedCard.level}`);
   } else {
     // Провал
-    const rollback = getRollbackLevel(realCard.level);
-    realCard.level = rollback;
+    const rollback = getRollbackLevel(savedCard.level);
+    savedCard.level = rollback; // Меняем В savedCard (в инвентаре)
     
     state.silver -= cost;
     updateResources();
     
-    alert('Провал! Откат до: ' + realCard.level);
-    
-    state.currentCard = realCard;
-    openCardModal(realCard, index);
+    state.currentCard = card;
+    openCardModal(card, index);
     renderCards();
-    showToast(`Провал! ${realCard.name} откатилась до +${rollback}`, true);
+    showToast(`Провал! ${card.name} откатилась до +${rollback}`, true);
   }
   
   saveGame();
-  alert('Игра сохранена');
 }
 
 function rerollCard() {
