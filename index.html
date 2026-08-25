@@ -49,7 +49,7 @@
   </div>
 </div>
 
-<!-- ВЕРХНЯЯ ПАНЕЛЬ (ИСПРАВЛЕНА) -->
+<!-- ВЕРХНЯЯ ПАНЕЛЬ -->
 <div class="topbar" id="topbar" style="display:none;">
   <div class="user-info">
     <div class="user-avatar" onclick="toggleUserMenu()">🫪</div>
@@ -57,7 +57,7 @@
       <div class="user-name" id="topbarUsername">Игрок</div>
       <div class="user-rank">ранг</div>
     </div>
-    <!-- МЕНЮ ТЕПЕРЬ СОДЕРЖИТ ПОДАРКИ И ЗАДАНИЯ -->
+    <!-- ВЫПАДАЮЩЕЕ МЕНЮ -->
     <div class="user-dropdown" id="userDropdown">
       <div class="dropdown-item" onclick="switchPage('inventory'); toggleUserMenu();">🎒 Инвентарь</div>
       <div class="dropdown-item" onclick="switchPage('gifts'); toggleUserMenu();">🎁 Подарки</div>
@@ -69,7 +69,6 @@
   <div class="resources">
     <div class="res-item res-energy"><span class="icon">⚡</span> <span id="resEnergy">0</span> / <span id="resMaxEnergy">0</span></div>
     <div class="res-item res-silver"><span class="icon">🪙</span> <span id="resSilver">0</span></div>
-    <!-- КНОПКИ ПОДАРКОВ И ЗАДАНИЙ ОТСЮДА УДАЛЕНЫ -->
   </div>
 </div>
 
@@ -392,4 +391,4 @@
 <script src="pages/quests.js"></script>
 
 </body>
-  </html>
+          </html>
