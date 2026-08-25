@@ -6,21 +6,24 @@ function renderCards() {
   const status = document.getElementById('filterStatus').value;
   const sort = document.getElementById('filterSort').value;
 
-  const inventory = getPlayerInventory(state.currentLogin);
-  if (!inventory) {
+  const inventory = PLAYER_ACCOUNTS[state.currentLogin];
+  if (!inventory || !inventory.cards) {
     grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #888; padding: 40px;">Нет карт</div>';
     return;
   }
 
-  let playerCards = inventory.cards.map((invCard, index) => {
+  // Сохраняем оригинальный индекс карты в инвентаре, чтобы потом правильно её обновлять
+  let playerCards = inventory.cards.map((invCard, originalIndex) => {
     const baseCard = getCardById(invCard.cardId);
-    return baseCard ? { ...baseCard, ...invCard, index: index } : null;
+    return baseCard ? { ...baseCard, ...invCard, originalIndex: originalIndex } : null;
   }).filter(c => c !== null);
 
+  // Фильтры
   if (rank !== 'any') playerCards = playerCards.filter(c => c.stars === parseInt(rank));
   if (status === 'broken') playerCards = playerCards.filter(c => c.broken);
   else if (status === 'normal') playerCards = playerCards.filter(c => !c.broken);
 
+  // Сортировка
   if (sort === 'power') {
     playerCards.sort((a, b) => {
       const pA = a.baseStats.atk + a.baseStats.def + a.baseStats.hp;
@@ -34,10 +37,12 @@ function renderCards() {
   }
 
   grid.innerHTML = '';
-  playerCards.forEach((card, displayIndex) => {
+  playerCards.forEach((card) => {
     const el = document.createElement('div');
     el.className = 'card-item' + (card.broken ? ' broken' : '');
-    el.onclick = () => openCardModal(card, card.index);
+    
+    // ПЕРЕДАЁМ оригинальный индекс при клике!
+    el.onclick = () => openCardModal(card, card.originalIndex);
 
     const power = card.baseStats.atk + card.baseStats.def + card.baseStats.hp;
 
@@ -55,9 +60,11 @@ function renderCards() {
   });
 }
 
-function filterCards() { renderCards(); }
+function filterCards() { 
+  renderCards(); 
+}
 
-// ===== НОВАЯ СИСТЕМА ЗАТОЧКИ =====
+// ===== СИСТЕМА ЗАТОЧКИ =====
 
 function getUpgradeChance(level) {
   if (level < 10) return 99;
@@ -69,7 +76,7 @@ function getUpgradeChance(level) {
   if (level < 70) return 50;
   if (level < 80) return 30;
   if (level < 90) return 15;
-  return 5; // 90-100
+  return 5;
 }
 
 function getUpgradeCost(level) {
@@ -82,7 +89,7 @@ function getUpgradeCost(level) {
   if (level < 70) return 40;
   if (level < 80) return 45;
   if (level < 90) return 50;
-  return 55; // 90-100
+  return 55;
 }
 
 function getRollbackLevel(level) {
@@ -95,7 +102,7 @@ function getRollbackLevel(level) {
   if (level < 70) return 60;
   if (level < 80) return 70;
   if (level < 90) return 80;
-  return 90; // 90-100
+  return 90;
 }
 
 function getUpgradeBonuses(card) {
@@ -106,36 +113,28 @@ function getUpgradeBonuses(card) {
 }
 
 function openCardModal(card, index) {
+  // СОХРАНЯЕМ индекс в глобальное состояние!
   state.currentCard = card;
   state.currentCardIndex = index;
   
   const power = card.baseStats.atk + card.baseStats.def + card.baseStats.hp;
 
-  // Картинка
-  const cardImageEl = document.getElementById('cdCardImage');
-  cardImageEl.style.backgroundImage = `url('${card.image}')`;
-
-  // BM
+  document.getElementById('cdCardImage').style.backgroundImage = `url('${card.image}')`;
   document.getElementById('cdPower').textContent = power;
   document.getElementById('cdPowerBonus').textContent = '+' + Math.floor(power * 0.2);
-
-  // Имя, звёзды, ранг
   document.getElementById('cdName').textContent = card.name;
   document.getElementById('cdStars').textContent = '★'.repeat(card.stars);
   document.getElementById('cdRarityBadge').textContent = card.rarity.toUpperCase().substring(0, 1);
   document.getElementById('cdRankLetter').textContent = card.rarity.toUpperCase().substring(0, 1);
 
-  // Статы
   document.getElementById('cdAtk').textContent = card.baseStats.atk;
   document.getElementById('cdDef').textContent = card.baseStats.def;
   document.getElementById('cdHp').textContent = card.baseStats.hp;
 
-  // Навык
   document.getElementById('cdSkillName').textContent = card.skill.name;
   document.getElementById('cdSkillDesc').textContent = card.skill.desc;
   document.getElementById('cdSkillStars').textContent = '★'.repeat(card.skill.stars) + '☆'.repeat(5 - card.skill.stars);
 
-  // Заточка
   const chance = getUpgradeChance(card.level);
   const cost = getUpgradeCost(card.level);
   const bonuses = getUpgradeBonuses(card);
@@ -172,13 +171,13 @@ function upgradeCard() {
   const index = state.currentCardIndex;
   
   if (!card) {
-    console.error('Карта не найдена');
+    console.error('Карта не найдена в state');
     showToast('Ошибка: карта не найдена', true);
     return;
   }
   
   if (index === null || index === undefined) {
-    console.error('Индекс карты не указан');
+    console.error('Индекс карты не указан. Проверь openCardModal');
     showToast('Ошибка: индекс карты не указан', true);
     return;
   }
@@ -197,20 +196,20 @@ function upgradeCard() {
   const chance = getUpgradeChance(card.level);
   const roll = Math.random() * 100;
 
-  // Получаем ссылку на реальную карту в инвентаре
   const inventory = PLAYER_ACCOUNTS[state.currentLogin];
-  if (!inventory || !inventory.cards[index]) {
-    console.error('Карта не найдена в инвентаре', index);
+  if (!inventory || !inventory.cards || !inventory.cards[index]) {
+    console.error('Карта не найдена в инвентаре по индексу', index, inventory);
     showToast('Ошибка: карта не найдена в инвентаре', true);
     return;
   }
   
+  // Получаем прямую ссылку на объект карты в массиве игрока
   const realCard = inventory.cards[index];
 
   if (roll < chance) {
-    // Успех - обновляем РЕАЛЬНУЮ карту в инвентаре
+    // Успех
     realCard.level++;
-    const bonuses = getUpgradeBonuses(card);
+    const bonuses = getUpgradeBonuses(realCard);
     realCard.baseStats.atk += bonuses.atk;
     realCard.baseStats.def += bonuses.def;
     realCard.baseStats.hp += bonuses.hp;
@@ -218,20 +217,19 @@ function upgradeCard() {
     state.silver -= cost;
     updateResources();
     
-    // Обновляем state.currentCard для отображения
+    // Обновляем отображение
     state.currentCard = realCard;
     openCardModal(realCard, index);
     renderCards();
     showToast(`Улучшение успешно! ${realCard.name} +${realCard.level}`);
   } else {
-    // Провал — откат уровня
+    // Провал
     const rollback = getRollbackLevel(realCard.level);
     realCard.level = rollback;
     
     state.silver -= cost;
     updateResources();
     
-    // Обновляем state.currentCard для отображения
     state.currentCard = realCard;
     openCardModal(realCard, index);
     renderCards();
