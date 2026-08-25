@@ -1,4 +1,3 @@
-
 // ===== КАРТА =====
 
 function initMap() {
@@ -64,21 +63,24 @@ function playAgain() {
   state.energy -= loc.energyCost;
   state.silver += loc.rewardSilver;
 
-  // Добавляем локацию в пройденные (если ещё не там)
-  if (!state.completedLocs.includes(loc.id)) {
-    state.completedLocs.push(loc.id);
-  }
-
-  // Пересчитываем макс. энергию
-  state.maxEnergy = getMaxEnergy();
+  // Проверяем, был ли уровень уже пройден
+  const wasAlreadyCompleted = state.completedLocs.includes(loc.id);
   
-  // ⭐ ВОССТАНАВЛИВАЕМ ЭНЕРГИЮ ДО МАКСИМУМА ПОСЛЕ ПРОХОЖДЕНИЯ
-  state.energy = state.maxEnergy;
+  // Добавляем локацию в пройденные (если ещё не там)
+  if (!wasAlreadyCompleted) {
+    state.completedLocs.push(loc.id);
+    // Восстанавливаем энергию только при первом прохождении
+    state.maxEnergy = getMaxEnergy();
+    state.energy = state.maxEnergy;
+    showToast(`Пройдено! +${loc.rewardSilver} серебра. Энергия восстановлена! Макс: ${state.maxEnergy}`);
+  } else {
+    // Уровень уже пройден - просто тратим энергию
+    showToast(`Пройдено! -${loc.energyCost} энергии, +${loc.rewardSilver} серебра`);
+  }
 
   updateResources();
   initMap();
   closeLocModal();
-  showToast(`Пройдено! +${loc.rewardSilver} серебра. Энергия восстановлена! Макс: ${state.maxEnergy}`);
   
   saveGame();
 }
