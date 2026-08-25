@@ -2,6 +2,9 @@
 
 function initMap() {
   const container = document.getElementById('mapContainer');
+  if (!container) return;
+
+  // Очищаем старые узлы локации перед перерисовкой
   container.querySelectorAll('.location-node').forEach(n => n.remove());
 
   locations.forEach(loc => {
@@ -33,6 +36,7 @@ function initMap() {
 
 function openLocModal(loc) {
   state.currentLoc = loc;
+  
   document.getElementById('locModalLabel').textContent = 'ЛОКАЦИЯ ' + loc.id;
   document.getElementById('locModalTitle').textContent = loc.name;
   document.getElementById('locModalDesc').textContent = loc.desc;
@@ -46,6 +50,7 @@ function openLocModal(loc) {
   document.getElementById('locCostEnergy').textContent = '-' + loc.energyCost;
   document.getElementById('locRepeatSilver').textContent = '+' + loc.rewardSilver;
   document.getElementById('locEnergyCost').textContent = loc.energyCost;
+  
   document.getElementById('locModal').classList.add('show');
 }
 
@@ -56,31 +61,32 @@ function closeLocModal() {
 function playAgain() {
   const loc = state.currentLoc;
   if (!loc) return;
+  
   if (state.energy < loc.energyCost) {
     showToast('Недостаточно энергии!', true);
     return;
   }
+  
   state.energy -= loc.energyCost;
   state.silver += loc.rewardSilver;
 
-  // Проверяем, был ли уровень уже пройден
-  const wasAlreadyCompleted = state.completedLocs.includes(loc.id);
-  
   // Добавляем локацию в пройденные (если ещё не там)
-  if (!wasAlreadyCompleted) {
+  if (!state.completedLocs.includes(loc.id)) {
     state.completedLocs.push(loc.id);
-    // Восстанавливаем энергию только при первом прохождении
-    state.maxEnergy = getMaxEnergy();
-    state.energy = state.maxEnergy;
-    showToast(`Пройдено! +${loc.rewardSilver} серебра. Энергия восстановлена! Макс: ${state.maxEnergy}`);
-  } else {
-    // Уровень уже пройден - просто тратим энергию
-    showToast(`Пройдено! -${loc.energyCost} энергии, +${loc.rewardSilver} серебра`);
   }
+
+  // Пересчитываем макс. энергию
+  state.maxEnergy = getMaxEnergy();
+  
+  // ⭐ ВОССТАНАВЛИВАЕМ ЭНЕРГИЮ ДО МАКСИМУМА ПОСЛЕ ПРОХОЖДЕНИЯ
+  state.energy = state.maxEnergy;
 
   updateResources();
   initMap();
   closeLocModal();
   
+  showToast(`Пройдено! +${loc.rewardSilver} серебра. Энергия восстановлена! Макс: ${state.maxEnergy}`);
+  
+  // 🔥 ОБЯЗАТЕЛЬНО: Сохраняем прогресс после прохождения локации
   saveGame();
 }
