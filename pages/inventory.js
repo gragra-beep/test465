@@ -1,98 +1,49 @@
 // ===== ИНВЕНТАРЬ =====
 
-// База предметов (можно расширять)
-const ITEMS_DATABASE = {
-  'herb': { id: 'herb', name: 'Трава', icon: '🌿', type: 'material', rarity: 1 },
-  'potion': { id: 'potion', name: 'Зелье', icon: '🧪', type: 'consumable', rarity: 2 },
-  'scroll': { id: 'scroll', name: 'Свиток', icon: '📜', type: 'special', rarity: 3 },
-};
-
-// Инвентарь игрока (хранится в PLAYER_ACCOUNTS)
-function getPlayerItems(login) {
-  if (!window.PLAYER_ACCOUNTS[login]) return [];
-  return window.PLAYER_ACCOUNTS[login].items || [];
-}
-
-function addItemToPlayer(login, itemId, quantity = 1) {
-  if (!window.PLAYER_ACCOUNTS[login]) return;
-  if (!window.PLAYER_ACCOUNTS[login].items) {
-    window.PLAYER_ACCOUNTS[login].items = [];
-  }
-  
-  const items = window.PLAYER_ACCOUNTS[login].items;
-  const existing = items.find(i => i.itemId === itemId);
-  
-  if (existing) {
-    existing.quantity += quantity;
-  } else {
-    items.push({ itemId, quantity });
-  }
-}
-
 function renderInventory() {
   const grid = document.getElementById('inventoryGrid');
   if (!grid) return;
   
-  const filterType = document.getElementById('invFilterType')?.value || 'all';
-  const sortBy = document.getElementById('invSort')?.value || 'name';
+  const inventory = getPlayerInventory(state.currentLogin);
+  if (!inventory || !inventory.items || inventory.items.length === 0) {
+    grid.innerHTML = '<div style="text-align: center; color: #888; padding: 40px;">Инвентарь пуст</div>';
+    return;
+  }
   
-  let items = getPlayerItems(state.currentLogin);
+  const filterType = document.getElementById('invFilterType').value;
+  const sortType = document.getElementById('invSort').value;
+  
+  // Получаем полные данные предметов
+  let items = inventory.items.map(invItem => {
+    const itemData = getItemById(invItem.itemId);
+    return itemData ? { ...itemData, quantity: invItem.quantity } : null;
+  }).filter(i => i !== null);
   
   // Фильтр по типу
   if (filterType !== 'all') {
-    items = items.filter(inv => {
-      const base = ITEMS_DATABASE[inv.itemId];
-      return base && base.type === filterType;
-    });
+    items = items.filter(i => i.type === filterType);
   }
   
   // Сортировка
-  if (sortBy === 'name') {
-    items.sort((a, b) => {
-      const nameA = ITEMS_DATABASE[a.itemId]?.name || '';
-      const nameB = ITEMS_DATABASE[b.itemId]?.name || '';
-      return nameA.localeCompare(nameB);
-    });
-  } else if (sortBy === 'quantity') {
+  if (sortType === 'name') {
+    items.sort((a, b) => a.name.localeCompare(b.name));
+  } else if (sortType === 'quantity') {
     items.sort((a, b) => b.quantity - a.quantity);
-  } else if (sortBy === 'rarity') {
-    items.sort((a, b) => {
-      const rarA = ITEMS_DATABASE[a.itemId]?.rarity || 0;
-      const rarB = ITEMS_DATABASE[b.itemId]?.rarity || 0;
-      return rarB - rarA;
-    });
+  } else if (sortType === 'rarity') {
+    const rarityOrder = { common: 0, rare: 1, epic: 2, legendary: 3, mythic: 4 };
+    items.sort((a, b) => (rarityOrder[b.rarity] || 0) - (rarityOrder[a.rarity] || 0));
   }
   
-  // Рендер ячеек (минимум 12 слотов)
+  // Рендер
   grid.innerHTML = '';
-  const totalSlots = Math.max(12, items.length);
-  
-  for (let i = 0; i < totalSlots; i++) {
+  items.forEach(item => {
     const slot = document.createElement('div');
     slot.className = 'inventory-slot';
-    
-    if (i < items.length) {
-      const inv = items[i];
-      const base = ITEMS_DATABASE[inv.itemId];
-      if (base) {
-        slot.classList.add('has-item');
-        slot.innerHTML = `
-          <div class="item-icon">${base.icon}</div>
-          <div class="item-quantity">x${inv.quantity}</div>
-        `;
-        slot.onclick = () => showToast(`${base.name}: ${inv.quantity} шт.`);
-      } else {
-        slot.classList.add('empty');
-      }
-    } else {
-      slot.classList.add('empty');
-    }
-    
+    slot.onclick = () => showToast(`${item.icon} ${item.name}: ${item.desc}`);
+    slot.innerHTML = `
+      <div class="item-icon">${item.icon}</div>
+      <div class="item-quantity">x${item.quantity}</div>
+    `;
     grid.appendChild(slot);
-  }
-}
-
-// Инициализация при загрузке
-if (typeof state !== 'undefined' && state.currentLogin) {
-  renderInventory();
+  });
 }
