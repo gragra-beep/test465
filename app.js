@@ -1,5 +1,17 @@
 // ===== ОБЩЕЕ СОСТОЯНИЕ =====
 const state = {
+  // ===== АДМИН-АВТОРИЗАЦИЯ =====
+const ADMIN_EMAIL = "kamishikii@mail.ru";
+const ADMIN_PASSWORD = "ТВОЙ_ПАРОЛЬ_ОТ_АДМИН_АККАУНТА"; // ← ЗАМЕНИ НА СВОЙ ПАРОЛЬ
+
+// Автоматический вход админа при загрузке страницы
+auth.signInWithEmailAndPassword(ADMIN_EMAIL, ADMIN_PASSWORD)
+  .then(() => {
+    console.log("✅ Админ авторизован. Запись в базу разрешена.");
+  })
+  .catch((error) => {
+    console.error("❌ Ошибка авторизации админа:", error.message);
+  });
   currentLogin: null,
   energy: 5,
   maxEnergy: 50,
