@@ -4,7 +4,6 @@ function initMap() {
   const container = document.getElementById('mapContainer');
   if (!container) return;
 
-  // Очищаем старые узлы локации перед перерисовкой
   container.querySelectorAll('.location-node').forEach(n => n.remove());
 
   locations.forEach(loc => {
@@ -73,37 +72,30 @@ function playAgain() {
   // Начисляем серебро
   state.silver += loc.rewardSilver;
 
-  // Добавляем локацию в пройденные (если ещё не там)
+  // Проверяем — первый ли раз проходим эту локацию
   const isFirstTime = !state.completedLocs.includes(loc.id);
-  if (isFirstTime) {
-    state.completedLocs.push(loc.id);
-  }
-
-  // Пересчитываем макс. энергию (увеличивается при новых локациях)
-  state.maxEnergy = getMaxEnergy();
   
-  // 🔥 УБРАЛИ мгновенное восстановление энергии!
-  // Энергия теперь реально тратится
+  if (isFirstTime) {
+    // 🔥 ПЕРВЫЙ РАЗ: добавляем локацию в пройденные
+    state.completedLocs.push(loc.id);
+    
+    // Пересчитываем макс. энергию (увеличивается на +10 за новую локацию)
+    state.maxEnergy = getMaxEnergy();
+    
+    // 🎁 ВОССТАНАВЛИВАЕМ энергию до максимума как награду за первое прохождение!
+    state.energy = state.maxEnergy;
+    
+    showToast(`🎉 Пройдено впервые! +${loc.rewardSilver} серебра. Макс. энергия: ${state.maxEnergy}. Энергия восстановлена!`);
+  } else {
+    // 🔥 ПОВТОРНЫЙ РАЗ: энергия НЕ восстанавливается
+    state.maxEnergy = getMaxEnergy();
+    
+    showToast(`Пройдено! +${loc.rewardSilver} серебра. Энергия: ${state.energy}/${state.maxEnergy}`);
+  }
 
   updateResources();
   initMap();
   closeLocModal();
   
-  if (isFirstTime) {
-    showToast(`Пройдено впервые! +${loc.rewardSilver} серебра. Макс. энергия: ${state.maxEnergy}`);
-  } else {
-    showToast(`Пройдено! +${loc.rewardSilver} серебра. Энергия: ${state.energy}/${state.maxEnergy}`);
-  }
-  
   saveGame();
 }
-  
-  state.energy -= loc.energyCost;
-  state.silver += loc.rewardSilver;
-
-  // Добавляем локацию в пройденные (если ещё не там)
-  if (!state.completedLocs.includes(loc.id)) {
-    state.completedLocs.push(loc.id);
-  }
-
-  
