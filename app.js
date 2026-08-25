@@ -1,8 +1,8 @@
 // ===== ОБЩЕЕ СОСТОЯНИЕ =====
 const state = {
   currentLogin: null,
-  energy: 999999,
-  maxEnergy: 999999,
+  energy: 5,
+  maxEnergy: 50,
   silver: 999999,
   currentLoc: null,
   currentCard: null,
@@ -207,6 +207,10 @@ function startEnergyRegen() {
       state.energy++;
       updateResources();
       saveGame();
+      console.log("⚡ Энергия восстановлена! Сейчас: " + state.energy + "/" + state.maxEnergy);
     }
-  }, 60000); // 60000 мс = 1 минута. Если хочешь 5 минут, поменяй на 300000
+  }, 60000); // 60000 мс = 1 минута
 }
+
+// ЗАПУСКАЕМ ТАЙМЕР СРАЗУ ПРИ ЗАГРУЗКЕ СТРАНИЦЫ (даже если уже залогинен)
+startEnergyRegen();
