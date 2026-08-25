@@ -8,15 +8,23 @@
 </head>
 <body>
 
-<!-- LOGIN -->
+<!-- LOGIN / REGISTER SCREEN -->
 <div id="loginScreen">
   <div class="login-box">
-    <h1>Игрулькаа</h1>
-    <p>Войдите в аккаунт</p>
+    <h1>Игрулька</h1>
+    <p id="authSubtitle">Войдите в аккаунт</p>
+    
     <input type="text" id="loginInput" placeholder="Логин" autocomplete="off">
     <input type="password" id="passwordInput" placeholder="Пароль">
-    <button onclick="doLogin()">Войти</button>
+    <input type="password" id="confirmPasswordInput" placeholder="Повторите пароль" style="display:none;">
+    
+    <button id="authButton" onclick="doLogin()">Войти</button>
     <div id="loginError"></div>
+    
+    <div class="auth-switch">
+      <span id="authSwitchText">Нет аккаунта?</span>
+      <button class="auth-switch-btn" onclick="toggleAuthMode()" id="authSwitchBtn">Зарегистрироваться</button>
+    </div>
   </div>
 </div>
 
