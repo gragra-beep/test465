@@ -1,9 +1,9 @@
 // ===== ОБЩЕЕ СОСТОЯНИЕ =====
 const state = {
   currentLogin: null,
-  energy: 999999,
-  maxEnergy: 999999,
-  silver: 999999,
+  energy: 80,
+  maxEnergy: 80,
+  silver: 100,
   currentLoc: null,
   currentCard: null,
   currentCardIndex: null,
@@ -11,7 +11,8 @@ const state = {
   bannerRolls: 0,
   lastEpicRoll: 0,
   lastLegendaryRoll: 0,
-  lastMythicRoll: 0
+  lastMythicRoll: 0,
+  isRegistering: false
 };
 
 // ===== УТИЛИТЫ =====
@@ -68,15 +69,148 @@ function loadGame() {
   }
 }
 
-// ===== ЛОГИН =====
-function doLogin() {
-  const login = document.getElementById('loginInput').value;
+// ===== ПЕРЕКЛЮЧЕНИЕ ВХОД/РЕГИСТРАЦИЯ =====
+function toggleAuthMode() {
+  state.isRegistering = !state.isRegistering;
+  
+  const subtitle = document.getElementById('authSubtitle');
+  const confirmInput = document.getElementById('confirmPasswordInput');
+  const authButton = document.getElementById('authButton');
+  const switchText = document.getElementById('authSwitchText');
+  const switchBtn = document.getElementById('authSwitchBtn');
+  const errorDiv = document.getElementById('loginError');
+  
+  errorDiv.textContent = '';
+  
+  if (state.isRegistering) {
+    subtitle.textContent = 'Создайте аккаунт';
+    confirmInput.style.display = 'block';
+    authButton.textContent = 'Зарегистрироваться';
+    authButton.onclick = doRegister;
+    switchText.textContent = 'Уже есть аккаунт?';
+    switchBtn.textContent = 'Войти';
+  } else {
+    subtitle.textContent = 'Войдите в аккаунт';
+    confirmInput.style.display = 'none';
+    authButton.textContent = 'Войти';
+    authButton.onclick = doLogin;
+    switchText.textContent = 'Нет аккаунта?';
+    switchBtn.textContent = 'Зарегистрироваться';
+  }
+}
+
+// ===== РЕГИСТРАЦИЯ =====
+function doRegister() {
+  const login = document.getElementById('loginInput').value.trim();
   const pass = document.getElementById('passwordInput').value;
-  if (login === 'ooo' && pass === '1234') {
-    state.currentLogin = login;
+  const confirmPass = document.getElementById('confirmPasswordInput').value;
+  const errorDiv = document.getElementById('loginError');
+  
+  if (!login || !pass) {
+    errorDiv.textContent = 'Заполните все поля';
+    return;
+  }
+  
+  if (pass !== confirmPass) {
+    errorDiv.textContent = 'Пароли не совпадают';
+    return;
+  }
+  
+  if (login.length < 3) {
+    errorDiv.textContent = 'Логин должен быть не короче 3 символов';
+    return;
+  }
+  
+  if (pass.length < 4) {
+    errorDiv.textContent = 'Пароль должен быть не короче 4 символов';
+    return;
+  }
+  
+  // Проверяем, не занят ли логин
+  if (PLAYER_ACCOUNTS[login]) {
+    errorDiv.textContent = 'Такой логин уже занят';
+    return;
+  }
+  
+  // Создаём новый аккаунт
+  createAccount(login, pass);
+  
+  // Сразу входим
+  state.currentLogin = login;
+  localStorage.setItem('remanga_current_login', login);
+  
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('topbar').style.display = 'flex';
+  document.getElementById('navBar').style.display = 'flex';
+  
+  // Обновляем имя пользователя в топбаре
+  document.querySelector('.user-name').textContent = login;
+  
+  loadGame();
+  
+  state.maxEnergy = getMaxEnergy();
+  if (state.energy > state.maxEnergy) state.energy = state.maxEnergy;
+  
+  updateResources();
+  initMap();
+  renderCards();
+  updateSummonCounters();
+}
+
+// ===== ВХОД =====
+function doLogin() {
+  const login = document.getElementById('loginInput').value.trim();
+  const pass = document.getElementById('passwordInput').value;
+  const errorDiv = document.getElementById('loginError');
+  
+  if (!login || !pass) {
+    errorDiv.textContent = 'Заполните все поля';
+    return;
+  }
+  
+  // Проверяем существование аккаунта
+  if (!PLAYER_ACCOUNTS[login]) {
+    errorDiv.textContent = 'Аккаунт не найден. Зарегистрируйтесь.';
+    return;
+  }
+  
+  // Проверяем пароль
+  if (PLAYER_ACCOUNTS[login].password !== pass) {
+    errorDiv.textContent = 'Неверный пароль';
+    return;
+  }
+  
+  state.currentLogin = login;
+  localStorage.setItem('remanga_current_login', login);
+  
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('topbar').style.display = 'flex';
+  document.getElementById('navBar').style.display = 'flex';
+  
+  // Обновляем имя пользователя в топбаре
+  document.querySelector('.user-name').textContent = login;
+  
+  loadGame();
+  
+  state.maxEnergy = getMaxEnergy();
+  if (state.energy > state.maxEnergy) state.energy = state.maxEnergy;
+  
+  updateResources();
+  initMap();
+  renderCards();
+  updateSummonCounters();
+}
+
+// ===== АВТО-ВХОД =====
+function checkAutoLogin() {
+  const savedLogin = localStorage.getItem('remanga_current_login');
+  if (savedLogin && PLAYER_ACCOUNTS[savedLogin]) {
+    state.currentLogin = savedLogin;
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('topbar').style.display = 'flex';
     document.getElementById('navBar').style.display = 'flex';
+    
+    document.querySelector('.user-name').textContent = savedLogin;
     
     loadGame();
     
@@ -87,12 +221,25 @@ function doLogin() {
     initMap();
     renderCards();
     updateSummonCounters();
-  } else {
-    document.getElementById('loginError').textContent = 'Неверный логин или пароль';
   }
 }
-document.getElementById('passwordInput').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
-document.getElementById('loginInput').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('passwordInput').focus(); });
+
+// ===== ВЫХОД =====
+function logout() {
+  localStorage.removeItem('remanga_current_login');
+  state.currentLogin = null;
+  location.reload();
+}
+
+document.getElementById('passwordInput').addEventListener('keydown', e => { 
+  if (e.key === 'Enter') {
+    if (state.isRegistering) doRegister();
+    else doLogin();
+  }
+});
+document.getElementById('loginInput').addEventListener('keydown', e => { 
+  if (e.key === 'Enter') document.getElementById('passwordInput').focus(); 
+});
 
 // ===== НАВИГАЦИЯ =====
 function switchPage(page) {
@@ -117,7 +264,7 @@ function showToast(msg, isError) {
   setTimeout(() => t.className = 'toast', 2500);
 }
 
-// ===== ЗАКРЫТИЕ МОДАЛОК ПО КЛИКУ НА ОВЕРЛЕЙ =====
+// ===== ЗАКРЫТИЕ МОДАЛОК =====
 document.getElementById('locModal').addEventListener('click', e => {
   if (e.target === document.getElementById('locModal')) closeLocModal();
 });
@@ -127,3 +274,6 @@ document.getElementById('cardModal').addEventListener('click', e => {
 document.getElementById('bannerModal').addEventListener('click', e => {
   if (e.target === document.getElementById('bannerModal')) closeBannerModal();
 });
+
+// ЗАПУСК ПРОВЕРКИ АВТО-ВХОДА
+checkAutoLogin();
