@@ -98,6 +98,8 @@ function doLogin() {
     if (state.energy > state.maxEnergy) state.energy = state.maxEnergy;
     
     updateResources();
+    startEnergyRegen(); // <-- ЗАПУСК ВОССТАНОВЛЕНИЯ ЭНЕРГИИ ПРИ ВХОДЕ
+    
     initMap();
     renderCards();
     updateSummonCounters();
@@ -197,3 +199,14 @@ document.addEventListener('click', e => {
     menu.classList.remove('show');
   }
 });
+
+// ===== АВТОМАТИЧЕСКОЕ ВОССТАНОВЛЕНИЕ ЭНЕРГИИ =====
+function startEnergyRegen() {
+  setInterval(() => {
+    if (state.currentLogin && state.energy < state.maxEnergy) {
+      state.energy++;
+      updateResources();
+      saveGame();
+    }
+  }, 60000); // 60000 мс = 1 минута. Если хочешь 5 минут, поменяй на 300000
+}
