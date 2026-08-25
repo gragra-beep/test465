@@ -79,12 +79,18 @@ body {
 .res-menu-btn {
   cursor: pointer;
   transition: all 0.2s;
+  background: rgba(0, 0, 0, 0.8) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  padding: 6px 12px !important;
 }
 .res-menu-btn:hover {
-  background: rgba(255,255,255,0.12);
+  background: rgba(0, 0, 0, 0.95) !important;
 }
 .res-menu-btn:active {
-  transform: scale(0.97);
+  transform: scale(0.95);
+}
+.res-menu-btn .icon {
+  font-size: 16px;
 }
 
 /* ===== ВЫПАДАЮЩЕЕ МЕНЮ ===== */
