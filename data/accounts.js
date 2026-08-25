@@ -12,8 +12,10 @@ const PLAYER_ACCOUNTS = {
     ],
     summons: 0, lastEpic: 0, lastLegendary: 0, lastMythic: 0,
     completedLocs: [],
-    energy: 999999,
-    silver: 999999
+    energy: 5,       // <-- ПОМЕНЯЙ НА 5
+    maxEnergy: 50,   // <-- ПОМЕНЯЙ НА 50 (если этого поля нет, добавь его)
+    silver: 100,     // <-- ПОМЕНЯЙ НА 100
+    lastEnergyUpdate: Date.now()
   }
 };
 
@@ -36,8 +38,9 @@ function createAccount(login, password) {
     lastLegendary: 0,
     lastMythic: 0,
     completedLocs: [],
-    energy: 50,
-    silver: 100,
+    energy: 5,       // <-- ПОМЕНЯЙ НА 5
+    maxEnergy: 50,   // <-- ПОМЕНЯЙ НА 50
+    silver: 100,     // <-- ПОМЕНЯЙ НА 100
     lastEnergyUpdate: Date.now()
   };
 }
