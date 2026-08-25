@@ -780,6 +780,24 @@ body {
 .auth-switch-btn:hover {
   color: #a78bfa;
 }
+/* ===== AUTH BUTTONS ===== */
+.auth-btn-login {
+  width: 100%; padding: 13px; margin-top: 8px;
+  background: linear-gradient(135deg, #4a90d9, #7c3aed);
+  border: none; border-radius: 10px; color: #fff;
+  font-size: 16px; font-weight: 600; cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.auth-btn-login:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(124,58,237,0.4); }
+.auth-btn-register {
+  width: 100%; padding: 13px; margin-top: 8px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 10px; color: #ccc;
+  font-size: 16px; font-weight: 600; cursor: pointer;
+  transition: transform 0.2s, background 0.2s;
+}
+.auth-btn-register:hover { transform: translateY(-2px); background: rgba(255,255,255,0.12); }
 /* ===== RESPONSIVE ===== */
 @media (max-width: 400px) {
   .cards-grid { grid-template-columns: repeat(2, 1fr); }
