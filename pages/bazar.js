@@ -2,17 +2,19 @@
 
 function showBannerDetails() {
   const pool = document.getElementById('cardsPool');
+  if (!pool) return;
+  
   pool.innerHTML = '';
 
   CARDS_DATABASE.forEach(card => {
     const cardEl = document.createElement('div');
     cardEl.className = 'pool-card';
     
-    // Используем абсолютный путь к картинке
+    // Безопасный путь к картинке
     const imagePath = card.image.startsWith('/') ? card.image : '/test465/' + card.image;
     
     cardEl.innerHTML = `
-      <div class="card-tag">戰 БОЕВАЯ</div>
+      <div class="card-tag">БОЕВАЯ</div>
       <div class="pool-card-img" style="background-image: url('${imagePath}');"></div>
       <div style="position:absolute; bottom:6px; left:6px; right:6px; font-size:10px; font-weight:600; text-shadow: 0 1px 3px rgba(0,0,0,0.9); text-align: center;">${card.name}</div>
     `;
@@ -64,6 +66,9 @@ function summon(count) {
     autoDustDuplicates();
   }
   
+  // 🔥 ФИКС: Обновляем колоду после призыва, чтобы новые карты сразу отображались
+  if (typeof renderCards === 'function') renderCards();
+  
   saveGame();
 }
 
@@ -108,7 +113,6 @@ function autoDustDuplicates() {
   if (!inventory) return;
 
   const seen = new Set();
-  // Проходим с конца, чтобы безопасно удалять элементы через splice
   for (let i = inventory.cards.length - 1; i >= 0; i--) {
     const cardId = inventory.cards[i].cardId;
     if (seen.has(cardId)) {
