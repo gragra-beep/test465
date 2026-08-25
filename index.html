@@ -39,6 +39,7 @@
   </div>
 </div>
 
+
 <!-- Кнопка раскрытия меню под аватаркой -->
 <div class="user-menu-toggle" id="userMenuToggle" style="display:none;">
   <div class="res-item res-menu-btn" onclick="toggleUserMenu()">
@@ -48,10 +49,48 @@
 
 <!-- Выпадающее меню -->
 <div class="user-menu" id="userMenu">
-  <div class="res-item res-energy"><span class="icon">⚡</span> <span id="resEnergy3">80</span> / <span id="resMaxEnergy3">80</span></div>
-  <div class="res-item res-silver"><span class="icon">🪙</span> <span id="resSilver2">1553</span></div>
-  <div class="res-item res-gifts" onclick="showToast('Дары'); toggleUserMenu()"><span class="icon">🎁</span></div>
-  <div class="res-item res-quests" onclick="showToast('Задания'); toggleUserMenu()"><span class="icon"></span></div>
+  <div class="res-item res-inventory" onclick="openInventory(); toggleUserMenu()">
+    <span class="icon">👜</span> Инвентарь
+  </div>
+  <div class="res-item res-quests" onclick="openQuests(); toggleUserMenu()">
+    <span class="icon">📋</span> Задания
+  </div>
+  <div class="res-item res-gifts" onclick="openGifts(); toggleUserMenu()">
+    <span class="icon"></span> Дары
+  </div>
+</div>
+
+<!-- МОДАЛЬНОЕ ОКНО: ИНВЕНТАРЬ -->
+<div class="modal-page-overlay" id="inventoryModal">
+  <div class="modal-page">
+    <button class="modal-page-close" onclick="closeInventory()">✕</button>
+    <h2>👜 ИНВЕНТАРЬ</h2>
+    <div class="modal-page-content">
+      <p>Здесь будет твой инвентарь</p>
+    </div>
+  </div>
+</div>
+
+<!-- МОДАЛЬНОЕ ОКНО: ЗАДАНИЯ -->
+<div class="modal-page-overlay" id="questsModal">
+  <div class="modal-page">
+    <button class="modal-page-close" onclick="closeQuests()">✕</button>
+    <h2>📋 ЗАДАНИЯ</h2>
+    <div class="modal-page-content">
+      <p>Здесь будут твои задания</p>
+    </div>
+  </div>
+</div>
+
+<!-- МОДАЛЬНОЕ ОКНО: ДАРЫ -->
+<div class="modal-page-overlay" id="giftsModal">
+  <div class="modal-page">
+    <button class="modal-page-close" onclick="closeGifts()">✕</button>
+    <h2>🎁 ДАРЫ</h2>
+    <div class="modal-page-content">
+      <p>Здесь будут твои дары</p>
+    </div>
+  </div>
 </div>
 
 <!-- ===== СТРАНИЦЫ ===== -->
