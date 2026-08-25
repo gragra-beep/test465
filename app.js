@@ -298,3 +298,21 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+function toggleUserMenu() {
+  document.getElementById('userDropdown').classList.toggle('show');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.user-info')) {
+    const menu = document.getElementById('userDropdown');
+    if (menu) menu.classList.remove('show');
+  }
+});
+function doLogout() {
+  state.currentLogin = null;
+  state.currentUserId = null;
+  document.getElementById('topbar').style.display = 'none';
+  document.getElementById('navBar').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('loginInput').value = '';
+  document.getElementById('passwordInput').value = '';
+}
