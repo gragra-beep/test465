@@ -32,13 +32,26 @@
       <div class="user-name">ооо</div>
       <div class="user-rank">ранг</div>
     </div>
+    <!-- Кнопка меню под аватаркой -->
+    <button class="menu-toggle-btn" onclick="toggleUserMenu()">👜</button>
   </div>
   <div class="resources">
     <div class="res-item res-energy"><span class="icon">⚡</span> <span id="resEnergy">80</span> / <span id="resMaxEnergy">80</span></div>
     <div class="res-item res-silver"><span class="icon">🪙</span> <span id="resSilver">1553</span></div>
-    <div class="res-item res-gifts" onclick="showToast('Дары')"><span class="icon">🎁</span></div>
-    <div class="res-item res-quests" onclick="showToast('Задания')"><span class="icon">📋</span></div>
   </div>
+</div>
+
+<!-- Выпадающее меню пользователя -->
+<div class="user-menu" id="userMenu">
+  <button class="user-menu-btn" onclick="showToast('Дары'); toggleUserMenu()">
+    <span class="menu-icon">🎁</span> Дары
+  </button>
+  <button class="user-menu-btn" onclick="showToast('Задания'); toggleUserMenu()">
+    <span class="menu-icon">📋</span> Задания
+  </button>
+  <button class="user-menu-btn" onclick="showToast('Инвентарь'); toggleUserMenu()">
+    <span class="menu-icon">👜</span> Инвентарь
+  </button>
 </div>
 
 <!-- ===== СТРАНИЦЫ ===== -->
