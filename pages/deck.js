@@ -12,9 +12,9 @@ function renderCards() {
     return;
   }
 
-  let playerCards = inventory.cards.map(invCard => {
+  let playerCards = inventory.cards.map((invCard, index) => {
     const baseCard = getCardById(invCard.cardId);
-    return baseCard ? { ...baseCard, ...invCard } : null;
+    return baseCard ? { ...baseCard, ...invCard, index: index } : null;
   }).filter(c => c !== null);
 
   if (rank !== 'any') playerCards = playerCards.filter(c => c.stars === parseInt(rank));
@@ -34,10 +34,10 @@ function renderCards() {
   }
 
   grid.innerHTML = '';
-  playerCards.forEach((card, index) => {
+  playerCards.forEach((card, displayIndex) => {
     const el = document.createElement('div');
     el.className = 'card-item' + (card.broken ? ' broken' : '');
-    el.onclick = () => openCardModal(card, index);
+    el.onclick = () => openCardModal(card, card.index);
 
     const power = card.baseStats.atk + card.baseStats.def + card.baseStats.hp;
 
@@ -108,6 +108,7 @@ function getUpgradeBonuses(card) {
 function openCardModal(card, index) {
   state.currentCard = card;
   state.currentCardIndex = index;
+  
   const power = card.baseStats.atk + card.baseStats.def + card.baseStats.hp;
 
   // Картинка
@@ -121,8 +122,8 @@ function openCardModal(card, index) {
   // Имя, звёзды, ранг
   document.getElementById('cdName').textContent = card.name;
   document.getElementById('cdStars').textContent = '★'.repeat(card.stars);
-  document.getElementById('cdRarityBadge').textContent = 'A';
-  document.getElementById('cdRankLetter').textContent = 'A';
+  document.getElementById('cdRarityBadge').textContent = card.rarity.toUpperCase().substring(0, 1);
+  document.getElementById('cdRankLetter').textContent = card.rarity.toUpperCase().substring(0, 1);
 
   // Статы
   document.getElementById('cdAtk').textContent = card.baseStats.atk;
@@ -168,7 +169,9 @@ function closeCardModal() {
 
 function upgradeCard() {
   const card = state.currentCard;
-  if (!card) return;
+  const index = state.currentCardIndex;
+  
+  if (!card || index === null) return;
   
   if (card.level >= 100) {
     showToast('Максимальный уровень достигнут!', true);
@@ -184,30 +187,42 @@ function upgradeCard() {
   const chance = getUpgradeChance(card.level);
   const roll = Math.random() * 100;
 
+  // Получаем ссылку на реальную карту в инвентаре
+  const inventory = PLAYER_ACCOUNTS[state.currentLogin];
+  const realCard = inventory.cards[index];
+
   if (roll < chance) {
-    // Успех
-    card.level++;
+    // Успех - обновляем РЕАЛЬНУЮ карту в инвентаре
+    realCard.level++;
     const bonuses = getUpgradeBonuses(card);
-    card.baseStats.atk += bonuses.atk;
-    card.baseStats.def += bonuses.def;
-    card.baseStats.hp += bonuses.hp;
+    realCard.baseStats.atk += bonuses.atk;
+    realCard.baseStats.def += bonuses.def;
+    realCard.baseStats.hp += bonuses.hp;
+    
     state.silver -= cost;
     updateResources();
-    openCardModal(card, state.currentCardIndex);
+    
+    // Обновляем state.currentCard для отображения
+    state.currentCard = realCard;
+    openCardModal(realCard, index);
     renderCards();
-    showToast(`Улучшение успешно! ${card.name} +${card.level}`);
-    saveGame();
+    showToast(`Улучшение успешно! ${realCard.name} +${realCard.level}`);
   } else {
     // Провал — откат уровня
-    const rollback = getRollbackLevel(card.level);
-    card.level = rollback;
+    const rollback = getRollbackLevel(realCard.level);
+    realCard.level = rollback;
+    
     state.silver -= cost;
     updateResources();
-    openCardModal(card, state.currentCardIndex);
+    
+    // Обновляем state.currentCard для отображения
+    state.currentCard = realCard;
+    openCardModal(realCard, index);
     renderCards();
-    showToast(`Провал! ${card.name} откатилась до +${rollback}`, true);
-    saveGame();
+    showToast(`Провал! ${realCard.name} откатилась до +${rollback}`, true);
   }
+  
+  saveGame();
 }
 
 function rerollCard() {
