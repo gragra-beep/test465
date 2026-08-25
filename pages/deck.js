@@ -159,22 +159,16 @@ function closeCardModal() {
   document.getElementById('cardModal').classList.remove('show');
 }
 
-function upgradeCard() {alert('Кнопка работает! Карта: ' + JSON.stringify(state.currentCard));
+function upgradeCard() {
+  alert('Начало улучшения. Индекс: ' + state.currentCardIndex);
+  
   const index = state.currentCardIndex;
-  
-  if (index === null || index === undefined) {
-    showToast('Ошибка: откройте карту заново', true);
-    return;
-  }
-  
   const inventory = PLAYER_ACCOUNTS[state.currentLogin];
-  if (!inventory || !inventory.cards || !inventory.cards[index]) {
-    showToast('Ошибка: карта не найдена в инвентаре', true);
-    return;
-  }
   
-  // ПОЛУЧАЕМ ПРЯМУЮ ССЫЛКУ на карту в массиве игрока
+  // Получаем ПРЯМУЮ ссылку на карту в массиве
   const realCard = inventory.cards[index];
+  
+  alert('Реальная карта в инвентаре: ' + JSON.stringify(realCard));
   
   if (realCard.level >= 100) {
     showToast('Максимальный уровень достигнут!', true);
@@ -191,7 +185,7 @@ function upgradeCard() {alert('Кнопка работает! Карта: ' + JS
   const roll = Math.random() * 100;
 
   if (roll < chance) {
-    // Успех: меняем ПРЯМО в массиве инвентаря
+    // Успех - меняем ПРЯМО в realCard
     realCard.level++;
     const bonuses = getUpgradeBonuses(realCard);
     realCard.baseStats.atk += bonuses.atk;
@@ -201,17 +195,21 @@ function upgradeCard() {alert('Кнопка работает! Карта: ' + JS
     state.silver -= cost;
     updateResources();
     
+    alert('Успех! Новый уровень: ' + realCard.level);
+    
     state.currentCard = realCard;
     openCardModal(realCard, index);
     renderCards();
     showToast(`Улучшение успешно! ${realCard.name} +${realCard.level}`);
   } else {
-    // Провал: меняем ПРЯМО в массиве инвентаря
+    // Провал
     const rollback = getRollbackLevel(realCard.level);
     realCard.level = rollback;
     
     state.silver -= cost;
     updateResources();
+    
+    alert('Провал! Откат до: ' + realCard.level);
     
     state.currentCard = realCard;
     openCardModal(realCard, index);
@@ -220,6 +218,7 @@ function upgradeCard() {alert('Кнопка работает! Карта: ' + JS
   }
   
   saveGame();
+  alert('Игра сохранена');
 }
 
 function rerollCard() {
