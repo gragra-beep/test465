@@ -148,7 +148,6 @@ function updateResources() {
   document.getElementById('resMaxEnergy').textContent = state.maxEnergy;
   document.getElementById('resSilver').textContent = state.silver;
   
-  // Обновляем дубли в меню
   if (document.getElementById('resEnergy3')) {
     document.getElementById('resEnergy3').textContent = state.energy;
     document.getElementById('resMaxEnergy3').textContent = state.maxEnergy;
@@ -176,6 +175,7 @@ document.getElementById('cardModal').addEventListener('click', e => {
 document.getElementById('bannerModal').addEventListener('click', e => {
   if (e.target === document.getElementById('bannerModal')) closeBannerModal();
 });
+
 // ===== МЕНЮ ПОЛЬЗОВАТЕЛЯ =====
 let menuOpen = false;
 
@@ -189,7 +189,6 @@ function toggleUserMenu() {
   }
 }
 
-// Закрытие меню при клике вне его
 document.addEventListener('click', e => {
   const menu = document.getElementById('userMenu');
   const toggle = document.getElementById('userMenuToggle');
@@ -197,40 +196,4 @@ document.addEventListener('click', e => {
     menuOpen = false;
     menu.classList.remove('show');
   }
-});
-// ===== МОДАЛЬНЫЕ СТРАНИЦЫ =====
-
-function openInventory() {
-  document.getElementById('inventoryModal').classList.add('show');
-}
-
-function closeInventory() {
-  document.getElementById('inventoryModal').classList.remove('show');
-}
-
-function openQuests() {
-  document.getElementById('questsModal').classList.add('show');
-}
-
-function closeQuests() {
-  document.getElementById('questsModal').classList.remove('show');
-}
-
-function openGifts() {
-  document.getElementById('giftsModal').classList.add('show');
-}
-
-function closeGifts() {
-  document.getElementById('giftsModal').classList.remove('show');
-}
-
-// Закрытие модалок при клике на оверлей
-document.getElementById('inventoryModal').addEventListener('click', e => {
-  if (e.target === document.getElementById('inventoryModal')) closeInventory();
-});
-document.getElementById('questsModal').addEventListener('click', e => {
-  if (e.target === document.getElementById('questsModal')) closeQuests();
-});
-document.getElementById('giftsModal').addEventListener('click', e => {
-  if (e.target === document.getElementById('giftsModal')) closeGifts();
 });
