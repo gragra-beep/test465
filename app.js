@@ -149,10 +149,6 @@ function updateResources() {
   document.getElementById('resSilver').textContent = state.silver;
   
   // Обновляем дубли в меню
-  if (document.getElementById('resEnergy2')) {
-    document.getElementById('resEnergy2').textContent = state.energy;
-    document.getElementById('resMaxEnergy2').textContent = state.maxEnergy;
-  }
   if (document.getElementById('resEnergy3')) {
     document.getElementById('resEnergy3').textContent = state.energy;
     document.getElementById('resMaxEnergy3').textContent = state.maxEnergy;
@@ -199,14 +195,6 @@ document.addEventListener('click', e => {
   const toggle = document.getElementById('userMenuToggle');
   if (menu && menuOpen && !menu.contains(e.target) && !toggle.contains(e.target)) {
     menuOpen = false;
-    menu.classList.remove('show');
-  }
-});
-// Закрытие меню при клике вне его
-document.addEventListener('click', e => {
-  const menu = document.getElementById('userMenu');
-  const toggleBtn = document.querySelector('.menu-toggle-btn');
-  if (menu && !menu.contains(e.target) && e.target !== toggleBtn) {
     menu.classList.remove('show');
   }
 });
