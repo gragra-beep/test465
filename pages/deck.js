@@ -1,3 +1,4 @@
+alert('deck.js загружен!');
 // ===== КОЛОДА =====
 
 function renderCards() {
