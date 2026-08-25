@@ -171,7 +171,17 @@ function upgradeCard() {
   const card = state.currentCard;
   const index = state.currentCardIndex;
   
-  if (!card || index === null) return;
+  if (!card) {
+    console.error('Карта не найдена');
+    showToast('Ошибка: карта не найдена', true);
+    return;
+  }
+  
+  if (index === null || index === undefined) {
+    console.error('Индекс карты не указан');
+    showToast('Ошибка: индекс карты не указан', true);
+    return;
+  }
   
   if (card.level >= 100) {
     showToast('Максимальный уровень достигнут!', true);
@@ -189,6 +199,12 @@ function upgradeCard() {
 
   // Получаем ссылку на реальную карту в инвентаре
   const inventory = PLAYER_ACCOUNTS[state.currentLogin];
+  if (!inventory || !inventory.cards[index]) {
+    console.error('Карта не найдена в инвентаре', index);
+    showToast('Ошибка: карта не найдена в инвентаре', true);
+    return;
+  }
+  
   const realCard = inventory.cards[index];
 
   if (roll < chance) {
