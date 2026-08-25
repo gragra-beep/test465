@@ -1,13 +1,13 @@
 // ===== ОБЩЕЕ СОСТОЯНИЕ =====
 const state = {
   currentLogin: null,
-  energy: 999999,
-  maxEnergy: 999999,
-  silver: 999999,
+  energy: 50,
+  maxEnergy: 50,
+  silver: 100,
   currentLoc: null,
   currentCard: null,
   currentCardIndex: null,
-  completedLocs: [1, 2, 3],
+  completedLocs: [],
   bannerRolls: 0,
   lastEpicRoll: 0,
   lastLegendaryRoll: 0,
@@ -22,8 +22,6 @@ function loadAccounts() {
     Object.assign(PLAYER_ACCOUNTS, accounts);
   }
 }
-
-// Вызываем загрузку аккаунтов сразу
 loadAccounts();
 
 // ===== УТИЛИТЫ =====
@@ -57,8 +55,6 @@ function saveGame() {
     playerCards: currentInventory
   };
   localStorage.setItem('remanga_save_' + state.currentLogin, JSON.stringify(saveData));
-  
-  // Сохраняем все аккаунты
   localStorage.setItem('remanga_accounts', JSON.stringify(PLAYER_ACCOUNTS));
 }
 
@@ -67,7 +63,6 @@ function loadGame() {
   const saved = localStorage.getItem('remanga_save_' + state.currentLogin);
   if (saved) {
     const data = JSON.parse(saved);
-    
     state.energy = data.energy !== undefined ? data.energy : state.energy;
     state.maxEnergy = data.maxEnergy !== undefined ? data.maxEnergy : state.maxEnergy;
     state.silver = data.silver !== undefined ? data.silver : state.silver;
@@ -77,13 +72,11 @@ function loadGame() {
     state.lastLegendaryRoll = data.lastLegendaryRoll || 0;
     state.lastMythicRoll = data.lastMythicRoll || 0;
 
-    // Восстанавливаем карты из сохранения
     if (data.playerCards && PLAYER_ACCOUNTS[state.currentLogin]) {
       PLAYER_ACCOUNTS[state.currentLogin].cards = data.playerCards;
     }
   }
 }
-
 
 // ===== ЛОГИН =====
 function doLogin() {
@@ -97,11 +90,9 @@ function doLogin() {
     document.getElementById('topbar').style.display = 'flex';
     document.getElementById('navBar').style.display = 'flex';
     
-    // Обновляем отображение имени
     document.querySelector('.user-name').textContent = login;
     
     loadGame();
-    
     state.maxEnergy = getMaxEnergy();
     if (state.energy > state.maxEnergy) state.energy = state.maxEnergy;
     
@@ -115,12 +106,8 @@ function doLogin() {
   }
 }
 
-document.getElementById('passwordInput').addEventListener('keydown', e => { 
-  if (e.key === 'Enter') doLogin(); 
-});
-document.getElementById('loginInput').addEventListener('keydown', e => { 
-  if (e.key === 'Enter') document.getElementById('passwordInput').focus(); 
-});
+document.getElementById('passwordInput').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+document.getElementById('loginInput').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('passwordInput').focus(); });
 
 // ===== РЕГИСТРАЦИЯ =====
 function doRegister() {
@@ -139,10 +126,7 @@ function doRegister() {
     return;
   }
   
-  // Создаём аккаунт
   createAccount(login, pass);
-  
-  // Сохраняем в localStorage
   localStorage.setItem('remanga_accounts', JSON.stringify(PLAYER_ACCOUNTS));
   
   document.getElementById('loginError').textContent = 'Аккаунт создан! Теперь войдите.';
@@ -172,7 +156,7 @@ function showToast(msg, isError) {
   setTimeout(() => t.className = 'toast', 2500);
 }
 
-// ===== ЗАКРЫТИЕ МОДАЛОК ПО КЛИКУ НА ОВЕРЛЕЙ =====
+// ===== ЗАКРЫТИЕ МОДАЛОК =====
 document.getElementById('locModal').addEventListener('click', e => {
   if (e.target === document.getElementById('locModal')) closeLocModal();
 });
