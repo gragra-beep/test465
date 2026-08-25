@@ -1217,6 +1217,16 @@ body {
   text-align: center;
   padding: 40px 20px;
 }
-
+.user-info { position: relative; }
+.user-dropdown {
+  display: none; position: absolute; top: 55px; left: 0;
+  background: #1a1a2e; border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px; width: 180px; z-index: 1000;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+.user-dropdown.show { display: block; }
+.dropdown-item { padding: 12px 15px; cursor: pointer; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.dropdown-item:last-child { border-bottom: none; }
+.dropdown-item:hover { background: rgba(255,255,255,0.05); }
 /* Цвет для новой кнопки инвентаря */
 .res-inventory { color: #a78bfa; }
