@@ -159,7 +159,7 @@ function closeCardModal() {
   document.getElementById('cardModal').classList.remove('show');
 }
 
-function upgradeCard() {
+function upgradeCard() {alert('Кнопка работает! Карта: ' + JSON.stringify(state.currentCard));
   const index = state.currentCardIndex;
   
   if (index === null || index === undefined) {
