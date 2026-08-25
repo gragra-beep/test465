@@ -14,24 +14,34 @@ const state = {
   lastMythicRoll: 0
 };
 
-// Флаг: загрузились ли аккаунты из Firebase
-let accountsLoaded = false;
-
 // ===== ЗАГРУЗКА АККАУНТОВ ИЗ FIREBASE =====
-async function loadAccounts() {
-  try {
-    const snapshot = await db.ref('accounts').once('value');
+function loadAccounts() {
+  if (typeof db === 'undefined') {
+    console.log("⚠️ Firebase не подключён, используем localStorage");
+    const savedAccounts = localStorage.getItem('remanga_accounts');
+    if (savedAccounts) {
+      const accounts = JSON.parse(savedAccounts);
+      Object.assign(PLAYER_ACCOUNTS, accounts);
+    }
+    return;
+  }
+  
+  // Пробуем загрузить из Firebase
+  db.ref('accounts').once('value').then((snapshot) => {
     const cloudAccounts = snapshot.val() || {};
     Object.assign(PLAYER_ACCOUNTS, cloudAccounts);
-    accountsLoaded = true;
     console.log("✅ Аккаунты загружены из Firebase:", Object.keys(cloudAccounts));
-  } catch (error) {
-    console.error(" Ошибка загрузки аккаунтов:", error);
-    accountsLoaded = true; // Всё равно ставим true, чтобы игра работала
-  }
+  }).catch((error) => {
+    console.error(" Ошибка Firebase, используем localStorage:", error);
+    const savedAccounts = localStorage.getItem('remanga_accounts');
+    if (savedAccounts) {
+      const accounts = JSON.parse(savedAccounts);
+      Object.assign(PLAYER_ACCOUNTS, accounts);
+    }
+  });
 }
 
-// Загружаем аккаунты сразу при старте
+// Загружаем аккаунты сразу
 loadAccounts();
 
 // ===== УТИЛИТЫ =====
@@ -67,13 +77,18 @@ function saveGame() {
     cards: account.cards || []
   };
   
-  db.ref('accounts/' + state.currentLogin).update(saveData)
-    .then(() => {
-      console.log("💾 Сохранено в Firebase:", state.currentLogin);
-    })
-    .catch((error) => {
-      console.error("❌ Ошибка сохранения:", error);
-    });
+  // Пробуем сохранить в Firebase
+  if (typeof db !== 'undefined') {
+    db.ref('accounts/' + state.currentLogin).update(saveData)
+      .then(() => console.log("💾 Сохранено в Firebase"))
+      .catch((error) => {
+        console.error(" Firebase не работает, сохраняем локально:", error);
+        localStorage.setItem('remanga_save_' + state.currentLogin, JSON.stringify(saveData));
+      });
+  } else {
+    // Сохраняем локально
+    localStorage.setItem('remanga_save_' + state.currentLogin, JSON.stringify(saveData));
+  }
 }
 
 function loadGame() {
@@ -96,16 +111,9 @@ function loadGame() {
 }
 
 // ===== ЛОГИН =====
-async function doLogin() {
+function doLogin() {
   const login = document.getElementById('loginInput').value.trim();
   const pass = document.getElementById('passwordInput').value.trim();
-  
-  // Ждём, пока аккаунты загрузятся из Firebase
-  if (!accountsLoaded) {
-    document.getElementById('loginError').textContent = 'Загрузка данных... Подождите.';
-    document.getElementById('loginError').style.color = '#fbbf24';
-    return;
-  }
   
   const account = PLAYER_ACCOUNTS[login];
   if (!account) {
@@ -146,21 +154,14 @@ async function doLogin() {
 document.getElementById('passwordInput').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 document.getElementById('loginInput').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('passwordInput').focus(); });
 
-// ===== РЕГИСТРАЦИЯ С СОХРАНЕНИЕМ В FIREBASE =====
-async function doRegister() {
+// ===== РЕГИСТРАЦИЯ =====
+function doRegister() {
   const login = document.getElementById('loginInput').value.trim();
   const pass = document.getElementById('passwordInput').value.trim();
   
   if (!login || !pass) {
     document.getElementById('loginError').textContent = 'Введите логин и пароль';
     document.getElementById('loginError').style.color = '#f87171';
-    return;
-  }
-  
-  // Ждём загрузки аккаунтов
-  if (!accountsLoaded) {
-    document.getElementById('loginError').textContent = 'Загрузка данных... Подождите.';
-    document.getElementById('loginError').style.color = '#fbbf24';
     return;
   }
   
@@ -173,20 +174,26 @@ async function doRegister() {
   // Создаём аккаунт локально
   createAccount(login, pass);
   
-  // Сохраняем в Firebase
-  try {
-    await db.ref('accounts/' + login).set(PLAYER_ACCOUNTS[login]);
-    console.log("✅ Аккаунт создан в Firebase:", login);
-    
-    // Добавляем в локальный объект сразу
-    Object.assign(PLAYER_ACCOUNTS, { [login]: PLAYER_ACCOUNTS[login] });
-    
-    document.getElementById('loginError').textContent = 'Аккаунт создан! Теперь войдите.';
+  // Сохраняем в Firebase (если доступен)
+  if (typeof db !== 'undefined') {
+    db.ref('accounts/' + login).set(PLAYER_ACCOUNTS[login])
+      .then(() => {
+        console.log("✅ Аккаунт создан в Firebase:", login);
+        document.getElementById('loginError').textContent = 'Аккаунт создан! Теперь войдите.';
+        document.getElementById('loginError').style.color = '#34d399';
+      })
+      .catch((error) => {
+        console.error(" Firebase не работает:", error);
+        // Сохраняем локально
+        localStorage.setItem('remanga_accounts', JSON.stringify(PLAYER_ACCOUNTS));
+        document.getElementById('loginError').textContent = 'Аккаунт создан локально! Теперь войдите.';
+        document.getElementById('loginError').style.color = '#34d399';
+      });
+  } else {
+    // Сохраняем локально
+    localStorage.setItem('remanga_accounts', JSON.stringify(PLAYER_ACCOUNTS));
+    document.getElementById('loginError').textContent = 'Аккаунт создан локально! Теперь войдите.';
     document.getElementById('loginError').style.color = '#34d399';
-  } catch (error) {
-    console.error("❌ Ошибка регистрации:", error);
-    document.getElementById('loginError').textContent = 'Ошибка сети. Попробуйте позже.';
-    document.getElementById('loginError').style.color = '#f87171';
   }
 }
 
@@ -261,7 +268,6 @@ function startEnergyRegen() {
       state.energy++;
       updateResources();
       saveGame();
-      console.log("⚡ Энергия восстановлена! Сейчас: " + state.energy + "/" + state.maxEnergy);
     }
-  }, 60000); // 60000 мс = 1 минута
+  }, 60000); // 1 минута
 }
