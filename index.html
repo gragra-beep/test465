@@ -376,3 +376,38 @@
 </html>
 </body>
 </html>
+<!-- ===== ПОДКЛЮЧЕНИЕ FIREBASE ===== -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCkbR-xrpdwa8zV9ELxfMhdItEWZIZMNeg",
+    authDomain: "miyy465.firebaseapp.com",
+    projectId: "miyy465",
+    storageBucket: "miyy465.firebasestorage.app",
+    messagingSenderId: "566692334791",
+    appId: "1:566692334791:web:b12e04215802da961cc2e2",
+    databaseURL: "https://miyy465-default-rtdb.europe-west1.firebasedatabase.app"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+  const auth = firebase.auth();
+  console.log("Firebase подключён!");
+</script>
+<!-- ===== КОНЕЦ FIREBASE ===== -->
+
+<script src="data/cards-db.js"></script>
+<script src="data/accounts.js"></script>
+<script src="data/locations.js"></script>
+<script src="app.js"></script>
+<script src="pages/map.js"></script>
+<script src="pages/deck.js"></script>
+<script src="pages/bazar.js"></script>
+<script src="pages/duel.js"></script>
+<script src="pages/top.js"></script>
+<script src="pages/inventory.js"></script>
+<script src="pages/quests.js"></script>
+<script src="pages/gifts.js"></script>
+</body>
+</html>
