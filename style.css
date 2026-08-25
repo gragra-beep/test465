@@ -940,3 +940,83 @@ body {
 .user-menu-btn .menu-icon {
   font-size: 18px;
 }
+/* ===== МОДАЛЬНЫЕ СТРАНИЦЫ ===== */
+.modal-page-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 2000;
+  display: none;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 60px;
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-page-overlay.show {
+  display: flex;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-page {
+  background: #0a0a0f;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  padding: 20px;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(50px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-page h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+  text-align: center;
+  color: #e0e0e0;
+}
+
+.modal-page-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.modal-page-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: rotate(90deg);
+}
+
+.modal-page-content {
+  color: #888;
+  text-align: center;
+  padding: 40px 20px;
+}
+
+/* Стили для кнопок в меню */
+.res-inventory { color: #a78bfa; }
+.res-quests { color: #34d399; }
+.res-gifts { color: #facc15; }
