@@ -49,13 +49,13 @@
 <!-- Выпадающее меню -->
 <div class="user-menu" id="userMenu">
   <div class="res-item res-inventory" onclick="openInventory(); toggleUserMenu()">
-    <span class="icon">👜</span> Инвентарь
+    <span class="icon"></span> Инвентарь
   </div>
   <div class="res-item res-quests" onclick="openQuests(); toggleUserMenu()">
     <span class="icon"></span> Задания
   </div>
   <div class="res-item res-gifts" onclick="openGifts(); toggleUserMenu()">
-    <span class="icon">🎁</span> Дары
+    <span class="icon"></span> Подар Очки
   </div>
 </div>
 
@@ -63,7 +63,7 @@
 <div class="modal-page-overlay" id="inventoryModal">
   <div class="modal-page">
     <button class="modal-page-close" onclick="closeInventory()">✕</button>
-    <h2>👜 ИНВЕНТАРЬ</h2>
+    <h2>ИНВЕНТАРЬ</h2>
     <div class="modal-page-content">
       <p>Здесь будет твой инвентарь</p>
     </div>
@@ -74,7 +74,7 @@
 <div class="modal-page-overlay" id="questsModal">
   <div class="modal-page">
     <button class="modal-page-close" onclick="closeQuests()">✕</button>
-    <h2>📋 ЗАДАНИЯ</h2>
+    <h2>ЗАДАНИЯ</h2>
     <div class="modal-page-content">
       <p>Здесь будут твои задания</p>
     </div>
@@ -85,9 +85,9 @@
 <div class="modal-page-overlay" id="giftsModal">
   <div class="modal-page">
     <button class="modal-page-close" onclick="closeGifts()">✕</button>
-    <h2>🎁 ДАРЫ</h2>
+    <h2>Подарки</h2>
     <div class="modal-page-content">
-      <p>Здесь будут твои дары</p>
+      <p>Здесь будут твои подар очки</p>
     </div>
   </div>
 </div>
@@ -100,7 +100,7 @@
     <div class="map-mountains"></div>
     <div class="map-river"></div>
     <div class="map-squad" onclick="showToast('Отряд: 5 бойцов')">
-      <span class="squad-icon">隊</span><span class="squad-text">ОТРЯД · 5</span>
+      <span class="squad-icon">⚔️</span><span class="squad-text">ОТРЯД · 5</span>
     </div>
   </div>
 </div>
@@ -108,7 +108,7 @@
 <!-- DECK -->
 <div class="page" id="page-deck">
   <div class="deck-page">
-    <div class="deck-title"><h2><span class="cn">牌</span> КОЛОДА</h2></div>
+    <div class="deck-title"><h2><span class="cn"></span> КОЛОДА</h2></div>
     <div class="deck-subtitle">Все карты что есть на аккаунте</div>
     <div class="deck-filters">
       <select id="filterRank" onchange="filterCards()">
@@ -143,14 +143,14 @@
 <div class="page" id="page-bazar">
   <div class="bazar-page">
     <div class="banner-header">
-      <div class="banner-tag">無 ВЕЧНЫЙ</div>
+      <div class="banner-tag"> АААААААААА</div>
       <div class="banner-image">
         <div style="font-size: 80px; text-align: center; padding-top: 80px;"></div>
       </div>
     </div>
     <div class="banner-info">
       <div class="banner-label">БАННЕР КАРТ</div>
-      <h1 class="banner-title">Под небом Мурима</h1>
+      <h1 class="banner-title">ЛЯЛЯЛЯЛЯЛЯ</h1>
       <div class="banner-rates">
         <div class="rate-row">
           <div class="rate-name">ЭПИЧЕСКАЯ <span class="stars">★★★</span></div>
@@ -169,10 +169,10 @@
         <div class="rate-sub">мягкий гарант с 80-й</div>
       </div>
       <div class="summon-price">
-        <span class="price-label">召 цена открытия</span>
+        <span class="price-label"> цена открытия</span>
         <span class="price-value">40 <span class="coin-icon">🪙</span></span>
       </div>
-       <button class="btn-details" onclick="showBannerDetails()">市 ПОДРОБНЕЕ →</button>
+       <button class="btn-details" onclick="showBannerDetails()">ПОДРОБНЕЕ →</button>
     </div>
   </div>
 </div>
@@ -226,13 +226,13 @@
       <div class="battle-rating">сила отряда / босса · ≥ 120%</div>
       <div class="battle-verdict" id="locVerdict"></div>
       <div class="battle-bar"><div class="battle-bar-fill" id="locBarFill"></div></div>
-      <div class="modal-section-title">ПОЛУЧЕНО 賞</div>
+      <div class="modal-section-title">ПОЛУЧЕНО </div>
       <div class="rewards-section">
         <div class="reward-row"><span class="rw-bonus">без статич. бонуса</span></div>
         <div class="reward-row"><span class="rw-val positive" id="locRewardEnergy"></span><span class="rw-label">к макс. энергии</span></div>
         <div class="reward-row"><span class="rw-val positive" id="locRewardSilver"></span><span class="rw-label">серебра (разово)</span></div>
       </div>
-      <div class="modal-section-title">ПОВТОР · ВХОД 行</div>
+      <div class="modal-section-title">ПОВТОР · ВХОД </div>
       <div class="rewards-section">
         <div class="reward-row"><span class="rw-val negative" id="locCostEnergy"></span><span class="rw-label">энергии за вход</span></div>
         <div class="reward-row"><span class="rw-val positive" id="locRepeatSilver"></span><span class="rw-label">серебра за прохождение</span></div>
@@ -254,7 +254,7 @@
     <button class="modal-close-x" onclick="closeBannerModal()"></button>
     <div class="banner-modal-header">
       <div class="banner-subtitle">· · БАННЕР КАРТ · ВЕЧНЫЙ ·</div>
-      <h2>Под небом Мурима</h2>
+      <h2>ЛЯЛЯЛЯЛЯЛЯ</h2>
       <div class="pool-info">В КОЛОДЕ · 25 КАРТ · все возможные дропы</div>
     </div>
     <div class="cards-pool" id="cardsPool"></div>
