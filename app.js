@@ -1,328 +1,394 @@
-// ===== ГЛОБАЛЬНОЕ СОСТОЯНИЕ =====
-const state = {
-  currentLogin: null,
-  currentUserId: null,
-  energy: 50,
-  maxEnergy: 50,
-  silver: 100,
-  currentLoc: null,
-  currentCard: null,
-  currentCardIndex: null,
-  completedLocs: [],
-  bannerRolls: 0,
-  lastEpicRoll: 0,
-  lastLegendaryRoll: 0,
-  lastMythicRoll: 0
-};
-
-// ===== УТИЛИТЫ =====
-function getMaxEnergy() {
-  return 50 + state.completedLocs.length * 10;
-}
-
-function getHighestCompleted() {
-  return state.completedLocs.length > 0 ? Math.max(...state.completedLocs) : 0;
-}
-
-function isLocationUnlocked(loc) {
-  return loc.id <= getHighestCompleted() + 1;
-}
-
-// ===== РЕГИСТРАЦИЯ =====
-async function doRegister() {
-  const login = document.getElementById('loginInput').value.trim();
-  const pass = document.getElementById('passwordInput').value;
-  const errorEl = document.getElementById('loginError');
-
-  if (!login || !pass) {
-    errorEl.textContent = 'Введите логин и пароль';
-    errorEl.style.color = '#f87171';
-    return;
-  }
-  if (pass.length < 6) {
-    errorEl.textContent = 'Пароль должен быть не менее 6 символов';
-    errorEl.style.color = '#f87171';
-    return;
-  }
-
-  const email = login.includes('@') ? login : `${login}@remanga.game`;
-
-  try {
-    console.log("🔄 Начало регистрации...");
-    errorEl.textContent = 'Создание аккаунта...';
-    errorEl.style.color = '#fbbf24';
-
-    const userCredential = await window.firebaseAPI.createUserWithEmailAndPassword(
-      window.firebaseAuth, email, pass
-    );
-    const user = userCredential.user;
-    console.log("✅ Пользователь создан в Auth, UID:", user.uid);
-
-    const starterCards = [
-      { cardId: 'card_001', level: 0, broken: false },
-      { cardId: 'card_002', level: 0, broken: false },
-      { cardId: 'card_003', level: 0, broken: false },
-      { cardId: 'card_005', level: 0, broken: false },
-      { cardId: 'card_006', level: 0, broken: false }
-    ];
-
-    const starterItems = [
-      { itemId: 'herb', quantity: 1 }
-    ];
-
-    await window.firebaseAPI.setDoc(
-      window.firebaseAPI.doc(window.firebaseDb, "users", user.uid), 
-      {
-        login: login,
-        email: email,
-        energy: 50,
-        maxEnergy: 50,
-        silver: 100,
-        completedLocs: [],
-        bannerRolls: 0,
-        lastEpicRoll: 0,
-        lastLegendaryRoll: 0,
-        lastMythicRoll: 0,
-        cards: starterCards,
-        items: starterItems,
-        createdAt: new Date().toISOString()
-      }
-    );
-    console.log("✅ Данные сохранены в Firestore!");
-
-    errorEl.textContent = '✅ Аккаунт создан! Вход...';
-    errorEl.style.color = '#4ade80';
-    await loginSuccess(user, login);
-
-  } catch (error) {
-    console.error("❌ ОШИБКА РЕГИСТРАЦИИ:", error.code, error.message);
-    if (error.code === 'auth/email-already-in-use') errorEl.textContent = '❌ Логин занят';
-    else if (error.code === 'auth/weak-password') errorEl.textContent = '❌ Пароль < 6 символов';
-    else errorEl.textContent = '❌ Ошибка: ' + error.message;
-    errorEl.style.color = '#f87171';
-  }
-}
-
-// ===== ВХОД =====
-async function doLogin() {
-  const login = document.getElementById('loginInput').value.trim();
-  const pass = document.getElementById('passwordInput').value;
-  const errorEl = document.getElementById('loginError');
-
-  if (!login || !pass) {
-    errorEl.textContent = 'Введите логин и пароль';
-    errorEl.style.color = '#f87171';
-    return;
-  }
-
-  const email = login.includes('@') ? login : `${login}@remanga.game`;
-
-  try {
-    console.log("🔄 Попытка входа...");
-    errorEl.textContent = 'Вход...';
-    errorEl.style.color = '#fbbf24';
-
-    const userCredential = await window.firebaseAPI.signInWithEmailAndPassword(
-      window.firebaseAuth, email, pass
-    );
-    console.log("✅ Успешный вход, UID:", userCredential.user.uid);
-    await loginSuccess(userCredential.user, login);
-
-  } catch (error) {
-    console.error("❌ ОШИБКА ВХОДА:", error.code, error.message);
-    errorEl.textContent = '❌ Неверный логин или пароль';
-    errorEl.style.color = '#f87171';
-  }
-}
-
-// ===== УСПЕШНЫЙ ВХОД =====
-async function loginSuccess(user, login) {
-  state.currentLogin = login;
-  state.currentUserId = user.uid;
-
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('topbar').style.display = 'flex';
-  document.getElementById('navBar').style.display = 'flex';
-  document.getElementById('topbarUsername').textContent = login;
-
-  await loadGame();
-
-  state.maxEnergy = getMaxEnergy();
-  if (state.energy > state.maxEnergy) state.energy = state.maxEnergy;
-
-  updateResources();
-  if (typeof initMap === 'function') initMap();
-  if (typeof renderCards === 'function') renderCards();
-  if (typeof renderInventory === 'function') renderInventory();
-  if (typeof updateSummonCounters === 'function') updateSummonCounters();
-}
-
-// ===== ЗАГРУЗКА ИЗ FIREBASE =====
-async function loadGame() {
-  if (!state.currentUserId) {
-    console.warn("⚠️ Нет currentUserId, загрузка невозможна");
-    return;
-  }
-
-  try {
-    console.log("🔄 Загрузка данных из Firestore для UID:", state.currentUserId);
-    const docRef = window.firebaseAPI.doc(window.firebaseDb, "users", state.currentUserId);
-    const docSnap = await window.firebaseAPI.getDoc(docRef);
-
-    if (docSnap.exists()) {
-      const data = docSnap.data();
-      console.log("✅ Данные успешно загружены:", data);
-      
-      state.energy = data.energy !== undefined ? data.energy : 50;
-      state.maxEnergy = data.maxEnergy !== undefined ? data.maxEnergy : 50;
-      state.silver = data.silver !== undefined ? data.silver : 100;
-      state.completedLocs = data.completedLocs || [];
-      state.bannerRolls = data.bannerRolls || 0;
-      state.lastEpicRoll = data.lastEpicRoll || 0;
-      state.lastLegendaryRoll = data.lastLegendaryRoll || 0;
-      state.lastMythicRoll = data.lastMythicRoll || 0;
-
-      // Инициализируем PLAYER_ACCOUNTS
-      if (!window.PLAYER_ACCOUNTS) window.PLAYER_ACCOUNTS = {};
-      
-      window.PLAYER_ACCOUNTS[state.currentLogin] = {
-        cards: data.cards || [],
-        items: data.items || [],
-        energy: state.energy,
-        silver: state.silver
-      };
-      
-      console.log("💾 PLAYER_ACCOUNTS инициализирован:", window.PLAYER_ACCOUNTS[state.currentLogin]);
-    } else {
-      console.warn("️ Документ не найден в базе. Создаем новый.");
-      if (!window.PLAYER_ACCOUNTS) window.PLAYER_ACCOUNTS = {};
-      window.PLAYER_ACCOUNTS[state.currentLogin] = { 
-        cards: [], 
-        items: [], 
-        energy: 50, 
-        silver: 100 
-      };
-    }
-  } catch (error) {
-    console.error("❌ КРИТИЧЕСКАЯ ОШИБКА ЗАГРУЗКИ:", error);
-    showToast("Ошибка загрузки данных", true);
-  }
-}
-
-// ===== СОХРАНЕНИЕ В FIREBASE =====
-async function saveGame() {
-  if (!state.currentUserId) {
-    console.warn("️ Попытка сохранения без currentUserId");
-    return;
-  }
-
-  try {
-    const userRef = window.firebaseAPI.doc(window.firebaseDb, "users", state.currentUserId);
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Remanga Game</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* КРИТИЧЕСКИЕ СТИЛИ ДЛЯ КАРТЫ */
+    #page-map { padding: 0 !important; position: relative; height: calc(100vh - 140px); min-height: 500px; }
+    .map-container { width: 100%; height: 100%; min-height: 500px; position: relative; background-color: #1a1a2e; background-image: url('/test465/cards/map.png'); background-size: cover; background-position: center; background-repeat: no-repeat; overflow: hidden; }
+    .map-bg, .map-mountains, .map-river { display: none !important; }
     
-    // Безопасно получаем данные
-    const playerData = window.PLAYER_ACCOUNTS[state.currentLogin] || {};
-    const cardsToSave = playerData.cards || [];
-    const itemsToSave = playerData.items || [];
+    /* ВЫПАДАЮЩЕЕ МЕНЮ */
+    .user-info { position: relative; }
+    .user-avatar { cursor: pointer; font-size: 28px; display: flex; align-items: center; justify-content: center; width: 45px; height: 45px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; }
+    .user-dropdown { display: none; position: absolute; top: 55px; left: 0; background: #1a1a2e; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; width: 180px; z-index: 1000; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+    .user-dropdown.show { display: block; }
+    .dropdown-item { padding: 12px 15px; cursor: pointer; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #fff; }
+    .dropdown-item:last-child { border-bottom: none; }
+    .dropdown-item:hover { background: rgba(255,255,255,0.05); }
+    
+    /* ИНВЕНТАРЬ */
+    .inventory-page { padding: 20px; min-height: calc(100vh - 200px); }
+    .inventory-title { font-size: 28px; font-weight: 300; text-align: center; margin-bottom: 15px; color: #fff; font-style: italic; }
+    .inventory-filters { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
+    .inventory-filters select { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 8px 15px; border-radius: 8px; font-size: 14px; cursor: pointer; }
+    .inventory-divider { height: 1px; background: rgba(255,255,255,0.2); margin: 20px 0; }
+    .inventory-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; padding: 10px; }
+    .inventory-slot { aspect-ratio: 1; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
+    .inventory-slot:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.15); }
+    .inventory-slot.empty { cursor: default; }
+    .inventory-slot .item-icon { font-size: 40px; }
+    .inventory-slot .item-quantity { position: absolute; bottom: 8px; left: 0; right: 0; text-align: center; font-size: 12px; color: rgba(255,255,255,0.7); font-weight: 500; }
+  </style>
+</head>
+<body>
 
-    console.log("💾 Сохранение данных:", {
-      energy: state.energy,
-      silver: state.silver,
-      cardsCount: cardsToSave.length,
-      itemsCount: itemsToSave.length
-    });
+<!-- ЭКРАН ВХОДА -->
+<div id="loginScreen">
+  <div class="login-box">
+    <h1>Игрулька</h1>
+    <p>Войдите или создайте аккаунт</p>
+    <input type="text" id="loginInput" placeholder="Логин" autocomplete="off">
+    <input type="password" id="passwordInput" placeholder="Пароль (мин. 6 символов)">
+    <button class="auth-btn-login" onclick="doLogin()">Войти</button>
+    <button class="auth-btn-register" onclick="doRegister()">Зарегистрироваться</button>
+    <div id="loginError"></div>
+  </div>
+</div>
 
-    await window.firebaseAPI.updateDoc(userRef, {
-      energy: state.energy,
-      maxEnergy: state.maxEnergy,
-      silver: state.silver,
-      completedLocs: state.completedLocs,
-      bannerRolls: state.bannerRolls,
-      lastEpicRoll: state.lastEpicRoll,
-      lastLegendaryRoll: state.lastLegendaryRoll,
-      lastMythicRoll: state.lastMythicRoll,
-      cards: cardsToSave,
-      items: itemsToSave,
-      lastSaved: new Date().toISOString()
-    });
-    console.log("✅ Игра успешно сохранена в Firebase");
-  } catch (error) {
-    console.error("❌ ОШИБКА СОХРАНЕНИЯ:", error);
-    // Показываем ошибку только если это не предупреждение
-    if (error.code !== 'invalid-argument' && error.code !== 'permission-denied') {
-      showToast("Ошибка сохранения", true);
-    }
-  }
-}
+<!-- ВЕРХНЯЯ ПАНЕЛЬ -->
+<div class="topbar" id="topbar" style="display:none;">
+  <div class="user-info">
+    <div class="user-avatar" onclick="toggleUserMenu()">🫪</div>
+    <div>
+      <div class="user-name" id="topbarUsername">Игрок</div>
+      <div class="user-rank">ранг</div>
+    </div>
+    <!-- ВЫПАДАЮЩЕЕ МЕНЮ -->
+    <div class="user-dropdown" id="userDropdown">
+      <div class="dropdown-item" onclick="switchPage('inventory'); toggleUserMenu();">🎒 Инвентарь</div>
+      <div class="dropdown-item" onclick="switchPage('gifts'); toggleUserMenu();">🎁 Подарки</div>
+      <div class="dropdown-item" onclick="switchPage('quests'); toggleUserMenu();">📋 Задания</div>
+      <div class="dropdown-item" onclick="showToast('Настройки'); toggleUserMenu();">⚙️ Настройки</div>
+      <div class="dropdown-item" onclick="doLogout()" style="color:#f87171">🚪 Выйти</div>
+    </div>
+  </div>
+  <div class="resources">
+    <div class="res-item res-energy"><span class="icon">⚡</span> <span id="resEnergy">0</span> / <span id="resMaxEnergy">0</span></div>
+    <div class="res-item res-silver"><span class="icon">🪙</span> <span id="resSilver">0</span></div>
+  </div>
+</div>
 
-// ===== НАВИГАЦИЯ =====
-function switchPage(page) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  
-  const targetPage = document.getElementById('page-' + page);
-  if (targetPage) targetPage.classList.add('active');
-  
-  const targetNav = document.querySelector(`.nav-item[data-page="${page}"]`);
-  if (targetNav) targetNav.classList.add('active');
-}
+<!-- ===== СТРАНИЦЫ ===== -->
 
-// ===== ВЫПАДАЮЩЕЕ МЕНЮ =====
-function toggleUserMenu() {
-  const menu = document.getElementById('userDropdown');
-  if (menu) menu.classList.toggle('show');
-}
+<!-- КАРТА -->
+<div class="page active" id="page-map">
+  <div class="map-container" id="mapContainer"></div>
+</div>
 
-function doLogout() {
-  state.currentLogin = null;
-  state.currentUserId = null;
-  document.getElementById('topbar').style.display = 'none';
-  document.getElementById('navBar').style.display = 'none';
-  document.getElementById('loginScreen').style.display = 'flex';
-  document.getElementById('loginInput').value = '';
-  document.getElementById('passwordInput').value = '';
-  document.getElementById('loginError').textContent = '';
-}
+<!-- КОЛОДА -->
+<div class="page" id="page-deck">
+  <div class="deck-page">
+    <div class="deck-title"><h2><span class="cn">牌</span> КОЛОДА</h2></div>
+    <div class="deck-subtitle">Все карты что есть на аккаунте</div>
+    <div class="deck-filters">
+      <select id="filterRank" onchange="filterCards()">
+        <option value="any">Любой ранг</option>
+        <option value="1">★1</option><option value="2">★2</option><option value="3">★3</option>
+      </select>
+      <select id="filterStatus" onchange="filterCards()">
+        <option value="all">Все статусы</option>
+        <option value="normal">Обычные</option><option value="broken">Сломанные</option>
+      </select>
+      <select id="filterSort" onchange="filterCards()">
+        <option value="rank">Сорт.: по рангу</option>
+        <option value="power">Сорт.: по силе</option>
+        <option value="name">Сорт.: по имени</option>
+      </select>
+    </div>
+    <button class="dust-btn" onclick="showToast('Функция распыления карт')">✨ РАСПЫЛИТЬ КАРТЫ</button>
+    <div class="cards-grid" id="cardsGrid"></div>
+  </div>
+</div>
 
-// Закрытие меню при клике вне его
-document.addEventListener('click', e => {
-  if (!e.target.closest('.user-info')) {
-    const menu = document.getElementById('userDropdown');
-    if (menu) menu.classList.remove('show');
-  }
-});
+<!-- ДУЭЛЬ -->
+<div class="page" id="page-duel">
+  <div class="placeholder-page"><div class="ph-icon">⚔️</div><div class="ph-text">Дуэль — скоро</div></div>
+</div>
 
-// ===== РЕСУРСЫ =====
-function updateResources() {
-  const elEnergy = document.getElementById('resEnergy');
-  const elMaxEnergy = document.getElementById('resMaxEnergy');
-  const elSilver = document.getElementById('resSilver');
-  if (elEnergy) elEnergy.textContent = state.energy;
-  if (elMaxEnergy) elMaxEnergy.textContent = state.maxEnergy;
-  if (elSilver) elSilver.textContent = state.silver;
-}
+<!-- БАЗАР -->
+<div class="page" id="page-bazar">
+  <div class="bazar-page">
+    <div class="banner-header">
+      <div class="banner-tag">無 ВЕЧНЫЙ</div>
+      <div class="banner-image">
+        <div style="font-size: 80px; text-align: center; padding-top: 80px;"></div>
+      </div>
+    </div>
+    <div class="banner-info">
+      <div class="banner-label">БАННЕР КАРТ</div>
+      <h1 class="banner-title">Под небом Мурима</h1>
+      <div class="banner-rates">
+        <div class="rate-row">
+          <div class="rate-name">ЭПИЧЕСКАЯ <span class="stars">★★★</span></div>
+          <div class="rate-guarantee">ЧЕРЕЗ <span id="epicCounter">20</span></div>
+        </div>
+        <div class="rate-sub">жёсткий гарант · каждые 20</div>
+        <div class="rate-row legendary">
+          <div class="rate-name">ЛЕГЕНДАРНАЯ <span class="stars">★★★★</span></div>
+          <div class="rate-guarantee">С 40-Й</div>
+        </div>
+        <div class="rate-sub">мягкий гарант с 40-й</div>
+        <div class="rate-row mythic">
+          <div class="rate-name">МИФИЧЕСКАЯ <span class="stars">★★★★★</span></div>
+          <div class="rate-guarantee">С 80-Й</div>
+        </div>
+        <div class="rate-sub">мягкий гарант с 80-й</div>
+      </div>
+      <div class="summon-price">
+        <span class="price-label">召 цена открытия</span>
+        <span class="price-value">40 <span class="coin-icon">🪙</span></span>
+      </div>
+      <button class="btn-details" onclick="showBannerDetails()">市 ПОДРОБНЕЕ →</button>
+    </div>
+  </div>
+</div>
 
-// ===== TOAST =====
-function showToast(msg, isError = false) {
-  const t = document.getElementById('toast');
-  if (!t) return;
-  t.textContent = msg;
-  t.className = 'toast show' + (isError ? ' error' : '');
-  setTimeout(() => { t.className = 'toast'; }, 2500);
-}
+<!-- ТОП -->
+<div class="page" id="page-top">
+  <div class="placeholder-page"><div class="ph-icon">🏆</div><div class="ph-text">Топ — скоро</div></div>
+</div>
 
-// ===== ИНИЦИАЛИЗАЦИЯ =====
-document.addEventListener('DOMContentLoaded', () => {
-  const passInput = document.getElementById('passwordInput');
-  const loginInput = document.getElementById('loginInput');
-  
-  if (passInput) passInput.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
-  if (loginInput) loginInput.addEventListener('keydown', e => { if (e.key === 'Enter') passInput.focus(); });
+<!-- ИНВЕНТАРЬ -->
+<div class="page" id="page-inventory">
+  <div class="inventory-page">
+    <h2 class="inventory-title">Сортировка</h2>
+    <div class="inventory-filters">
+      <select id="invFilterType" onchange="renderInventory()">
+        <option value="all">Все типы</option>
+        <option value="material">Материалы</option>
+        <option value="consumable">Расходники</option>
+        <option value="special">Особые</option>
+      </select>
+      <select id="invSort" onchange="renderInventory()">
+        <option value="name">По имени</option>
+        <option value="quantity">По количеству</option>
+        <option value="rarity">По редкости</option>
+      </select>
+    </div>
+    <div class="inventory-divider"></div>
+    <div class="inventory-grid" id="inventoryGrid"></div>
+  </div>
+</div>
 
-  const locModal = document.getElementById('locModal');
-  const cardModal = document.getElementById('cardModal');
-  const bannerModal = document.getElementById('bannerModal');
+<!-- ПОДАРКИ -->
+<div class="page" id="page-gifts">
+  <div class="placeholder-page"><div class="ph-icon">🎁</div><div class="ph-text">Подарки — скоро</div></div>
+</div>
 
-  if (locModal) locModal.addEventListener('click', e => { if (e.target === locModal && typeof closeLocModal === 'function') closeLocModal(); });
-  if (cardModal) cardModal.addEventListener('click', e => { if (e.target === cardModal && typeof closeCardModal === 'function') closeCardModal(); });
-  if (bannerModal) bannerModal.addEventListener('click', e => { if (e.target === bannerModal && typeof closeBannerModal === 'function') closeBannerModal(); });
-});
+<!-- ЗАДАНИЯ -->
+<div class="page" id="page-quests">
+  <div class="placeholder-page"><div class="ph-icon">📋</div><div class="ph-text">Задания — скоро</div></div>
+</div>
+
+<!-- ===== НАВИГАЦИЯ ===== -->
+<div class="nav-bar" id="navBar" style="display:none;">
+  <div class="nav-item active" data-page="map" onclick="switchPage('map')">
+    <div class="nav-icon">🗺️</div><div class="nav-label">КАРТА</div>
+  </div>
+  <div class="nav-item" data-page="duel" onclick="switchPage('duel')">
+    <div class="nav-icon">⚔️</div><div class="nav-label">ДУЭЛЬ</div>
+  </div>
+  <div class="nav-item" data-page="deck" onclick="switchPage('deck')">
+    <div class="nav-icon">🃏</div><div class="nav-label">КОЛОДА</div>
+  </div>
+  <div class="nav-item" data-page="bazar" onclick="switchPage('bazar')">
+    <div class="nav-icon">🎴</div><div class="nav-label">БАЗАР</div>
+  </div>
+  <div class="nav-item" data-page="top" onclick="switchPage('top')">
+    <div class="nav-icon">🏆</div><div class="nav-label">ТОП</div>
+  </div>
+</div>
+
+<!-- ===== МОДАЛКИ ===== -->
+
+<!-- МОДАЛКА ЛОКАЦИИ -->
+<div class="modal-overlay" id="locModal">
+  <div class="modal-content">
+    <button class="modal-close-x" onclick="closeLocModal()">✕</button>
+    <div class="modal-header-img">
+      <div class="loc-label" id="locModalLabel">ЛОКАЦИЯ 1</div>
+      <div class="loc-title" id="locModalTitle">Название</div>
+      <div class="loc-boss-img" id="locModalBossImg"></div>
+    </div>
+    <div class="modal-body">
+      <div class="loc-desc" id="locModalDesc"></div>
+      <div class="modal-section-title">БОСС ЛОКАЦИИ</div>
+      <div class="boss-info">
+        <div class="boss-avatar" id="locBossAvatar"></div>
+        <div>
+          <div class="boss-name" id="locBossName"></div>
+          <div class="boss-sub">Сила оценивается по соотношению к вашему отряду</div>
+        </div>
+      </div>
+      <div class="modal-section-title">ОЦЕНКА БОЯ</div>
+      <div class="battle-rating">сила отряда / босса · ≥ 120%</div>
+      <div class="battle-verdict" id="locVerdict"></div>
+      <div class="battle-bar"><div class="battle-bar-fill" id="locBarFill"></div></div>
+      <div class="modal-section-title">ПОЛУЧЕНО 賞</div>
+      <div class="rewards-section">
+        <div class="reward-row"><span class="rw-bonus">без статич. бонуса</span></div>
+        <div class="reward-row"><span class="rw-val positive" id="locRewardEnergy"></span><span class="rw-label">к макс. энергии</span></div>
+        <div class="reward-row"><span class="rw-val positive" id="locRewardSilver"></span><span class="rw-label">серебра (разово)</span></div>
+      </div>
+      <div class="modal-section-title">ПОВТОР · ВХОД 行</div>
+      <div class="rewards-section">
+        <div class="reward-row"><span class="rw-val negative" id="locCostEnergy"></span><span class="rw-label">энергии за вход</span></div>
+        <div class="reward-row"><span class="rw-val positive" id="locRepeatSilver"></span><span class="rw-label">серебра за прохождение</span></div>
+        <div class="reward-row"><span class="rw-val" style="color:#888;">—</span><span class="rw-label">без доп. дропа</span></div>
+      </div>
+      <button class="play-again-btn" onclick="playAgain()">
+        <span class="btn-icon">⚔️</span> ПРОЙТИ СНОВА · <span id="locEnergyCost">0</span> ЕН.
+      </button>
+      <label class="skip-checkbox">
+        <input type="checkbox" checked> Пропустить бой — сразу к результату
+      </label>
+    </div>
+  </div>
+</div>
+
+<!-- МОДАЛКА БАННЕРА -->
+<div class="modal-overlay" id="bannerModal">
+  <div class="banner-modal">
+    <button class="modal-close-x" onclick="closeBannerModal()">✕</button>
+    <div class="banner-modal-header">
+      <div class="banner-subtitle">· · БАННЕР КАРТ · ВЕЧНЫЙ ·</div>
+      <h2>Под небом Мурима</h2>
+      <div class="pool-info">В КОЛОДЕ · 25 КАРТ · все возможные дропы</div>
+    </div>
+    <div class="cards-pool" id="cardsPool"></div>
+    <div class="auto-dust">
+      <label class="checkbox-label">
+        <input type="checkbox" id="autoDustCheck">
+        <span>АВТО-РАСПЫЛЕНИЕ</span>
+      </label>
+    </div>
+    <div class="summon-buttons">
+      <button class="btn-summon btn-summon-1" onclick="summon(1)">ПРИЗВАТЬ ×1<br>40 СЕРЕБРА</button>
+      <button class="btn-summon btn-summon-10" onclick="summon(10)">ПРИЗВАТЬ ×10<br>400 СЕРЕБРА</button>
+    </div>
+  </div>
+</div>
+
+<!-- МОДАЛКА КАРТЫ -->
+<div class="card-modal-overlay" id="cardModal">
+  <div class="card-modal">
+    <button class="card-modal-close" onclick="closeCardModal()">✕</button>
+    <div class="cd-top">
+      <div class="cd-image-wrap">
+        <div class="cd-image" id="cdCardImage"></div>
+      </div>
+      <div class="cd-info">
+        <div class="cd-info-top">
+          <div class="cd-bm-block">
+            <div class="cd-bm-label">BM</div>
+            <div class="cd-bm-sub">БОЕВАЯ СИЛА</div>
+            <div class="cd-bm-val" id="cdPower">0</div>
+            <div class="cd-bm-bonus" id="cdPowerBonus">+0</div>
+          </div>
+          <div class="cd-name-block">
+            <div class="cd-name" id="cdName">Имя</div>
+            <div class="cd-stars" id="cdStars">★</div>
+            <div class="cd-rarity-badge" id="cdRarityBadge">A</div>
+            <div class="cd-rank-letter" id="cdRankLetter">A</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cd-stats">
+      <div class="cd-stat"><div class="stat-label-big atk">ATK</div><div class="stat-label-small">АТАКА</div><div class="stat-val atk" id="cdAtk">0</div></div>
+      <div class="cd-stat"><div class="stat-label-big def">DEF</div><div class="stat-label-small">ЗАЩИТА</div><div class="stat-val def" id="cdDef">0</div></div>
+      <div class="cd-stat"><div class="stat-label-big hp">HP</div><div class="stat-label-small">ЗДОРОВЬЕ</div><div class="stat-val hp" id="cdHp">0</div></div>
+    </div>
+    <div class="skill-section">
+      <div class="skill-header">
+        <div class="skill-name"><span class="sk-icon">◎</span> <span id="cdSkillName">Навык</span></div>
+        <div class="skill-stars" id="cdSkillStars"></div>
+      </div>
+      <div class="skill-desc" id="cdSkillDesc"></div>
+    </div>
+    <div class="upgrade-section">
+      <div class="upgrade-header">
+        <div class="upgrade-title"><span class="up-icon">✦</span> СЛЕДУЮЩАЯ ЗАТОЧКА</div>
+        <div class="upgrade-chance" id="cdChance">Шанс: 0%</div>
+      </div>
+      <div class="upgrade-stats-row">
+        <div class="upgrade-level"><span id="cdCurLevel">+0</span><span class="arrow">→</span><span id="cdNextLevel">+1</span></div>
+        <div class="upgrade-bonuses">
+          <span class="ub-atk" id="cdUpAtk">+0</span>
+          <span class="ub-def" id="cdUpDef">+0</span>
+          <span class="ub-hp" id="cdUpHp">+0</span>
+        </div>
+      </div>
+      <div class="upgrade-price"><div>ЦЕНА</div><div class="price-value"> <span id="cdPrice">0</span> 🪙</div></div>
+      <div class="upgrade-warning" id="cdUpgradeWarning"></div>
+    </div>
+    <div class="card-action-btns">
+      <button class="btn-upgrade" onclick="upgradeCard()"><span>УЛУЧШИТЬ</span> · +<span id="cdUpBtnLevel">1</span></button>
+      <button class="btn-reroll" onclick="rerollCard()"><span>ВОЗНЕСЕНИЕ</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ===== FIREBASE SDK ===== -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { 
+    getAuth, 
+    createUserWithEmailAndPassword, 
+    signInWithEmailAndPassword 
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  import { 
+    getFirestore, 
+    doc, 
+    setDoc, 
+    getDoc, 
+    updateDoc 
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCkbR-xrpdwa8zV9ELxfMhdItEWZIZMNeg",
+    authDomain: "miyy465.firebaseapp.com",
+    databaseURL: "https://miyy465-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "miyy465",
+    storageBucket: "miyy465.firebasestorage.app",
+    messagingSenderId: "566692334791",
+    appId: "1:566692334791:web:b12e04215802da961cc2e2"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  window.firebaseAuth = getAuth(app);
+  window.firebaseDb = getFirestore(app);
+  window.firebaseAPI = {
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    doc,
+    setDoc,
+    getDoc,
+    updateDoc
+  };
+  console.log("✅ Firebase подключен");
+</script>
+
+<!-- ===== СКРИПТЫ ИГРЫ ===== -->
+<script src="data/cards-db.js"></script>
+<script src="data/accounts.js"></script>
+<script src="data/locations.js"></script>
+<script src="app.js"></script>
+<script src="pages/map.js"></script>
+<script src="pages/deck.js"></script>
+<script src="pages/bazar.js"></script>
+<script src="pages/duel.js"></script>
+<script src="pages/top.js"></script>
+<script src="pages/inventory.js"></script>
+<script src="pages/gifts.js"></script>
+<script src="pages/quests.js"></script>
+
+</body>
+</html>
