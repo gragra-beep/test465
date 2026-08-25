@@ -12,8 +12,8 @@ const PLAYER_ACCOUNTS = {
     ],
     summons: 0, lastEpic: 0, lastLegendary: 0, lastMythic: 0,
     completedLocs: [],
-    energy: 50,
-    silver: 100
+    energy: 999999,
+    silver: 999999
   }
 };
 
