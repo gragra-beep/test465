@@ -1,20 +1,30 @@
 // ===== ОБЩЕЕ СОСТОЯНИЕ =====
 const state = {
   currentLogin: null,
-  energy: 50,
-  maxEnergy: 50,
-  silver: 100,
+  energy: 999999,
+  maxEnergy: 999999,
+  silver: 999999,
   currentLoc: null,
   currentCard: null,
   currentCardIndex: null,
-  completedLocs: [],
+  completedLocs: [1, 2, 3],
   bannerRolls: 0,
   lastEpicRoll: 0,
   lastLegendaryRoll: 0,
-  lastMythicRoll: 0,
-  lastEnergyUpdate: Date.now(),
-  energyRegenRate: 3 // минут на 1 энергию
+  lastMythicRoll: 0
 };
+
+// ===== ЗАГРУЗКА АККАУНТОВ ПРИ СТАРТЕ =====
+function loadAccounts() {
+  const savedAccounts = localStorage.getItem('remanga_accounts');
+  if (savedAccounts) {
+    const accounts = JSON.parse(savedAccounts);
+    Object.assign(PLAYER_ACCOUNTS, accounts);
+  }
+}
+
+// Вызываем загрузку аккаунтов сразу
+loadAccounts();
 
 // ===== УТИЛИТЫ =====
 function getMaxEnergy() {
@@ -27,18 +37,6 @@ function getHighestCompleted() {
 
 function isLocationUnlocked(loc) {
   return loc.id <= getHighestCompleted() + 1;
-}
-
-// ===== ВОССТАНОВЛЕНИЕ ЭНЕРГИИ =====
-function restoreEnergy() {
-  const now = Date.now();
-  const elapsed = now - state.lastEnergyUpdate;
-  const minutesPassed = Math.floor(elapsed / (state.energyRegenRate * 60 * 1000));
-  
-  if (minutesPassed > 0) {
-    state.energy = Math.min(state.energy + minutesPassed, state.maxEnergy);
-    state.lastEnergyUpdate = now;
-  }
 }
 
 // ===== СОХРАНЕНИЕ/ЗАГРУЗКА =====
@@ -56,10 +54,12 @@ function saveGame() {
     lastEpicRoll: state.lastEpicRoll,
     lastLegendaryRoll: state.lastLegendaryRoll,
     lastMythicRoll: state.lastMythicRoll,
-    lastEnergyUpdate: state.lastEnergyUpdate,
     playerCards: currentInventory
   };
   localStorage.setItem('remanga_save_' + state.currentLogin, JSON.stringify(saveData));
+  
+  // Сохраняем все аккаунты
+  localStorage.setItem('remanga_accounts', JSON.stringify(PLAYER_ACCOUNTS));
 }
 
 function loadGame() {
@@ -76,10 +76,6 @@ function loadGame() {
     state.lastEpicRoll = data.lastEpicRoll || 0;
     state.lastLegendaryRoll = data.lastLegendaryRoll || 0;
     state.lastMythicRoll = data.lastMythicRoll || 0;
-    state.lastEnergyUpdate = data.lastEnergyUpdate || Date.now();
-
-    // Восстанавливаем энергию за время отсутствия
-    restoreEnergy();
 
     if (data.playerCards && PLAYER_ACCOUNTS[state.currentLogin]) {
       PLAYER_ACCOUNTS[state.currentLogin].cards = data.playerCards;
@@ -87,105 +83,20 @@ function loadGame() {
   }
 }
 
-// ===== РЕГИСТРАЦИЯ =====
-function doRegister() {
-  const login = document.getElementById('loginInput').value.trim();
-  const pass = document.getElementById('passwordInput').value;
-  const errorDiv = document.getElementById('loginError');
-  
-  if (!login || !pass) {
-    errorDiv.textContent = 'Заполните все поля';
-    return;
-  }
-  
-  if (login.length < 3) {
-    errorDiv.textContent = 'Логин должен быть не короче 3 символов';
-    return;
-  }
-  
-  if (pass.length < 4) {
-    errorDiv.textContent = 'Пароль должен быть не короче 4 символов';
-    return;
-  }
-  
-  if (PLAYER_ACCOUNTS[login]) {
-    errorDiv.textContent = 'Такой логин уже занят';
-    return;
-  }
-  
-  createAccount(login, pass);
-  
-  state.currentLogin = login;
-  localStorage.setItem('remanga_current_login', login);
-  
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('topbar').style.display = 'flex';
-  document.getElementById('navBar').style.display = 'flex';
-  
-  document.querySelector('.user-name').textContent = login;
-  
-  loadGame();
-  
-  state.maxEnergy = getMaxEnergy();
-  if (state.energy > state.maxEnergy) state.energy = state.maxEnergy;
-  
-  updateResources();
-  initMap();
-  renderCards();
-  updateSummonCounters();
-}
-
-// ===== ВХОД =====
+// ===== ЛОГИН =====
 function doLogin() {
   const login = document.getElementById('loginInput').value.trim();
-  const pass = document.getElementById('passwordInput').value;
-  const errorDiv = document.getElementById('loginError');
+  const pass = document.getElementById('passwordInput').value.trim();
   
-  if (!login || !pass) {
-    errorDiv.textContent = 'Заполните все поля';
-    return;
-  }
-  
-  if (!PLAYER_ACCOUNTS[login]) {
-    errorDiv.textContent = 'Аккаунт не найден. Зарегистрируйтесь.';
-    return;
-  }
-  
-  if (PLAYER_ACCOUNTS[login].password !== pass) {
-    errorDiv.textContent = 'Неверный пароль';
-    return;
-  }
-  
-  state.currentLogin = login;
-  localStorage.setItem('remanga_current_login', login);
-  
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('topbar').style.display = 'flex';
-  document.getElementById('navBar').style.display = 'flex';
-  
-  document.querySelector('.user-name').textContent = login;
-  
-  loadGame();
-  
-  state.maxEnergy = getMaxEnergy();
-  if (state.energy > state.maxEnergy) state.energy = state.maxEnergy;
-  
-  updateResources();
-  initMap();
-  renderCards();
-  updateSummonCounters();
-}
-
-// ===== АВТО-ВХОД =====
-function checkAutoLogin() {
-  const savedLogin = localStorage.getItem('remanga_current_login');
-  if (savedLogin && PLAYER_ACCOUNTS[savedLogin]) {
-    state.currentLogin = savedLogin;
+  const account = PLAYER_ACCOUNTS[login];
+  if (account && account.password === pass) {
+    state.currentLogin = login;
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('topbar').style.display = 'flex';
     document.getElementById('navBar').style.display = 'flex';
     
-    document.querySelector('.user-name').textContent = savedLogin;
+    // Обновляем отображение имени
+    document.querySelector('.user-name').textContent = login;
     
     loadGame();
     
@@ -196,22 +107,45 @@ function checkAutoLogin() {
     initMap();
     renderCards();
     updateSummonCounters();
+  } else {
+    document.getElementById('loginError').textContent = 'Аккаунт не найден. Зарегистрируйтесь.';
+    document.getElementById('loginError').style.color = '#f87171';
   }
 }
 
-// ===== ВЫХОД =====
-function logout() {
-  localStorage.removeItem('remanga_current_login');
-  state.currentLogin = null;
-  location.reload();
-}
-
 document.getElementById('passwordInput').addEventListener('keydown', e => { 
-  if (e.key === 'Enter') doLogin();
+  if (e.key === 'Enter') doLogin(); 
 });
 document.getElementById('loginInput').addEventListener('keydown', e => { 
   if (e.key === 'Enter') document.getElementById('passwordInput').focus(); 
 });
+
+// ===== РЕГИСТРАЦИЯ =====
+function doRegister() {
+  const login = document.getElementById('loginInput').value.trim();
+  const pass = document.getElementById('passwordInput').value.trim();
+  
+  if (!login || !pass) {
+    document.getElementById('loginError').textContent = 'Введите логин и пароль';
+    document.getElementById('loginError').style.color = '#f87171';
+    return;
+  }
+  
+  if (PLAYER_ACCOUNTS[login]) {
+    document.getElementById('loginError').textContent = 'Такой логин уже существует';
+    document.getElementById('loginError').style.color = '#f87171';
+    return;
+  }
+  
+  // Создаём аккаунт
+  createAccount(login, pass);
+  
+  // Сохраняем в localStorage
+  localStorage.setItem('remanga_accounts', JSON.stringify(PLAYER_ACCOUNTS));
+  
+  document.getElementById('loginError').textContent = 'Аккаунт создан! Теперь войдите.';
+  document.getElementById('loginError').style.color = '#34d399';
+}
 
 // ===== НАВИГАЦИЯ =====
 function switchPage(page) {
@@ -236,7 +170,7 @@ function showToast(msg, isError) {
   setTimeout(() => t.className = 'toast', 2500);
 }
 
-// ===== ЗАКРЫТИЕ МОДАЛОК =====
+// ===== ЗАКРЫТИЕ МОДАЛОК ПО КЛИКУ НА ОВЕРЛЕЙ =====
 document.getElementById('locModal').addEventListener('click', e => {
   if (e.target === document.getElementById('locModal')) closeLocModal();
 });
@@ -246,6 +180,3 @@ document.getElementById('cardModal').addEventListener('click', e => {
 document.getElementById('bannerModal').addEventListener('click', e => {
   if (e.target === document.getElementById('bannerModal')) closeBannerModal();
 });
-
-// ЗАПУСК ПРОВЕРКИ АВТО-ВХОДА
-checkAutoLogin();
