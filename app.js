@@ -214,8 +214,9 @@ async function saveGame() {
 
   try {
     const userRef = window.firebaseAPI.doc(window.firebaseDb, "users", state.currentUserId);
-    const cardsToSave = window.PLAYER_ACCOUNTS[state.currentLogin]?.cards || [];
-    const itemsToSave = window.PLAYER_ACCOUNTS[state.currentLogin]?.items || [];
+    const playerData = window.PLAYER_ACCOUNTS[state.currentLogin] || {};
+    const cardsToSave = playerData.cards || [];
+    const itemsToSave = playerData.items || [];
 
     await window.firebaseAPI.updateDoc(userRef, {
       energy: state.energy,
@@ -233,9 +234,13 @@ async function saveGame() {
     console.log("💾 Игра успешно сохранена в Firebase");
   } catch (error) {
     console.error("❌ ОШИБКА СОХРАНЕНИЯ:", error);
-    showToast("Ошибка сохранения", true);
+    // Не показываем ошибку пользователю, если это предупреждение о missing fields
+    if (error.code !== 'invalid-argument') {
+      showToast("Ошибка сохранения", true);
+    }
   }
 }
+
 
 // ===== НАВИГАЦИЯ =====
 function switchPage(page) {
