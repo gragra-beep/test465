@@ -8,7 +8,6 @@ const state = {
   currentLoc: null,
   currentCard: null,
   currentCardIndex: null,
-  squad: [],                      // 🔥 ДОБАВЛЕНО: отряд
   completedLocs: [],
   bannerRolls: 0,
   lastEpicRoll: 0,
@@ -84,7 +83,6 @@ async function doRegister() {
         lastEpicRoll: 0,
         lastLegendaryRoll: 0,
         lastMythicRoll: 0,
-        squad: [],                  // 🔥 ДОБАВЛЕНО: пустой отряд
         cards: starterCards,
         items: starterItems,
         createdAt: new Date().toISOString()
@@ -158,7 +156,6 @@ async function loginSuccess(user, login) {
   if (typeof initMap === 'function') initMap();
   if (typeof renderCards === 'function') renderCards();
   if (typeof renderInventory === 'function') renderInventory();
-  if (typeof updateSquadButton === 'function') updateSquadButton();   // 🔥 ДОБАВЛЕНО
   if (typeof updateSummonCounters === 'function') updateSummonCounters();
 }
 
@@ -186,7 +183,6 @@ async function loadGame() {
       state.lastEpicRoll = data.lastEpicRoll || 0;
       state.lastLegendaryRoll = data.lastLegendaryRoll || 0;
       state.lastMythicRoll = data.lastMythicRoll || 0;
-      state.squad = data.squad || [];             // 🔥 ДОБАВЛЕНО: загрузка отряда
 
       // Инициализируем PLAYER_ACCOUNTS
       if (!window.PLAYER_ACCOUNTS) window.PLAYER_ACCOUNTS = {};
@@ -234,7 +230,6 @@ async function loadGame() {
           lastEpicRoll: 0,
           lastLegendaryRoll: 0,
           lastMythicRoll: 0,
-          squad: [],                // 🔥 ДОБАВЛЕНО: пустой отряд
           cards: starterCards,
           items: starterItems,
           createdAt: new Date().toISOString()
@@ -273,6 +268,7 @@ async function saveGame() {
     });
 
     // 🔥 ФИКС: Используем setDoc с merge: true вместо updateDoc
+    // Это решает ошибку "No document to update" если документ ещё не создан
     await window.firebaseAPI.setDoc(userRef, {
       energy: state.energy,
       maxEnergy: state.maxEnergy,
@@ -284,13 +280,13 @@ async function saveGame() {
       lastMythicRoll: state.lastMythicRoll,
       cards: cardsToSave,
       items: itemsToSave,
-      squad: state.squad || [],            // 🔥 ДОБАВЛЕНО: отряд
       lastSaved: new Date().toISOString()
     }, { merge: true });
     
     console.log("✅ Игра успешно сохранена в Firebase");
   } catch (error) {
     console.error("❌ ОШИБКА СОХРАНЕНИЯ:", error);
+    // Показываем ошибку только если это не предупреждение
     if (error.code !== 'invalid-argument' && error.code !== 'permission-denied') {
       showToast("Ошибка сохранения: " + (error.message || error.code), true);
     }
@@ -369,6 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (cardModal) cardModal.addEventListener('click', e => { if (e.target === cardModal && typeof closeCardModal === 'function') closeCardModal(); });
   if (bannerModal) bannerModal.addEventListener('click', e => { if (e.target === bannerModal && typeof closeBannerModal === 'function') closeBannerModal(); });
 });
+// Добавь в конец файла app.js (перед последним закрывающим тегом)
 
 // ===== СИСТЕМА ВОССТАНОВЛЕНИЯ ЭНЕРГИИ =====
 const ENERGY_REGEN_RATE = 1;        // Сколько энергии восстанавливается
