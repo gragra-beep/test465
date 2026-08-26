@@ -148,7 +148,7 @@ const CARDS_DATABASE = [
     skill: { name: '1', desc: '1', stars: 1 },
     image: '/test465/cards/uishy.png', 
     tags: ['убийца'] 
-  }
+  },
   { 
     id: 'card_016', 
     name: 'Цинлань', 
@@ -159,6 +159,36 @@ const CARDS_DATABASE = [
     image: '/test465/cards/cinlan.png', 
     tags: ['убийца'] 
   },
+  { 
+    id: 'card_017', 
+    name: 'Юйцы', 
+    rarity: 'rare', 
+    stars: 1,
+    baseStats: { atk: 80, def: 110, hp: 150 },
+    skill: { name: '1', desc: '1', stars: 1 },
+    image: '/test465/cards/uitsi.png', 
+    tags: ['убийца'] 
+  },
+  { 
+    id: 'card_018', 
+    name: 'Фэйсянь', 
+    rarity: 'rare', 
+    stars: 1,
+    baseStats: { atk: 80, def: 110, hp: 150 },
+    skill: { name: '1', desc: '1', stars: 1 },
+    image: '/test465/cards/feisian.png', 
+    tags: ['убийца'] 
+  },
+  { 
+    id: 'card_019', 
+    name: 'Ханьцю', 
+    rarity: 'rare', 
+    stars: 1,
+    baseStats: { atk: 80, def: 110, hp: 150 },
+    skill: { name: '1', desc: '1', stars: 1 },
+    image: '/test465/cards/hantsy.png', 
+    tags: ['убийца'] 
+  }
 ];
 
 function getCardById(cardId) {
