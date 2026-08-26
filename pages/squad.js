@@ -27,6 +27,8 @@ function updateSquadButton() {
 
 // ===== ОТКРЫТИЕ ОТРЯДА =====
 function openSquadModal() {
+  // При открытии отряда проверяем что state.squad загружен
+  if (!state.squad) state.squad = [];
   renderSquadSlots();
   document.getElementById('squadModal').classList.add('show');
 }
