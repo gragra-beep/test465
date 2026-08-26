@@ -90,7 +90,7 @@ const CARDS_DATABASE = [
     tags: ['танк'] 
   }
     { 
-    id: 'card_009', 
+    id: 'card_010', 
     name: 'Лихуа', 
     rarity: 'rare', 
     stars: 1,
@@ -100,7 +100,7 @@ const CARDS_DATABASE = [
     tags: ['убийца'] 
   },
   { 
-    id: 'card_010', 
+    id: 'card_011', 
     name: 'Сюинь', 
     rarity: 'rare', 
     stars: 1,
@@ -110,7 +110,7 @@ const CARDS_DATABASE = [
     tags: ['убийца'] 
   },
     { 
-    id: 'card_011', 
+    id: 'card_012', 
     name: 'Хуан', 
     rarity: 'rare', 
     stars: 1,
@@ -120,7 +120,7 @@ const CARDS_DATABASE = [
     tags: ['убийца'] 
   },
       { 
-    id: 'card_012', 
+    id: 'card_013', 
     name: 'Шу', 
     rarity: 'rare', 
     stars: 1,
@@ -130,7 +130,7 @@ const CARDS_DATABASE = [
     tags: ['убийца'] 
   },
         { 
-    id: 'card_013', 
+    id: 'card_014', 
     name: 'Юань', 
     rarity: 'rare', 
     stars: 1,
@@ -140,7 +140,7 @@ const CARDS_DATABASE = [
     tags: ['убийца'] 
   },
           { 
-    id: 'card_014', 
+    id: 'card_015', 
     name: 'Юйшу', 
     rarity: 'rare', 
     stars: 1,
