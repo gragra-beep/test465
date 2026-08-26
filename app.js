@@ -52,7 +52,7 @@ async function doRegister() {
     return;
   }
 
-  const email = login.includes('@') ? login : `${login}@miyy.game`;
+  const email = login.includes('@') ? login : `${login}@remanga.game`;
 
   try {
     errorEl.textContent = 'Создание аккаунта...';
@@ -127,7 +127,7 @@ async function doLogin() {
   }
 
   // Пробуем оба домена — чтобы входили и старые, и новые аккаунты
-  const candidates = login.includes('@') ? [login] : [login + '@miyy.game', login + '@remanga.game'];
+  const candidates = login.includes('@') ? [login] : [login + '@remanga.game'];
 
   errorEl.textContent = 'Вход...';
   errorEl.style.color = '#fbbf24';
