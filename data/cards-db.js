@@ -88,7 +88,7 @@ const CARDS_DATABASE = [
     skill: { name: 'Славянский зажим бровью', desc: 'Поигрывает бровями, доводя врагов до смерти', stars: 5 },
     image: '/test465/cards/saki.png', 
     tags: ['танк'] 
-  }
+  },
     { 
     id: 'card_010', 
     name: 'Лихуа', 
