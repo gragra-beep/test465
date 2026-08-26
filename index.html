@@ -67,6 +67,20 @@
 </head>
 <body>
 
+<!-- ВРЕМЕННЫЙ ДЕБАГ: показывает ошибки красной плашкой -->
+<script>
+  window.onerror = function (msg, url, line) {
+    var d = document.getElementById('debugBox');
+    if (!d) {
+      d = document.createElement('div');
+      d.id = 'debugBox';
+      d.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;background:#7f1d1d;color:#fff;padding:10px;font-size:12px;white-space:pre-wrap;max-height:45vh;overflow:auto;';
+      document.body.appendChild(d);
+    }
+    d.textContent += '❌ ' + msg + ' (строка ' + line + ')\n';
+    return false;
+  };
+</script>
 <!-- ЭКРАН ВХОДА -->
 <div id="loginScreen">
   <div class="login-box">
