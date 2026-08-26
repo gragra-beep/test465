@@ -8,6 +8,7 @@ const state = {
   currentLoc: null,
   currentCard: null,
   currentCardIndex: null,
+  squad: [],
   completedLocs: [],
   bannerRolls: 0,
   lastEpicRoll: 0,
@@ -83,6 +84,7 @@ async function doRegister() {
         lastEpicRoll: 0,
         lastLegendaryRoll: 0,
         lastMythicRoll: 0,
+        squad: [],
         cards: starterCards,
         items: starterItems,
         createdAt: new Date().toISOString()
@@ -154,19 +156,19 @@ async function loginSuccess(user, login) {
 
   updateResources();
   if (typeof initMap === 'function') initMap();
+  if (typeof initTown === 'function') initTown();
   if (typeof renderCards === 'function') renderCards();
   if (typeof renderInventory === 'function') renderInventory();
+  if (typeof updateSquadButton === 'function') updateSquadButton();
   if (typeof updateSummonCounters === 'function') updateSummonCounters();
 }
 
 // ===== ЗАГРУЗКА ИЗ FIREBASE =====
-window.PLAYER_ACCOUNTS[state.currentLogin] = {
-  cards: data.cards || [],
-  items: data.items || [],
-  squad: data.squad || [],
-  energy: state.energy,
-  silver: state.silver
-};
+async function loadGame() {
+  if (!state.currentUserId) {
+    console.warn("⚠️ Нет currentUserId, загрузка невозможна");
+    return;
+  }
 
   try {
     console.log("🔄 Загрузка данных из Firestore для UID:", state.currentUserId);
@@ -185,13 +187,14 @@ window.PLAYER_ACCOUNTS[state.currentLogin] = {
       state.lastEpicRoll = data.lastEpicRoll || 0;
       state.lastLegendaryRoll = data.lastLegendaryRoll || 0;
       state.lastMythicRoll = data.lastMythicRoll || 0;
+      state.squad = data.squad || [];
 
-      // Инициализируем PLAYER_ACCOUNTS
       if (!window.PLAYER_ACCOUNTS) window.PLAYER_ACCOUNTS = {};
       
       window.PLAYER_ACCOUNTS[state.currentLogin] = {
         cards: data.cards || [],
         items: data.items || [],
+        squad: data.squad || [],
         energy: state.energy,
         silver: state.silver
       };
@@ -200,7 +203,6 @@ window.PLAYER_ACCOUNTS[state.currentLogin] = {
     } else {
       console.warn("⚠️ Документ не найден в базе. Создаем новый со стартовыми данными.");
       
-      // Стартовые данные
       const starterCards = [
         { cardId: 'card_001', level: 0, broken: false },
         { cardId: 'card_002', level: 0, broken: false },
@@ -210,16 +212,15 @@ window.PLAYER_ACCOUNTS[state.currentLogin] = {
       ];
       const starterItems = [{ itemId: 'herb', quantity: 1 }];
       
-      // Сохраняем стартовые данные в память
       if (!window.PLAYER_ACCOUNTS) window.PLAYER_ACCOUNTS = {};
       window.PLAYER_ACCOUNTS[state.currentLogin] = { 
         cards: starterCards, 
         items: starterItems, 
+        squad: [],
         energy: 50, 
         silver: 100 
       };
       
-      // 🔥 ФИКС: Автоматически создаем документ в базе, чтобы saveGame() не падал
       try {
         await window.firebaseAPI.setDoc(docRef, {
           login: state.currentLogin,
@@ -232,6 +233,7 @@ window.PLAYER_ACCOUNTS[state.currentLogin] = {
           lastEpicRoll: 0,
           lastLegendaryRoll: 0,
           lastMythicRoll: 0,
+          squad: [],
           cards: starterCards,
           items: starterItems,
           createdAt: new Date().toISOString()
@@ -257,7 +259,6 @@ async function saveGame() {
   try {
     const userRef = window.firebaseAPI.doc(window.firebaseDb, "users", state.currentUserId);
     
-    // Безопасно получаем данные
     const playerData = window.PLAYER_ACCOUNTS[state.currentLogin] || {};
     const cardsToSave = playerData.cards || [];
     const itemsToSave = playerData.items || [];
@@ -269,8 +270,6 @@ async function saveGame() {
       itemsCount: itemsToSave.length
     });
 
-    // 🔥 ФИКС: Используем setDoc с merge: true вместо updateDoc
-    // Это решает ошибку "No document to update" если документ ещё не создан
     await window.firebaseAPI.setDoc(userRef, {
       energy: state.energy,
       maxEnergy: state.maxEnergy,
@@ -282,13 +281,13 @@ async function saveGame() {
       lastMythicRoll: state.lastMythicRoll,
       cards: cardsToSave,
       items: itemsToSave,
+      squad: state.squad || [],
       lastSaved: new Date().toISOString()
     }, { merge: true });
     
     console.log("✅ Игра успешно сохранена в Firebase");
   } catch (error) {
     console.error("❌ ОШИБКА СОХРАНЕНИЯ:", error);
-    // Показываем ошибку только если это не предупреждение
     if (error.code !== 'invalid-argument' && error.code !== 'permission-denied') {
       showToast("Ошибка сохранения: " + (error.message || error.code), true);
     }
@@ -366,12 +365,13 @@ document.addEventListener('DOMContentLoaded', () => {
   if (locModal) locModal.addEventListener('click', e => { if (e.target === locModal && typeof closeLocModal === 'function') closeLocModal(); });
   if (cardModal) cardModal.addEventListener('click', e => { if (e.target === cardModal && typeof closeCardModal === 'function') closeCardModal(); });
   if (bannerModal) bannerModal.addEventListener('click', e => { if (e.target === bannerModal && typeof closeBannerModal === 'function') closeBannerModal(); });
-});
-// Добавь в конец файла app.js (перед последним закрывающим тегом)
 
-// ===== СИСТЕМА ВОССТАНОВЛЕНИЯ ЭНЕРГИИ =====
-const ENERGY_REGEN_RATE = 1;        // Сколько энергии восстанавливается
-const ENERGY_REGEN_INTERVAL = 300000; // Интервал в миллисекундах (5 минут = 300000)
+  startEnergyRegen();
+});
+
+// ===== ВОССТАНОВЛЕНИЕ ЭНЕРГИИ =====
+const ENERGY_REGEN_RATE = 1;
+const ENERGY_REGEN_INTERVAL = 300000; // 5 минут
 
 function startEnergyRegen() {
   setInterval(() => {
@@ -383,8 +383,3 @@ function startEnergyRegen() {
     }
   }, ENERGY_REGEN_INTERVAL);
 }
-
-// Запускаем восстановление энергии при загрузке страницы
-document.addEventListener('DOMContentLoaded', () => {
-  startEnergyRegen();
-});
