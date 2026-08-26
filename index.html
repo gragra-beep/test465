@@ -488,45 +488,8 @@
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<!-- ===== FIREBASE SDK ===== -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { 
-    getAuth, 
-    createUserWithEmailAndPassword, 
-    signInWithEmailAndPassword 
-  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-  import { 
-    getFirestore, 
-    doc, 
-    setDoc, 
-    getDoc, 
-    updateDoc 
-  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyCkbR-xrpdwa8zV9ELxfMhdItEWZIZMNeg",
-    authDomain: "miyy465.firebaseapp.com",
-    databaseURL: "https://miyy465-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "miyy465",
-    storageBucket: "miyy465.firebasestorage.app",
-    messagingSenderId: "566692334791",
-    appId: "1:566692334791:web:b12e04215802da961cc2e2"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  window.firebaseAuth = getAuth(app);
-  window.firebaseDb = getFirestore(app);
-  window.firebaseAPI = {
-    createUserWithEmailAndPassword,
-    signInWithEmailAndPassword,
-    doc,
-    setDoc,
-    getDoc,
-    updateDoc
-  };
-  console.log("✅ Firebase подключен");
-</script>
+<!-- ===== яндекс ===== -->
+<script src="data/ydb-api.js"></script>
 
 <!-- ===== СКРИПТЫ ИГРЫ ===== -->
 <script src="data/cards-db.js"></script>
