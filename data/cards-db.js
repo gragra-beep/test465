@@ -149,6 +149,16 @@ const CARDS_DATABASE = [
     image: '/test465/cards/uishy.png', 
     tags: ['убийца'] 
   }
+  { 
+    id: 'card_016', 
+    name: 'Цинлань', 
+    rarity: 'rare', 
+    stars: 1,
+    baseStats: { atk: 80, def: 110, hp: 150 },
+    skill: { name: '1', desc: '🤤', stars: 1 },
+    image: '/test465/cards/cinlan.png', 
+    tags: ['убийца'] 
+  },
 ];
 
 function getCardById(cardId) {
