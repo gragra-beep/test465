@@ -405,3 +405,64 @@
       </div>
       <div class="upgrade-stats-row">
         <div class="upgrade-level"><span id="cdCurLevel">+0</span
+                                                             <!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ===== FIREBASE SDK ===== -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { 
+    getAuth, 
+    createUserWithEmailAndPassword, 
+    signInWithEmailAndPassword 
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  import { 
+    getFirestore, 
+    doc, 
+    setDoc, 
+    getDoc, 
+    updateDoc 
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCkbR-xrpdwa8zV9ELxfMhdItEWZIZMNeg",
+    authDomain: "miyy465.firebaseapp.com",
+    databaseURL: "https://miyy465-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "miyy465",
+    storageBucket: "miyy465.firebasestorage.app",
+    messagingSenderId: "566692334791",
+    appId: "1:566692334791:web:b12e04215802da961cc2e2"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  window.firebaseAuth = getAuth(app);
+  window.firebaseDb = getFirestore(app);
+  window.firebaseAPI = {
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    doc,
+    setDoc,
+    getDoc,
+    updateDoc
+  };
+  console.log("✅ Firebase подключен");
+</script>
+
+<!-- ===== СКРИПТЫ ИГРЫ ===== -->
+<script src="data/cards-db.js?v=3"></script>
+<script src="data/accounts.js?v=3"></script>
+<script src="data/items.js?v=3"></script>
+<script src="data/locations.js?v=3"></script>
+<script src="app.js?v=3"></script>
+<script src="pages/map.js?v=3"></script>
+<script src="pages/deck.js?v=3"></script>
+<script src="pages/squad.js?v=3"></script>
+<script src="pages/bazar.js?v=3"></script>
+<script src="pages/duel.js?v=3"></script>
+<script src="pages/top.js?v=3"></script>
+<script src="pages/inventory.js?v=3"></script>
+<script src="pages/gifts.js?v=3"></script>
+<script src="pages/quests.js?v=3"></script>
+
+</body>
+        </html>
