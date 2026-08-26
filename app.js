@@ -103,7 +103,6 @@ async function doRegister() {
     errorEl.style.color = '#f87171';
   }
 }
-
 // ===== ВХОД =====
 async function doLogin() {
   const login = document.getElementById('loginInput').value.trim();
@@ -116,6 +115,7 @@ async function doLogin() {
     return;
   }
 
+  // 🔥 Исправлено: тот же домен что и при регистрации
   const email = login.includes('@') ? login : `${login}@miyy.game`;
 
   try {
