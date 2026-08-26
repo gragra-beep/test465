@@ -63,6 +63,31 @@
     .squad-total-sub { font-size: 12px; color: #888; font-weight: 400; }
     .squad-hint { color: #888; font-size: 12px; font-style: italic; margin-bottom: 14px; }
     .squad-save-btn { width: 100%; padding: 14px; background: #86efac; color: #052e16; font-weight: 800; font-size: 15px; border: none; border-radius: 8px; cursor: pointer; letter-spacing: 1px; }
+        /* ГОРОД */
+    #page-town { padding: 0 !important; position: relative; height: calc(100vh - 140px); min-height: 500px; }
+    .town-container { width: 100%; height: 100%; position: relative; background-image: url('/test465/cards/town.png'); background-size: cover; background-position: center; overflow: hidden; }
+    .town-node { position: absolute; transform: translate(-50%, -50%); cursor: pointer; z-index: 5; }
+    .town-node-name { background: rgba(26,26,46,0.85); border: 1px solid rgba(212,168,67,0.5); color: #fff; padding: 8px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+
+    /* КРАФТ */
+    .craft-page { padding: 16px; padding-bottom: 90px; }
+    .craft-top { display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap; }
+    .craft-select { width: 90px; height: 90px; border: 2px dashed rgba(255,255,255,0.25); border-radius: 12px; cursor: pointer; background: rgba(255,255,255,0.03); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .craft-select-img { width: 60px; height: 60px; background-size: cover; background-position: center; border-radius: 8px; }
+    .craft-select-name { font-size: 9px; color: #ccc; text-align: center; padding: 2px; }
+    .craft-slots { display: flex; gap: 6px; flex-wrap: wrap; }
+    .craft-slot { width: 44px; height: 44px; border: 2px dashed rgba(255,255,255,0.25); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #888; cursor: pointer; }
+    .craft-slot.filled { border-style: solid; border-color: rgba(52,211,153,0.5); background: rgba(52,211,153,0.1); }
+    .craft-recipe { flex: 1; min-width: 120px; }
+    .craft-recipe-title { color: #888; font-size: 11px; letter-spacing: 1px; margin-bottom: 4px; }
+    .craft-recipe-text { font-size: 14px; color: #fff; margin-bottom: 8px; }
+    .craft-btn { padding: 10px !important; }
+    .item-img { width: 70%; height: 70%; background-size: cover; background-position: center; border-radius: 10px; }
+    .craft-list-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 10px; }
+    .craft-list-item { border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 8px; cursor: pointer; text-align: center; background: rgba(255,255,255,0.03); }
+    .craft-list-img { width: 100%; aspect-ratio: 1; background-size: cover; background-position: center; border-radius: 8px; margin-bottom: 6px; }
+    .craft-list-name { font-size: 11px; color: #fff; }
+    .back-to-town { margin: 10px; background: rgba(26,26,46,0.9); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 8px 16px; border-radius: 20px; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -144,6 +169,7 @@
 <!-- БАЗАР -->
 <div class="page" id="page-bazar">
   <div class="bazar-page">
+        <button class="back-to-town" onclick="switchPage('town')">← В город</button>
     <div class="banner-header">
       <div class="banner-tag">ВЕЧНЫЙ</div>
       <div class="banner-image">
@@ -215,7 +241,52 @@
 <div class="page" id="page-quests">
   <div class="placeholder-page"><div class="ph-icon">📋</div><div class="ph-text">Задания — скоро</div></div>
 </div>
+<!-- ГОРОД -->
+<div class="page" id="page-town">
+  <div class="town-container" id="townContainer"></div>
+</div>
 
+<!-- КУЗНЯ -->
+<div class="page" id="page-smith">
+  <div class="craft-page">
+    <h2 class="inventory-title">Кузня</h2>
+    <div class="craft-top">
+      <div class="craft-select" onclick="openCraftList('weapon')">
+        <div class="craft-select-img" id="smSelectImg"></div>
+        <div class="craft-select-name" id="smSelectName">Выбрать предмет</div>
+      </div>
+      <div class="craft-slots" id="smSlots"></div>
+      <div class="craft-recipe">
+        <div class="craft-recipe-title">РЕЦЕПТ</div>
+        <div class="craft-recipe-text" id="smRecipe">—</div>
+        <button class="squad-save-btn craft-btn" onclick="tryCraft('weapon')">СКРАФТИТЬ</button>
+      </div>
+    </div>
+    <div class="inventory-divider"></div>
+    <div class="inventory-grid" id="smGrid"></div>
+  </div>
+</div>
+
+<!-- ЗЕЛЬЕВАРНЯ -->
+<div class="page" id="page-alchemy">
+  <div class="craft-page">
+    <h2 class="inventory-title">Зельеварня</h2>
+    <div class="craft-top">
+      <div class="craft-select" onclick="openCraftList('potion')">
+        <div class="craft-select-img" id="alSelectImg"></div>
+        <div class="craft-select-name" id="alSelectName">Выбрать предмет</div>
+      </div>
+      <div class="craft-slots" id="alSlots"></div>
+      <div class="craft-recipe">
+        <div class="craft-recipe-title">РЕЦЕПТ</div>
+        <div class="craft-recipe-text" id="alRecipe">—</div>
+        <button class="squad-save-btn craft-btn" onclick="tryCraft('potion')">СКРАФТИТЬ</button>
+      </div>
+    </div>
+    <div class="inventory-divider"></div>
+    <div class="inventory-grid" id="alGrid"></div>
+  </div>
+</div>
 <!-- ===== НАВИГАЦИЯ ===== -->
 <div class="nav-bar" id="navBar" style="display:none;">
   <div class="nav-item active" data-page="map" onclick="switchPage('map')">
@@ -227,9 +298,9 @@
   <div class="nav-item" data-page="deck" onclick="switchPage('deck')">
     <div class="nav-icon">🃏</div><div class="nav-label">КОЛОДА</div>
   </div>
-  <div class="nav-item" data-page="bazar" onclick="switchPage('bazar')">
-    <div class="nav-icon">🎴</div><div class="nav-label">БАЗАР</div>
-  </div>
+    <div class="nav-item" data-page="town" onclick="switchPage('town')">
+    <div class="nav-icon">🏯</div><div class="nav-label">ГОРОД</div>
+    </div>
   <div class="nav-item" data-page="top" onclick="switchPage('top')">
     <div class="nav-icon">🏆</div><div class="nav-label">ТОП</div>
   </div>
@@ -406,7 +477,14 @@
     </div>
   </div>
 </div>
-
+<!-- МОДАЛКА ВЫБОРА КРАФТА -->
+<div class="modal-overlay" id="craftListModal">
+  <div class="modal-content squad-sheet">
+    <button class="modal-close-x" onclick="closeCraftList()">✕</button>
+    <div class="squad-title">Что крафтим?</div>
+    <div class="craft-list-grid" id="craftListGrid"></div>
+  </div>
+</div>
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
@@ -454,17 +532,19 @@
 <script src="data/cards-db.js"></script>
 <script src="data/accounts.js"></script>
 <script src="data/items.js"></script>
+  <script src="data/recipes.js"></script>
 <script src="data/locations.js"></script>
 <script src="app.js"></script>
 <script src="pages/map.js"></script>
 <script src="pages/deck.js"></script>
 <script src="pages/squad.js"></script>
+  <script src="pages/town.js"></script>
+  <script src="pages/craft.js"></script>
 <script src="pages/bazar.js"></script>
 <script src="pages/duel.js"></script>
 <script src="pages/top.js"></script>
 <script src="pages/inventory.js"></script>
 <script src="pages/gifts.js"></script>
 <script src="pages/quests.js"></script>
-
 </body>
 </html>
