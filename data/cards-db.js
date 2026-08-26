@@ -89,6 +89,66 @@ const CARDS_DATABASE = [
     image: '/test465/cards/saki.png', 
     tags: ['танк'] 
   }
+    { 
+    id: 'card_009', 
+    name: 'Лихуа', 
+    rarity: 'rare', 
+    stars: 1,
+    baseStats: { atk: 80, def: 110, hp: 150 },
+    skill: { name: '1', desc: '1', stars: 1 },
+    image: '/test465/cards/lihua.png', 
+    tags: ['убийца'] 
+  },
+  { 
+    id: 'card_010', 
+    name: 'Сюинь', 
+    rarity: 'rare', 
+    stars: 1,
+    baseStats: { atk: 80, def: 110, hp: 150 },
+    skill: { name: '1', desc: '1', stars: 1 },
+    image: '/test465/cards/suin.png', 
+    tags: ['убийца'] 
+  },
+    { 
+    id: 'card_011', 
+    name: 'Хуан', 
+    rarity: 'rare', 
+    stars: 1,
+    baseStats: { atk: 80, def: 110, hp: 150 },
+    skill: { name: '1', desc: '1', stars: 1 },
+    image: '/test465/cards/huan.png', 
+    tags: ['убийца'] 
+  },
+      { 
+    id: 'card_012', 
+    name: 'Шу', 
+    rarity: 'rare', 
+    stars: 1,
+    baseStats: { atk: 80, def: 110, hp: 150 },
+    skill: { name: '1', desc: '1', stars: 1 },
+    image: '/test465/cards/shy.png', 
+    tags: ['убийца'] 
+  },
+        { 
+    id: 'card_013', 
+    name: 'Юань', 
+    rarity: 'rare', 
+    stars: 1,
+    baseStats: { atk: 80, def: 110, hp: 150 },
+    skill: { name: '1', desc: '1', stars: 1 },
+    image: '/test465/cards/uan.png', 
+    tags: ['убийца'] 
+  },
+          { 
+    id: 'card_014', 
+    name: 'Юйшу', 
+    rarity: 'rare', 
+    stars: 1,
+    baseStats: { atk: 80, def: 110, hp: 150 },
+    skill: { name: '1', desc: '1', stars: 1 },
+    image: '/test465/cards/uishy.png', 
+    tags: ['убийца'] 
+  }
 ];
 
 function getCardById(cardId) {
