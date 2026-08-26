@@ -6,11 +6,22 @@
   <title>Remanga Game</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    /* КРИТИЧЕСКИЕ СТИЛИ ДЛЯ КАРТЫ */
+    /* КАРТА */
     #page-map { padding: 0 !important; position: relative; height: calc(100vh - 140px); min-height: 500px; }
     .map-container { width: 100%; height: 100%; min-height: 500px; position: relative; background-color: #1a1a2e; background-image: url('/test465/cards/map.png'); background-size: cover; background-position: center; background-repeat: no-repeat; overflow: hidden; }
     .map-bg, .map-mountains, .map-river { display: none !important; }
-    
+
+    /* КНОПКА ОТРЯДА НА КАРТЕ */
+    .map-squad { position: absolute; right: 16px; bottom: 16px; background: rgba(26,26,46,0.9); border: 1px solid rgba(52,211,153,0.4); border-radius: 30px; padding: 12px 20px; color: #fff; font-weight: 700; cursor: pointer; z-index: 5; }
+
+    /* КВАДРАТИК БОССА В ШАПКЕ МОДАЛКИ */
+    .modal-header-img { position: relative; }
+    .loc-boss-img { position: absolute; top: 12px; right: 12px; width: 70px; height: 70px; border-radius: 10px; background-size: cover; background-position: center; background-color: #2a1a3a; }
+
+    /* БМ ЦВЕТА */
+    .bm-ok { color: #4ade80; font-weight: 700; }
+    .bm-bad { color: #f87171; font-weight: 700; }
+
     /* ВЫПАДАЮЩЕЕ МЕНЮ */
     .user-info { position: relative; }
     .user-avatar { cursor: pointer; font-size: 28px; display: flex; align-items: center; justify-content: center; width: 45px; height: 45px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; }
@@ -19,7 +30,7 @@
     .dropdown-item { padding: 12px 15px; cursor: pointer; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #fff; }
     .dropdown-item:last-child { border-bottom: none; }
     .dropdown-item:hover { background: rgba(255,255,255,0.05); }
-    
+
     /* ИНВЕНТАРЬ */
     .inventory-page { padding: 20px; min-height: calc(100vh - 200px); }
     .inventory-title { font-size: 28px; font-weight: 300; text-align: center; margin-bottom: 15px; color: #fff; font-style: italic; }
@@ -29,9 +40,29 @@
     .inventory-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; padding: 10px; }
     .inventory-slot { aspect-ratio: 1; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
     .inventory-slot:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.15); }
-    .inventory-slot.empty { cursor: default; }
     .inventory-slot .item-icon { font-size: 40px; }
     .inventory-slot .item-quantity { position: absolute; bottom: 8px; left: 0; right: 0; text-align: center; font-size: 12px; color: rgba(255,255,255,0.7); font-weight: 500; }
+
+    /* ОТРЯД */
+    .squad-sheet { max-height: 85vh; overflow-y: auto; }
+    .squad-title { font-size: 20px; font-weight: 700; margin-bottom: 12px; }
+    .squad-subtitle { color: #86efac; font-size: 12px; letter-spacing: 2px; margin-bottom: 4px; }
+    .squad-slots { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 14px; }
+    .squad-slot { position: relative; aspect-ratio: 3/4; border-radius: 10px; border: 2px solid rgba(52,211,153,0.5); overflow: hidden; cursor: pointer; background: #2a1a3a; }
+    .squad-slot.empty { border: 2px dashed rgba(255,255,255,0.2); display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(255,255,255,0.03); }
+    .squad-empty-plus { font-size: 22px; color: #888; }
+    .squad-empty-text { font-size: 10px; color: #888; }
+    .squad-card-img { width: 100%; height: 100%; }
+    .squad-card-stars { position: absolute; top: 4px; left: 4px; background: rgba(0,0,0,0.7); border-radius: 4px; padding: 1px 5px; font-size: 10px; }
+    .squad-card-level { position: absolute; top: 4px; right: 4px; background: rgba(52,211,153,0.9); border-radius: 4px; padding: 1px 5px; font-size: 10px; font-weight: 700; color: #052e16; }
+    .squad-card-name { position: absolute; bottom: 16px; left: 4px; right: 4px; font-size: 9px; font-weight: 600; text-shadow: 0 1px 3px #000; }
+    .squad-card-power { position: absolute; bottom: 2px; left: 4px; right: 4px; font-size: 9px; color: #d4a843; font-weight: 700; text-shadow: 0 1px 3px #000; }
+    .squad-total { display: flex; align-items: baseline; gap: 10px; margin: 10px 0; }
+    .squad-total-label { color: #888; font-size: 12px; letter-spacing: 2px; }
+    .squad-total-val { font-size: 26px; font-weight: 800; color: #d4a843; }
+    .squad-total-sub { font-size: 12px; color: #888; font-weight: 400; }
+    .squad-hint { color: #888; font-size: 12px; font-style: italic; margin-bottom: 14px; }
+    .squad-save-btn { width: 100%; padding: 14px; background: #86efac; color: #052e16; font-weight: 800; font-size: 15px; border: none; border-radius: 8px; cursor: pointer; letter-spacing: 1px; }
   </style>
 </head>
 <body>
@@ -57,7 +88,6 @@
       <div class="user-name" id="topbarUsername">Игрок</div>
       <div class="user-rank">ранг</div>
     </div>
-    <!-- ВЫПАДАЮЩЕЕ МЕНЮ -->
     <div class="user-dropdown" id="userDropdown">
       <div class="dropdown-item" onclick="switchPage('inventory'); toggleUserMenu();">🎒 Инвентарь</div>
       <div class="dropdown-item" onclick="switchPage('gifts'); toggleUserMenu();">🎁 Подарки</div>
@@ -76,13 +106,15 @@
 
 <!-- КАРТА -->
 <div class="page active" id="page-map">
-  <div class="map-container" id="mapContainer"></div>
+  <div class="map-container" id="mapContainer">
+    <div class="map-squad" onclick="openSquadModal()">ОТРЯД · <span id="squadCount">0</span></div>
+  </div>
 </div>
 
 <!-- КОЛОДА -->
 <div class="page" id="page-deck">
   <div class="deck-page">
-    <div class="deck-title"><h2><span class="cn">牌</span> КОЛОДА</h2></div>
+    <div class="deck-title"><h2>КОЛОДА</h2></div>
     <div class="deck-subtitle">Все карты что есть на аккаунте</div>
     <div class="deck-filters">
       <select id="filterRank" onchange="filterCards()">
@@ -113,7 +145,7 @@
 <div class="page" id="page-bazar">
   <div class="bazar-page">
     <div class="banner-header">
-      <div class="banner-tag">無 ВЕЧНЫЙ</div>
+      <div class="banner-tag">ВЕЧНЫЙ</div>
       <div class="banner-image">
         <div style="font-size: 80px; text-align: center; padding-top: 80px;"></div>
       </div>
@@ -139,10 +171,10 @@
         <div class="rate-sub">мягкий гарант с 80-й</div>
       </div>
       <div class="summon-price">
-        <span class="price-label">召 цена открытия</span>
+        <span class="price-label">цена открытия</span>
         <span class="price-value">40 <span class="coin-icon">🪙</span></span>
       </div>
-      <button class="btn-details" onclick="showBannerDetails()">市 ПОДРОБНЕЕ →</button>
+      <button class="btn-details" onclick="showBannerDetails()">ПОДРОБНЕЕ →</button>
     </div>
   </div>
 </div>
@@ -203,9 +235,7 @@
   </div>
 </div>
 
-<!-- ===== МОДАЛКИ ===== -->
-
-<!-- МОДАЛКА ЛОКАЦИИ -->
+<!-- ===== МОДАЛКА ЛОКАЦИИ ===== -->
 <div class="modal-overlay" id="locModal">
   <div class="modal-content">
     <button class="modal-close-x" onclick="closeLocModal()">✕</button>
@@ -221,24 +251,23 @@
         <div class="boss-avatar" id="locBossAvatar"></div>
         <div>
           <div class="boss-name" id="locBossName"></div>
-          <div class="boss-sub">Сила оценивается по соотношению к вашему отряду</div>
+          <div class="boss-sub">Для победы нужна БМ отряда не меньше необходимой</div>
         </div>
       </div>
       <div class="modal-section-title">ОЦЕНКА БОЯ</div>
-      <div class="battle-rating">сила отряда / босса · ≥ 120%</div>
-      <div class="battle-verdict" id="locVerdict"></div>
+      <div class="battle-rating">Сложность: <span id="locDifficulty"></span> · Необходимая БМ: <span id="locRequiredBM"></span></div>
+      <div class="battle-rating">БМ твоего отряда: <span id="locSquadBM"></span></div>
       <div class="battle-bar"><div class="battle-bar-fill" id="locBarFill"></div></div>
-      <div class="modal-section-title">ПОЛУЧЕНО 賞</div>
+      <div class="modal-section-title">ПОЛУЧЕНО</div>
       <div class="rewards-section">
         <div class="reward-row"><span class="rw-bonus">без статич. бонуса</span></div>
         <div class="reward-row"><span class="rw-val positive" id="locRewardEnergy"></span><span class="rw-label">к макс. энергии</span></div>
         <div class="reward-row"><span class="rw-val positive" id="locRewardSilver"></span><span class="rw-label">серебра (разово)</span></div>
       </div>
-      <div class="modal-section-title">ПОВТОР · ВХОД 行</div>
+      <div class="modal-section-title">ПОВТОР · ВХОД</div>
       <div class="rewards-section">
         <div class="reward-row"><span class="rw-val negative" id="locCostEnergy"></span><span class="rw-label">энергии за вход</span></div>
         <div class="reward-row"><span class="rw-val positive" id="locRepeatSilver"></span><span class="rw-label">серебра за прохождение</span></div>
-        <div class="reward-row"><span class="rw-val" style="color:#888;">—</span><span class="rw-label">без доп. дропа</span></div>
       </div>
       <button class="play-again-btn" onclick="playAgain()">
         <span class="btn-icon">⚔️</span> ПРОЙТИ СНОВА · <span id="locEnergyCost">0</span> ЕН.
@@ -250,7 +279,52 @@
   </div>
 </div>
 
-<!-- МОДАЛКА БАННЕРА -->
+<!-- ===== МОДАЛКА ОТРЯДА ===== -->
+<div class="modal-overlay" id="squadModal">
+  <div class="modal-content squad-sheet">
+    <button class="modal-close-x" onclick="closeSquadModal()">✕</button>
+    <div class="squad-title">Отряд</div>
+    <div class="squad-slots" id="squadSlots"></div>
+    <div class="squad-total">
+      <div class="squad-total-label">БОЕВАЯ СИЛА ОТРЯДА</div>
+      <div class="squad-total-val"><span id="squadBM">0</span> <span class="squad-total-sub">/ 5 карт</span></div>
+    </div>
+    <div class="squad-hint">Формация — строго 5 карт. Тапни слот, чтобы выбрать карту из колоды.</div>
+    <button class="squad-save-btn" onclick="saveSquad()">СОХРАНИТЬ ОТРЯД</button>
+  </div>
+</div>
+
+<!-- ===== МОДАЛКА ВЫБОРА КАРТЫ В ОТРЯД ===== -->
+<div class="modal-overlay" id="squadPickModal">
+  <div class="modal-content squad-sheet">
+    <button class="modal-close-x" onclick="closeSquadPickModal()">✕</button>
+    <div class="squad-subtitle">КОЛОДА</div>
+    <div class="squad-title">Выбери карту в отряд</div>
+    <div class="deck-filters">
+      <select id="squadFilterRarity" onchange="renderSquadPick()">
+        <option value="any">Любая редкость</option>
+        <option value="common">Обычная</option>
+        <option value="rare">Редкая</option>
+        <option value="epic">Эпическая</option>
+        <option value="legendary">Легендарная</option>
+        <option value="mythic">Мифическая</option>
+      </select>
+      <select id="squadFilterRank" onchange="renderSquadPick()">
+        <option value="any">Любой ранг</option>
+        <option value="1">★1</option><option value="2">★2</option><option value="3">★3</option>
+        <option value="4">★4</option><option value="5">★5</option>
+      </select>
+      <select id="squadFilterSort" onchange="renderSquadPick()">
+        <option value="power">По силе</option>
+        <option value="name">По имени</option>
+        <option value="rank">По рангу</option>
+      </select>
+    </div>
+    <div class="cards-grid" id="squadPickGrid"></div>
+  </div>
+</div>
+
+<!-- ===== МОДАЛКА БАННЕРА ===== -->
 <div class="modal-overlay" id="bannerModal">
   <div class="banner-modal">
     <button class="modal-close-x" onclick="closeBannerModal()">✕</button>
@@ -273,7 +347,7 @@
   </div>
 </div>
 
-<!-- МОДАЛКА КАРТЫ -->
+<!-- ===== МОДАЛКА КАРТЫ ===== -->
 <div class="card-modal-overlay" id="cardModal">
   <div class="card-modal">
     <button class="card-modal-close" onclick="closeCardModal()">✕</button>
@@ -316,80 +390,4 @@
         <div class="upgrade-chance" id="cdChance">Шанс: 0%</div>
       </div>
       <div class="upgrade-stats-row">
-        <div class="upgrade-level"><span id="cdCurLevel">+0</span><span class="arrow">→</span><span id="cdNextLevel">+1</span></div>
-        <div class="upgrade-bonuses">
-          <span class="ub-atk" id="cdUpAtk">+0</span>
-          <span class="ub-def" id="cdUpDef">+0</span>
-          <span class="ub-hp" id="cdUpHp">+0</span>
-        </div>
-      </div>
-      <div class="upgrade-price"><div>ЦЕНА</div><div class="price-value"> <span id="cdPrice">0</span> 🪙</div></div>
-      <div class="upgrade-warning" id="cdUpgradeWarning"></div>
-    </div>
-    <div class="card-action-btns">
-      <button class="btn-upgrade" onclick="upgradeCard()"><span>УЛУЧШИТЬ</span> · +<span id="cdUpBtnLevel">1</span></button>
-      <button class="btn-reroll" onclick="rerollCard()"><span>ВОЗНЕСЕНИЕ</span></button>
-    </div>
-  </div>
-</div>
-
-<!-- TOAST -->
-<div class="toast" id="toast"></div>
-
-<!-- ===== FIREBASE SDK ===== -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { 
-    getAuth, 
-    createUserWithEmailAndPassword, 
-    signInWithEmailAndPassword 
-  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-  import { 
-    getFirestore, 
-    doc, 
-    setDoc, 
-    getDoc, 
-    updateDoc 
-  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyCkbR-xrpdwa8zV9ELxfMhdItEWZIZMNeg",
-    authDomain: "miyy465.firebaseapp.com",
-    databaseURL: "https://miyy465-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "miyy465",
-    storageBucket: "miyy465.firebasestorage.app",
-    messagingSenderId: "566692334791",
-    appId: "1:566692334791:web:b12e04215802da961cc2e2"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  window.firebaseAuth = getAuth(app);
-  window.firebaseDb = getFirestore(app);
-  window.firebaseAPI = {
-    createUserWithEmailAndPassword,
-    signInWithEmailAndPassword,
-    doc,
-    setDoc,
-    getDoc,
-    updateDoc
-  };
-  console.log("✅ Firebase подключен");
-</script>
-
-<!-- ===== СКРИПТЫ ИГРЫ ===== -->
-<script src="data/cards-db.js"></script>
-<script src="data/accounts.js"></script>
-<script src="data/items.js"></script>
-<script src="data/locations.js"></script>
-<script src="app.js"></script>
-<script src="pages/map.js"></script>
-<script src="pages/deck.js"></script>
-<script src="pages/bazar.js"></script>
-<script src="pages/duel.js"></script>
-<script src="pages/top.js"></script>
-<script src="pages/inventory.js"></script>
-<script src="pages/gifts.js"></script>
-<script src="pages/quests.js"></script>
-
-</body>
-          </html>
+        <div class="upgrade-level"><span id="cdCurLevel">+0</span
