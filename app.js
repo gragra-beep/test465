@@ -8,6 +8,7 @@ const state = {
   currentLoc: null,
   currentCard: null,
   currentCardIndex: null,
+    squad: [],
   completedLocs: [],
   bannerRolls: 0,
   lastEpicRoll: 0,
@@ -45,7 +46,7 @@ async function doRegister() {
     return;
   }
 
-  const email = login.includes('@') ? login : `${login}@remanga.game`;
+  const email = login.includes('@') ? login : `${login}@miyy.game`;
 
   try {
     console.log("🔄 Начало регистрации...");
@@ -156,6 +157,7 @@ async function loginSuccess(user, login) {
   if (typeof initMap === 'function') initMap();
   if (typeof renderCards === 'function') renderCards();
   if (typeof renderInventory === 'function') renderInventory();
+    if (typeof updateSquadButton === 'function') updateSquadButton();
   if (typeof updateSummonCounters === 'function') updateSummonCounters();
 }
 
@@ -183,6 +185,7 @@ async function loadGame() {
       state.lastEpicRoll = data.lastEpicRoll || 0;
       state.lastLegendaryRoll = data.lastLegendaryRoll || 0;
       state.lastMythicRoll = data.lastMythicRoll || 0;
+            state.squad = data.squad || [];
 
       // Инициализируем PLAYER_ACCOUNTS
       if (!window.PLAYER_ACCOUNTS) window.PLAYER_ACCOUNTS = {};
@@ -259,6 +262,7 @@ async function saveGame() {
     const playerData = window.PLAYER_ACCOUNTS[state.currentLogin] || {};
     const cardsToSave = playerData.cards || [];
     const itemsToSave = playerData.items || [];
+          squad: state.squad || [],
 
     console.log("💾 Сохранение данных:", {
       energy: state.energy,
