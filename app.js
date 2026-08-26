@@ -116,7 +116,7 @@ async function doLogin() {
     return;
   }
 
-  const email = login.includes('@') ? login : `${login}@remanga.game`;
+  const email = login.includes('@') ? login : `${login}@miyy.game`;
 
   try {
     console.log("🔄 Попытка входа...");
@@ -262,7 +262,6 @@ async function saveGame() {
     const playerData = window.PLAYER_ACCOUNTS[state.currentLogin] || {};
     const cardsToSave = playerData.cards || [];
     const itemsToSave = playerData.items || [];
-          squad: state.squad || [],
 
     console.log("💾 Сохранение данных:", {
       energy: state.energy,
@@ -271,8 +270,7 @@ async function saveGame() {
       itemsCount: itemsToSave.length
     });
 
-    // 🔥 ФИКС: Используем setDoc с merge: true вместо updateDoc
-    // Это решает ошибку "No document to update" если документ ещё не создан
+    // 🔥 ФИКС: squad ВНУТРИ объекта setDoc
     await window.firebaseAPI.setDoc(userRef, {
       energy: state.energy,
       maxEnergy: state.maxEnergy,
@@ -284,18 +282,19 @@ async function saveGame() {
       lastMythicRoll: state.lastMythicRoll,
       cards: cardsToSave,
       items: itemsToSave,
+      squad: state.squad || [],        // ← ПРАВИЛЬНО: внутри объекта
       lastSaved: new Date().toISOString()
     }, { merge: true });
     
     console.log("✅ Игра успешно сохранена в Firebase");
   } catch (error) {
     console.error("❌ ОШИБКА СОХРАНЕНИЯ:", error);
-    // Показываем ошибку только если это не предупреждение
     if (error.code !== 'invalid-argument' && error.code !== 'permission-denied') {
       showToast("Ошибка сохранения: " + (error.message || error.code), true);
     }
   }
 }
+
 
 // ===== НАВИГАЦИЯ =====
 function switchPage(page) {
