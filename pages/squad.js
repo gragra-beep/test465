@@ -80,15 +80,20 @@ function renderSquadSlots() {
   if (bmEl) bmEl.textContent = getSquadBM();
 }
 
-// ===== СОХРАНЕНИЕ ОТРЯДА (плашка НЕ закрывается) =====
 function saveSquad() {
+  // Синхронизируем state.squad с PLAYER_ACCOUNTS
   const inventory = getPlayerInventory(state.currentLogin);
-  if (inventory) inventory.squad = state.squad;
+  if (inventory) {
+    inventory.squad = state.squad;
+  }
+  
+  // Сохраняем в Firebase
   saveGame();
+  
+  // Обновляем UI
   updateSquadButton();
   showToast(`✅ Отряд сохранён! БМ: ${getSquadBM()}`);
 }
-
 // ===== ВЫБОР КАРТЫ В ОТРЯД =====
 function openSquadPick(slotIndex) {
   currentSquadSlot = slotIndex;
