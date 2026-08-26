@@ -188,6 +188,26 @@ const CARDS_DATABASE = [
     skill: { name: '1', desc: '1', stars: 1 },
     image: '/test465/cards/hantsy.png', 
     tags: ['убийца'] 
+  },
+  { 
+    id: 'card_020', 
+    name: 'Лунсю', 
+    rarity: 'rare', 
+    stars: 1,
+    baseStats: { atk: 80, def: 110, hp: 150 },
+    skill: { name: '1', desc: '1', stars: 1 },
+    image: '/test465/cards/lynsiy.png', 
+    tags: ['убийца'] 
+  },
+  { 
+    id: 'card_021', 
+    name: 'Тао', 
+    rarity: 'rare', 
+    stars: 1,
+    baseStats: { atk: 80, def: 110, hp: 150 },
+    skill: { name: '1', desc: '1', stars: 1 },
+    image: '/test465/cards/tao.png', 
+    tags: ['убийца'] 
   }
 ];
 
