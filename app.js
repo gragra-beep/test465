@@ -29,7 +29,7 @@ function isLocationUnlocked(loc) {
   return loc.id <= getHighestCompleted() + 1;
 }
 
-// ===== РЕГИСТРАЦИЯ =====
+// ===== РЕГИСТРАЦИЯ (исправленная версия) =====
 async function doRegister() {
   const login = document.getElementById('loginInput').value.trim();
   const pass = document.getElementById('passwordInput').value;
@@ -52,7 +52,7 @@ async function doRegister() {
     return;
   }
 
-  const email = login.includes('@') ? login : `${login}@remanga.game`;
+  const email = login.includes('@') ? login : `${login}@miyy.game`;
 
   try {
     errorEl.textContent = 'Создание аккаунта...';
@@ -108,7 +108,7 @@ async function doRegister() {
   }
 }
 
-// ===== ВХОД =====
+// ===== ВХОД (исправленная версия) =====
 async function doLogin() {
   const login = document.getElementById('loginInput').value.trim();
   const pass = document.getElementById('passwordInput').value;
@@ -126,8 +126,8 @@ async function doLogin() {
     return;
   }
 
-  // Пробуем оба домена — чтобы входили и старые, и новые аккаунты
-  const candidates = login.includes('@') ? [login] : [login + '@remanga.game'];
+  // Пробуем оба домена, чтобы работали и старые, и новые аккаунты
+  const candidates = login.includes('@') ? [login] : [login + '@miyy.game', login + '@remanga.game'];
 
   errorEl.textContent = 'Вход...';
   errorEl.style.color = '#fbbf24';
@@ -180,7 +180,7 @@ async function loginSuccess(user, login) {
   if (typeof updateSummonCounters === 'function') updateSummonCounters();
 }
 
-// ===== ЗАГРУЗКА ИЗ FIREBASE =====
+// ===== ЗАГРУЗКА ИЗ FIREBASE (исправленная версия) =====
 async function loadGame() {
   if (!state.currentUserId) {
     console.warn("⚠️ Нет currentUserId, загрузка невозможна");
@@ -210,9 +210,11 @@ async function loadGame() {
         cards: data.cards || [],
         items: data.items || [],
         energy: state.energy,
-        silver: state.silver
+        silver: state.silver,
+        squad: state.squad
       };
     } else {
+      // Если документ не найден, создаём новый
       const starterCards = [
         { cardId: 'card_001', level: 0, broken: false },
         { cardId: 'card_002', level: 0, broken: false },
@@ -227,7 +229,8 @@ async function loadGame() {
         cards: starterCards, 
         items: starterItems, 
         energy: 50, 
-        silver: 100 
+        silver: 100,
+        squad: []
       };
       
       try {
@@ -257,7 +260,7 @@ async function loadGame() {
   }
 }
 
-// ===== СОХРАНЕНИЕ В FIREBASE =====
+// ===== СОХРАНЕНИЕ В FIREBASE (исправленная версия) =====
 async function saveGame() {
   if (!state.currentUserId) {
     console.warn("⚠️ Попытка сохранения без currentUserId");
@@ -270,6 +273,7 @@ async function saveGame() {
     const playerData = window.PLAYER_ACCOUNTS[state.currentLogin] || {};
     const cardsToSave = playerData.cards || [];
     const itemsToSave = playerData.items || [];
+    const squadToSave = playerData.squad || state.squad || [];
 
     await window.firebaseAPI.setDoc(userRef, {
       energy: state.energy,
@@ -282,7 +286,7 @@ async function saveGame() {
       lastMythicRoll: state.lastMythicRoll,
       cards: cardsToSave,
       items: itemsToSave,
-      squad: state.squad || [],
+      squad: squadToSave,
       lastSaved: new Date().toISOString()
     }, { merge: true });
     
@@ -360,6 +364,7 @@ function startEnergyRegen() {
     if (state.currentUserId && state.energy < state.maxEnergy) {
       state.energy = Math.min(state.energy + ENERGY_REGEN_RATE, state.maxEnergy);
       updateResources();
+      // Сохраняем ТОЛЬКО когда энергия реально увеличилась
       saveGame();
     }
   }, ENERGY_REGEN_INTERVAL);
