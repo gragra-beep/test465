@@ -160,11 +160,13 @@ async function loginSuccess(user, login) {
 }
 
 // ===== ЗАГРУЗКА ИЗ FIREBASE =====
-async function loadGame() {
-  if (!state.currentUserId) {
-    console.warn("⚠️ Нет currentUserId, загрузка невозможна");
-    return;
-  }
+window.PLAYER_ACCOUNTS[state.currentLogin] = {
+  cards: data.cards || [],
+  items: data.items || [],
+  squad: data.squad || [],
+  energy: state.energy,
+  silver: state.silver
+};
 
   try {
     console.log("🔄 Загрузка данных из Firestore для UID:", state.currentUserId);
