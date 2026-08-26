@@ -8,7 +8,7 @@ const state = {
   currentLoc: null,
   currentCard: null,
   currentCardIndex: null,
-  squad: [],
+  squad: [],                      // 🔥 ДОБАВЛЕНО: отряд
   completedLocs: [],
   bannerRolls: 0,
   lastEpicRoll: 0,
@@ -29,17 +29,11 @@ function isLocationUnlocked(loc) {
   return loc.id <= getHighestCompleted() + 1;
 }
 
-// ===== РЕГИСТРАЦИЯ (исправленная версия) =====
+// ===== РЕГИСТРАЦИЯ =====
 async function doRegister() {
   const login = document.getElementById('loginInput').value.trim();
   const pass = document.getElementById('passwordInput').value;
   const errorEl = document.getElementById('loginError');
-
-  if (!window.firebaseAPI) {
-    errorEl.textContent = '❌ Firebase не загрузился! Обнови страницу';
-    errorEl.style.color = '#f87171';
-    return;
-  }
 
   if (!login || !pass) {
     errorEl.textContent = 'Введите логин и пароль';
@@ -52,9 +46,10 @@ async function doRegister() {
     return;
   }
 
-  const email = login.includes('@') ? login : `${login}@miyy.game`;
+  const email = login.includes('@') ? login : `${login}@remanga.game`;
 
   try {
+    console.log("🔄 Начало регистрации...");
     errorEl.textContent = 'Создание аккаунта...';
     errorEl.style.color = '#fbbf24';
 
@@ -62,6 +57,7 @@ async function doRegister() {
       window.firebaseAuth, email, pass
     );
     const user = userCredential.user;
+    console.log("✅ Пользователь создан в Auth, UID:", user.uid);
 
     const starterCards = [
       { cardId: 'card_001', level: 0, broken: false },
@@ -88,12 +84,13 @@ async function doRegister() {
         lastEpicRoll: 0,
         lastLegendaryRoll: 0,
         lastMythicRoll: 0,
-        squad: [],
+        squad: [],                  // 🔥 ДОБАВЛЕНО: пустой отряд
         cards: starterCards,
         items: starterItems,
         createdAt: new Date().toISOString()
       }
     );
+    console.log("✅ Данные сохранены в Firestore!");
 
     errorEl.textContent = '✅ Аккаунт создан! Вход...';
     errorEl.style.color = '#4ade80';
@@ -108,17 +105,11 @@ async function doRegister() {
   }
 }
 
-// ===== ВХОД (исправленная версия) =====
+// ===== ВХОД =====
 async function doLogin() {
   const login = document.getElementById('loginInput').value.trim();
   const pass = document.getElementById('passwordInput').value;
   const errorEl = document.getElementById('loginError');
-
-  if (!window.firebaseAPI) {
-    errorEl.textContent = '❌ Firebase не загрузился! Обнови страницу';
-    errorEl.style.color = '#f87171';
-    return;
-  }
 
   if (!login || !pass) {
     errorEl.textContent = 'Введите логин и пароль';
@@ -126,30 +117,21 @@ async function doLogin() {
     return;
   }
 
-  // Пробуем оба домена, чтобы работали и старые, и новые аккаунты
-  const candidates = login.includes('@') ? [login] : [login + '@miyy.game', login + '@remanga.game'];
+  const email = login.includes('@') ? login : `${login}@remanga.game`;
 
-  errorEl.textContent = 'Вход...';
-  errorEl.style.color = '#fbbf24';
+  try {
+    console.log("🔄 Попытка входа...");
+    errorEl.textContent = 'Вход...';
+    errorEl.style.color = '#fbbf24';
 
-  let userCredential = null;
-  let lastError = null;
-
-  for (const email of candidates) {
-    try {
-      userCredential = await window.firebaseAPI.signInWithEmailAndPassword(
-        window.firebaseAuth, email, pass
-      );
-      break;
-    } catch (e) {
-      lastError = e;
-    }
-  }
-
-  if (userCredential) {
+    const userCredential = await window.firebaseAPI.signInWithEmailAndPassword(
+      window.firebaseAuth, email, pass
+    );
+    console.log("✅ Успешный вход, UID:", userCredential.user.uid);
     await loginSuccess(userCredential.user, login);
-  } else {
-    console.error("❌ ОШИБКА ВХОДА:", lastError && lastError.code, lastError && lastError.message);
+
+  } catch (error) {
+    console.error("❌ ОШИБКА ВХОДА:", error.code, error.message);
     errorEl.textContent = '❌ Неверный логин или пароль';
     errorEl.style.color = '#f87171';
   }
@@ -176,11 +158,11 @@ async function loginSuccess(user, login) {
   if (typeof initMap === 'function') initMap();
   if (typeof renderCards === 'function') renderCards();
   if (typeof renderInventory === 'function') renderInventory();
-  if (typeof updateSquadButton === 'function') updateSquadButton();
+  if (typeof updateSquadButton === 'function') updateSquadButton();   // 🔥 ДОБАВЛЕНО
   if (typeof updateSummonCounters === 'function') updateSummonCounters();
 }
 
-// ===== ЗАГРУЗКА ИЗ FIREBASE (исправленная версия) =====
+// ===== ЗАГРУЗКА ИЗ FIREBASE =====
 async function loadGame() {
   if (!state.currentUserId) {
     console.warn("⚠️ Нет currentUserId, загрузка невозможна");
@@ -188,11 +170,13 @@ async function loadGame() {
   }
 
   try {
+    console.log("🔄 Загрузка данных из Firestore для UID:", state.currentUserId);
     const docRef = window.firebaseAPI.doc(window.firebaseDb, "users", state.currentUserId);
     const docSnap = await window.firebaseAPI.getDoc(docRef);
 
     if (docSnap.exists()) {
       const data = docSnap.data();
+      console.log("✅ Данные успешно загружены:", data);
       
       state.energy = data.energy !== undefined ? data.energy : 50;
       state.maxEnergy = data.maxEnergy !== undefined ? data.maxEnergy : 50;
@@ -202,19 +186,23 @@ async function loadGame() {
       state.lastEpicRoll = data.lastEpicRoll || 0;
       state.lastLegendaryRoll = data.lastLegendaryRoll || 0;
       state.lastMythicRoll = data.lastMythicRoll || 0;
-      state.squad = data.squad || [];
+      state.squad = data.squad || [];             // 🔥 ДОБАВЛЕНО: загрузка отряда
 
+      // Инициализируем PLAYER_ACCOUNTS
       if (!window.PLAYER_ACCOUNTS) window.PLAYER_ACCOUNTS = {};
       
       window.PLAYER_ACCOUNTS[state.currentLogin] = {
         cards: data.cards || [],
         items: data.items || [],
         energy: state.energy,
-        silver: state.silver,
-        squad: state.squad
+        silver: state.silver
       };
+      
+      console.log("💾 PLAYER_ACCOUNTS инициализирован:", window.PLAYER_ACCOUNTS[state.currentLogin]);
     } else {
-      // Если документ не найден, создаём новый
+      console.warn("⚠️ Документ не найден в базе. Создаем новый со стартовыми данными.");
+      
+      // Стартовые данные
       const starterCards = [
         { cardId: 'card_001', level: 0, broken: false },
         { cardId: 'card_002', level: 0, broken: false },
@@ -224,19 +212,20 @@ async function loadGame() {
       ];
       const starterItems = [{ itemId: 'herb', quantity: 1 }];
       
+      // Сохраняем стартовые данные в память
       if (!window.PLAYER_ACCOUNTS) window.PLAYER_ACCOUNTS = {};
       window.PLAYER_ACCOUNTS[state.currentLogin] = { 
         cards: starterCards, 
         items: starterItems, 
         energy: 50, 
-        silver: 100,
-        squad: []
+        silver: 100 
       };
       
+      // 🔥 ФИКС: Автоматически создаем документ в базе, чтобы saveGame() не падал
       try {
         await window.firebaseAPI.setDoc(docRef, {
           login: state.currentLogin,
-          email: `${state.currentLogin}@miyy.game`,
+          email: `${state.currentLogin}@remanga.game`,
           energy: 50,
           maxEnergy: 50,
           silver: 100,
@@ -245,11 +234,12 @@ async function loadGame() {
           lastEpicRoll: 0,
           lastLegendaryRoll: 0,
           lastMythicRoll: 0,
-          squad: [],
+          squad: [],                // 🔥 ДОБАВЛЕНО: пустой отряд
           cards: starterCards,
           items: starterItems,
           createdAt: new Date().toISOString()
         });
+        console.log("✅ Стартовый документ создан в базе");
       } catch (createErr) {
         console.error("❌ Не удалось создать стартовый документ:", createErr);
       }
@@ -260,7 +250,7 @@ async function loadGame() {
   }
 }
 
-// ===== СОХРАНЕНИЕ В FIREBASE (исправленная версия) =====
+// ===== СОХРАНЕНИЕ В FIREBASE =====
 async function saveGame() {
   if (!state.currentUserId) {
     console.warn("⚠️ Попытка сохранения без currentUserId");
@@ -270,11 +260,19 @@ async function saveGame() {
   try {
     const userRef = window.firebaseAPI.doc(window.firebaseDb, "users", state.currentUserId);
     
+    // Безопасно получаем данные
     const playerData = window.PLAYER_ACCOUNTS[state.currentLogin] || {};
     const cardsToSave = playerData.cards || [];
     const itemsToSave = playerData.items || [];
-    const squadToSave = playerData.squad || state.squad || [];
 
+    console.log("💾 Сохранение данных:", {
+      energy: state.energy,
+      silver: state.silver,
+      cardsCount: cardsToSave.length,
+      itemsCount: itemsToSave.length
+    });
+
+    // 🔥 ФИКС: Используем setDoc с merge: true вместо updateDoc
     await window.firebaseAPI.setDoc(userRef, {
       energy: state.energy,
       maxEnergy: state.maxEnergy,
@@ -286,7 +284,7 @@ async function saveGame() {
       lastMythicRoll: state.lastMythicRoll,
       cards: cardsToSave,
       items: itemsToSave,
-      squad: squadToSave,
+      squad: state.squad || [],            // 🔥 ДОБАВЛЕНО: отряд
       lastSaved: new Date().toISOString()
     }, { merge: true });
     
@@ -355,21 +353,6 @@ function showToast(msg, isError = false) {
   setTimeout(() => { t.className = 'toast'; }, 2500);
 }
 
-// ===== ВОССТАНОВЛЕНИЕ ЭНЕРГИИ =====
-const ENERGY_REGEN_RATE = 1;
-const ENERGY_REGEN_INTERVAL = 300000; // 5 минут
-
-function startEnergyRegen() {
-  setInterval(() => {
-    if (state.currentUserId && state.energy < state.maxEnergy) {
-      state.energy = Math.min(state.energy + ENERGY_REGEN_RATE, state.maxEnergy);
-      updateResources();
-      // Сохраняем ТОЛЬКО когда энергия реально увеличилась
-      saveGame();
-    }
-  }, ENERGY_REGEN_INTERVAL);
-}
-
 // ===== ИНИЦИАЛИЗАЦИЯ =====
 document.addEventListener('DOMContentLoaded', () => {
   const passInput = document.getElementById('passwordInput');
@@ -385,6 +368,24 @@ document.addEventListener('DOMContentLoaded', () => {
   if (locModal) locModal.addEventListener('click', e => { if (e.target === locModal && typeof closeLocModal === 'function') closeLocModal(); });
   if (cardModal) cardModal.addEventListener('click', e => { if (e.target === cardModal && typeof closeCardModal === 'function') closeCardModal(); });
   if (bannerModal) bannerModal.addEventListener('click', e => { if (e.target === bannerModal && typeof closeBannerModal === 'function') closeBannerModal(); });
+});
 
+// ===== СИСТЕМА ВОССТАНОВЛЕНИЯ ЭНЕРГИИ =====
+const ENERGY_REGEN_RATE = 1;        // Сколько энергии восстанавливается
+const ENERGY_REGEN_INTERVAL = 300000; // Интервал в миллисекундах (5 минут = 300000)
+
+function startEnergyRegen() {
+  setInterval(() => {
+    if (state.currentUserId && state.energy < state.maxEnergy) {
+      state.energy = Math.min(state.energy + ENERGY_REGEN_RATE, state.maxEnergy);
+      updateResources();
+      saveGame();
+      console.log(`⚡ Энергия восстановлена: ${state.energy}/${state.maxEnergy}`);
+    }
+  }, ENERGY_REGEN_INTERVAL);
+}
+
+// Запускаем восстановление энергии при загрузке страницы
+document.addEventListener('DOMContentLoaded', () => {
   startEnergyRegen();
 });
