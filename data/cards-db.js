@@ -86,7 +86,7 @@ const CARDS_DATABASE = [
     stars: 1,
     baseStats: { atk: 90, def: 100, hp: 110 },
     skill: { name: 'Славянский зажим бровью', desc: 'Поигрывает бровями, доводя врагов до смерти', stars: 5 },
-    image: '/test465/cards/so_jin.png', 
+    image: '/test465/cards/saki.png', 
     tags: ['танк'] 
   }
 ];
