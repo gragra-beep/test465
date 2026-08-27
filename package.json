@@ -1,0 +1,7 @@
+{
+  "name": "game-api",
+  "version": "1.0.0",
+  "dependencies": {
+    "@yandex-cloud/nodejs-sdk": "^2.4.0"
+  }
+}
