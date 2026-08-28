@@ -7,7 +7,7 @@ const CARDS_DATABASE = [
     baseStats: { atk: 520, def: 310, hp: 552 },
     skill: { name: 'Славянскиц зажим пальцем', desc: 'Бьет пальцем', stars: 3 },
     image: '/test465/cards/hoshi.png',
-    tags: ['𝓐'] 
+    tags: ['ы'] 
   },
   { 
     id: 'card_002', 
