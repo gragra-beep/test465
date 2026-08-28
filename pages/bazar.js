@@ -14,7 +14,7 @@ function showBannerDetails() {
     const imagePath = card.image.startsWith('/') ? card.image : '/test465/' + card.image;
     
     cardEl.innerHTML = `
-      <div class="card-tag">БОЕВАЯ</div>
+      <div class="card-tag">•</div>
       <div class="pool-card-img" style="background-image: url('${imagePath}');"></div>
       <div style="position:absolute; bottom:6px; left:6px; right:6px; font-size:10px; font-weight:600; text-shadow: 0 1px 3px rgba(0,0,0,0.9); text-align: center;">${card.name}</div>
     `;
