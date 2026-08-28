@@ -208,6 +208,146 @@ const CARDS_DATABASE = [
     skill: { name: '1', desc: '1', stars: 1 },
     image: '/test465/cards/tao.png', 
     tags: ['убийца'] 
+  },
+  { 
+    id: 'card_022', 
+    name: 'Хуаин', 
+    rarity: 'celestial', 
+    stars: 1,
+    baseStats: { atk: 80, def: 110, hp: 150 },
+    skill: { name: '1', desc: '1', stars: 1 },
+    image: '/test465/cards/huain.png', 
+    tags: ['убийца'] 
+  },
+  { 
+    id: 'card_023', 
+    name: 'Ланьхуа', 
+    rarity: 'celestial', 
+    stars: 1,
+    baseStats: { atk: 80, def: 110, hp: 150 },
+    skill: { name: '1', desc: '1', stars: 1 },
+    image: '/test465/cards/lanhua.png', 
+    tags: ['убийца'] 
+  },
+  { 
+    id: 'card_024', 
+    name: 'Цинхуа', 
+    rarity: 'celestial', 
+    stars: 1,
+    baseStats: { atk: 80, def: 110, hp: 150 },
+    skill: { name: '1', desc: '1', stars: 1 },
+    image: '/test465/cards/tsinhua.png', 
+    tags: ['убийца'] 
+  },
+  { 
+    id: 'card_025', 
+    name: 'Синхэ', 
+    rarity: 'celestial', 
+    stars: 1,
+    baseStats: { atk: 80, def: 110, hp: 150 },
+    skill: { name: '1', desc: '1', stars: 1 },
+    image: '/test465/cards/sinhe.png', 
+    tags: ['убийца'] 
+  },
+  { 
+    id: 'card_026', 
+    name: 'Аньин', 
+    rarity: 'celestial', 
+    stars: 1,
+    baseStats: { atk: 80, def: 110, hp: 150 },
+    skill: { name: '1', desc: '1', stars: 1 },
+    image: '/test465/cards/anin.png', 
+    tags: ['убийца'] 
+  },
+  { 
+    id: 'card_027', 
+    name: 'Яньлун', 
+    rarity: 'epic', 
+    stars: 1,
+    baseStats: { atk: 80, def: 110, hp: 150 },
+    skill: { name: '1', desc: '1', stars: 1 },
+    image: '/test465/cards/yanlun.png', 
+    tags: ['убийца'] 
+  },
+  { 
+    id: 'card_028', 
+    name: 'Синъи', 
+    rarity: 'epic', 
+    stars: 1,
+    baseStats: { atk: 80, def: 110, hp: 150 },
+    skill: { name: '1', desc: '1', stars: 1 },
+    image: '/test465/cards/sini.png', 
+    tags: ['убийца'] 
+  },
+  { 
+    id: 'card_029', 
+    name: 'Юйцзинь', 
+    rarity: 'epic', 
+    stars: 1,
+    baseStats: { atk: 80, def: 110, hp: 150 },
+    skill: { name: '1', desc: '1', stars: 1 },
+    image: '/test465/cards/uitsin.png', 
+    tags: ['убийца'] 
+  },
+  { 
+    id: 'card_030', 
+    name: 'Ланьфэн', 
+    rarity: 'epic', 
+    stars: 1,
+    baseStats: { atk: 80, def: 110, hp: 150 },
+    skill: { name: '1', desc: '1', stars: 1 },
+    image: '/test465/cards/lanfen.png', 
+    tags: ['убийца'] 
+  },
+  { 
+    id: 'card_031', 
+    name: 'Ваньин', 
+    rarity: 'epic', 
+    stars: 1,
+    baseStats: { atk: 80, def: 110, hp: 150 },
+    skill: { name: '1', desc: '1', stars: 1 },
+    image: '/test465/cards/vanin.png', 
+    tags: ['убийца'] 
+  },
+  { 
+    id: 'card_032', 
+    name: 'Сяньмэй', 
+    rarity: 'epic', 
+    stars: 1,
+    baseStats: { atk: 80, def: 110, hp: 150 },
+    skill: { name: '1', desc: '1', stars: 1 },
+    image: '/test465/cards/sianmei.png', 
+    tags: ['убийца'] 
+  },
+  { 
+    id: 'card_033', 
+    name: 'Цзунинь', 
+    rarity: 'epic', 
+    stars: 1,
+    baseStats: { atk: 80, def: 110, hp: 150 },
+    skill: { name: '1', desc: '1', stars: 1 },
+    image: '/test465/cards/tsynin.png', 
+    tags: ['убийца'] 
+  },
+  { 
+    id: 'card_034', 
+    name: 'Юэхуа', 
+    rarity: 'epic', 
+    stars: 1,
+    baseStats: { atk: 80, def: 110, hp: 150 },
+    skill: { name: '1', desc: '1', stars: 1 },
+    image: '/test465/cards/uehua.png', 
+    tags: ['убийца'] 
+  },
+  { 
+    id: 'card_035', 
+    name: 'Яньшуа', 
+    rarity: 'epic', 
+    stars: 1,
+    baseStats: { atk: 80, def: 110, hp: 150 },
+    skill: { name: '1', desc: '1', stars: 1 },
+    image: '/test465/cards/yanshua.png', 
+    tags: ['убийца'] 
   }
 ];
 
