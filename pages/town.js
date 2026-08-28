@@ -1,9 +1,9 @@
 // ===== ГОРОД =====
 const TOWN_BUILDINGS = [
   { id: 'shop',    name: 'Магазин',    x: 65, y: 33, action: "switchPage('bazar')" },
-  { id: 'shrine',  name: 'Святилище',  x: 30, y: 43, action: "showToast('Святилище — скоро')" },
+  { id: 'shrine',  name: 'КнопОчка',  x: 30, y: 43, action: "showToast('скоро')" },
   { id: 'smith',   name: 'Кузня',      x: 28, y: 60, action: "openCraftPage('weapon')" },
-  { id: 'stub',    name: 'Заглушка',   x: 85, y: 56, action: "showToast('Скоро')" },
+  { id: 'stub',    name: 'КнопОчка',   x: 85, y: 56, action: "showToast('не очень скоро')" },
   { id: 'alchemy', name: 'Зельеварня', x: 60, y: 75, action: "openCraftPage('potion')" }
 ];
 
